@@ -10,3 +10,5 @@ To run the application, first follow the steps below to setup the project on you
 5. Navigate to the directory of your project and run the command `chmod u+x start.sh`.
 
 Then, run the command `./start.sh` to start the application. 
+
+Navigate to http://localhost:4000/admin/. If you see a page stating that Agriworks is running, you have successfully setup the project correctly.

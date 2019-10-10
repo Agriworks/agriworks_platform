@@ -10,8 +10,10 @@ def create_app():
     with app.app_context():
         import auth.routes as auth
         import data.routes as data
+        import admin.routes as admin
         
         app.register_blueprint(auth.auth_bp)
         app.register_blueprint(data.data_bp)
+        app.register_blueprint(admin.admin_bp)
 
         return app
