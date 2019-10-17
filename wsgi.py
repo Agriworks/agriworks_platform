@@ -1,6 +1,6 @@
-import init
+import app
 
-app = init.create_app()
+app = app.create_app()
 
 if __name__ == "main":
     app.run()
