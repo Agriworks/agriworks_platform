@@ -11,6 +11,7 @@ class Authentication():
     def __init__(self):
         return
     
+    #TODO: 
     def login_required(self,f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -31,7 +32,7 @@ class Authentication():
 
     """
     Authenticate the user
-    #TODO: Hash the inputted password and compare with the password in the DB
+    #TODO: SHAIVYA Hash the inputted password and compare with the password in the DB
     """
     def authenticate(self,email,password):
         user = getUser(email)
@@ -42,5 +43,5 @@ class Authentication():
         return True
     
     """
-    #TODO: save the user to the database upon signup
+    #TODO: GAGAN  save the user to the database upon signup
     """

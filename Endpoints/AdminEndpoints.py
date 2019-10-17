@@ -9,7 +9,7 @@ IndexController = IndexController()
 
 admin = Blueprint("AdminEndpoints", __name__, url_prefix="/admin")
 
-@admin.route("/index", methods=["GET"])
+@admin.route("/", methods=["GET"])
 def index():
     return IndexController.get()
 

@@ -11,10 +11,9 @@ def authenticateUser():
     if not AuthenticationService.authenticate(request.form.email, request.form.password):
         return "Incorrect username or password"
     else:
-        return "Authenticated user"
-
+        return "Authentication"
 """
-TODO: 
+TODO: KOAH
 Create signup API endpoint
 Request params: first name, last name, email (will be used as username), password
 Return: Success or failure codes    
