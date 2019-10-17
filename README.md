@@ -11,4 +11,4 @@ To run the application, first follow the steps below to setup the project on you
 
 Then, run the command `./start.sh` to start the application. 
 
-Navigate to http://localhost:4000/admin/. If you see a page stating that Agriworks is running, you have successfully setup the project correctly.
+Navigate to http://localhost:4000/admin/. If you see a JSON response stating that Agriworks is running, you have successfully setup the project correctly.
