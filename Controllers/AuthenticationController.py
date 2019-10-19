@@ -4,7 +4,7 @@ from Services.AuthenticationService import Authentication
 
 AuthenticationService = Authentication()
 
-auth = Blueprint("AuthenticationEndpoints", __name__, "/auth")
+auth = Blueprint("AuthenticationController", __name__, "/auth")
 
 @auth.route("/login", methods=["POST"])
 def authenticateUser():

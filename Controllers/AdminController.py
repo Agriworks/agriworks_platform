@@ -1,17 +1,14 @@
 from flask import Blueprint
 from flask import current_app as app
-from Controllers.IndexController import IndexController
 from Services.AuthenticationService import Authentication
 
-
 Authentication = Authentication()
-IndexController = IndexController()
 
-admin = Blueprint("AdminEndpoints", __name__, url_prefix="/admin")
+admin = Blueprint("AdminController", __name__, url_prefix="/admin")
 
 @admin.route("/", methods=["GET"])
 def index():
-    return IndexController.get()
+    return {"status": "Congradulations, Agriworks is now running on your machine."}
 
 @admin.route("/account", methods=["GET"])
 @Authentication.login_required
