@@ -32,10 +32,8 @@ def signup():
 
         try:
             user.validate()
+            # save user to database
             return "It DOES work"
-            # else:
-            #     return "error"
-            #     print(validation)
         except ValidationError:
             return "error"
 
