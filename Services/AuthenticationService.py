@@ -35,10 +35,25 @@ class Authentication():
     #TODO: SHAIVYA Hash the inputted password and compare with the password in the DB
     """
     def authenticate(self,email,password):
+              
+        yummyYummySalty = "dHw33Th"
+        db_password = password+yummyYummySalty
+        hasher = hashlib.sha256(db_password.encode())
+        hashLevelOne = hasher.hexdigest()
+        
+        print(hashLevelOne)
+        print(type(hashLevelOne))
+        
+        supaHasher = hashlib.sha256(hashLevelOne.encode())
+        hashLevelTwo = supaHasher.hexdigest()
+        
+        print(hashLevelTwo)
+        print(type(hashLevelTwo))
+
         user = getUser(email)
         if not user:
             return False
-        if password != user.password:
+        if hashLevelTwo != user.password:
             return False
         return True
     
