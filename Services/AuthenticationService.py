@@ -45,3 +45,10 @@ class Authentication():
     """
     #TODO: GAGAN  save the user to the database upon signup
     """
+    def save(self, user): 
+        if getUser(user.email): 
+            return False
+        else:
+            user.save()
+     
+
