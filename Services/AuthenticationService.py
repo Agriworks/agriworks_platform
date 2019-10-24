@@ -43,7 +43,7 @@ class AuthenticationService():
         return True
     
     """
-    #TODO: GAGAN  save the user to the database upon signup
+    Save the user to the database upon signup if they don't exist
     """
     def save(self, user): 
         if getUser(user.email): 
