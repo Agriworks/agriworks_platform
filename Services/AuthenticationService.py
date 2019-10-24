@@ -52,3 +52,20 @@ class AuthenticationService():
             user.save()
      
 
+    @auth.route("/signup", methods=["POST", "GET"])
+    def signup():
+        if request.method == "POST":
+
+            user = User(
+                firstName=request.form["firstName"], lastName=request.form["lastName"], email=request.form["email"],
+                password=request.form["password"])
+
+            try:
+                user.validate()
+                # save user to database
+                return "It DOES work"
+            except ValidationError:
+                return "error"
+
+        else:
+            return "Hello"
