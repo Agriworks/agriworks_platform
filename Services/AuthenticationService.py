@@ -6,7 +6,7 @@ from app import db
 from Models.User import User
 from Models.Session import Session 
 
-class Authentication():
+class AuthenticationService():
     
     def __init__(self):
         return
@@ -35,7 +35,6 @@ class Authentication():
     #TODO: SHAIVYA Hash the inputted password and compare with the password in the DB
     """
     def authenticate(self,email,password):
-              
         yummyYummySalty = "dHw33Th"
         db_password = password+yummyYummySalty
         hasher = hashlib.sha256(db_password.encode())
@@ -51,6 +50,8 @@ class Authentication():
         print(type(hashLevelTwo))
 
         user = getUser(email)
+
+        user = self.getUser(email)
         if not user:
             return False
         if hashLevelTwo != user.password:
