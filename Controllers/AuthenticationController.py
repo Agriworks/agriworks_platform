@@ -11,6 +11,10 @@ def login():
     if not AuthenticationService.authenticate(request.form["email"], request.form["password"]):
         return "Incorrect username or password"
     else:
+        """
+        add cookie to response object
+        return response 
+        """
         return "Authentication"
 """
 TODO: KOAH

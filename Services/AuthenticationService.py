@@ -40,6 +40,11 @@ class AuthenticationService():
             return False
         if password != user.password:
             return False
+        """
+        sessionId = create session 
+        create cookie 
+        return cookie object here 
+        """
         return True
     
     """
