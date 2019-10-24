@@ -22,4 +22,15 @@ Create signup API endpoint
 Request params: first name, last name, email (will be used as username), password
 Return: Success or failure codes    
 """
-
+@auth.route("/signup", methods=["GET","POST"])
+def signup():
+    if request.method == "POST":
+        user = {"firstName": request.form["firstName"], 
+                "lastName": request.form["lastName"], 
+                "email": request.form["email"],
+                "password": request.form["password"]}
+        success,error = AuthenticationService.signup(user)  # Authenticate signup route
+        if not success:
+            return error
+        return "Placeholder POST"  # redirect if successful
+    return "Placeholder GET"  # render template of signup page for Get

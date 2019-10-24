@@ -46,26 +46,30 @@ class AuthenticationService():
     Save the user to the database upon signup if they don't exist
     """
     def save(self, user): 
-        if getUser(user.email): 
+        if self.getUser(user.email):
             return False
         else:
             user.save()
+            return True
      
+    """
+    New user signup
+    """
+    def signup(self, document):
+        user = User(
+            firstName=document["firstName"], lastName=document["lastName"], email=document["email"],
+            password=document["password"])
+        error = None
+        try:
+            user.validate()  # check if its an error with the type entered
+            if (self.save(user)):
+                success = True
+            else:
+                success = False
+                error = "DuplicateError"
+        except ValidationError:  # If error occurs, it means its an error in the typing
+            error = "TypeError"
+            success = False
+        
+        return success, error
 
-    @auth.route("/signup", methods=["POST", "GET"])
-    def signup():
-        if request.method == "POST":
-
-            user = User(
-                firstName=request.form["firstName"], lastName=request.form["lastName"], email=request.form["email"],
-                password=request.form["password"])
-
-            try:
-                user.validate()
-                # save user to database
-                return "It DOES work"
-            except ValidationError:
-                return "error"
-
-        else:
-            return "Hello"
