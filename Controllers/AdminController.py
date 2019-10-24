@@ -1,8 +1,8 @@
 from flask import Blueprint
 from flask import current_app as app
-from Services.AuthenticationService import Authentication
+from Services.AuthenticationService import AuthenticationService
 
-Authentication = Authentication()
+Authentication = AuthenticationService()
 
 admin = Blueprint("AdminController", __name__, url_prefix="/admin")
 
