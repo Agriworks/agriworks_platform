@@ -3,6 +3,7 @@ from flask import current_app as app
 from flask import request, redirect, url_for
 from functools import wraps
 from app import db
+from uuid import uuid4
 from Models.User import User
 from Models.Session import Session 
 
@@ -34,32 +35,37 @@ class AuthenticationService():
 
     """
     Authenticate the user
-    #TODO: SHAIVYA Hash the inputted password and compare with the password in the DB
     """
     def authenticate(self,email,password):
-        
         hashed = saltPassword(user.password)
-    
-
-        user = self.getUser(email)
-        
+        user = self.getUser(email)   
         if not user:
             return False
         if hashed != user.password:
             return False
-        return True
+        """
+        sessionId = create session 
+        create cookie 
+        return cookie object here 
+        """
+
+        sessionId = Session(user=user)
+        Session.objects(user=user).update(upsert=True, sessionId=sessionId.sessionId, date_created=sessionId.date_created)
+        print(Session.objects.count())
+        print(Session.objects.filter(user=user))
+        return sessionId
     
     """
     Save the user to the database upon signup if they don't exist
     """
-    def save(self, user):
-
-        if getUser(user.email): 
+    def save(self, user): 
+        if self.getUser(user.email): 
             return False
         else:
             user.password = saltPassword(user.password)
             user.save()
             return True
+          
     """
      Takes a password and returns a hashed version of it
     """
@@ -69,17 +75,28 @@ class AuthenticationService():
         db_password = password+yummyYummySalty
         hasher = hashlib.sha256(db_password.encode())
         hashLevelOne = hasher.hexdigest()
-        
-        print(hashLevelOne)
-        print(type(hashLevelOne))
-        
         supaHasher = hashlib.sha256(hashLevelOne.encode())
         hashLevelTwo = supaHasher.hexdigest()
         
-        print(hashLevelTwo)
-        print(type(hashLevelTwo))
-
         return hashLevelTwo
-
-
-
+     
+    """
+    New user signup
+    """
+    def signup(self, document):
+        user = User(
+            firstName=document["firstName"], lastName=document["lastName"], email=document["email"],
+            password=document["password"])
+        error = None
+        try:
+            user.validate()  # check if its an error with the type entered
+            if (self.save(user)):
+                success = True
+            else:
+                success = False
+                error = "DuplicateError"
+        except ValidationError:  # If error occurs, it means its an error in the typing
+            error = "TypeError"
+            success = False
+        
+        return success, error
