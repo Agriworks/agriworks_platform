@@ -61,5 +61,26 @@ class AuthenticationService():
             return False
         else:
             user.save()
+            return True
      
+    """
+    New user signup
+    """
+    def signup(self, document):
+        user = User(
+            firstName=document["firstName"], lastName=document["lastName"], email=document["email"],
+            password=document["password"])
+        error = None
+        try:
+            user.validate()  # check if its an error with the type entered
+            if (self.save(user)):
+                success = True
+            else:
+                success = False
+                error = "DuplicateError"
+        except ValidationError:  # If error occurs, it means its an error in the typing
+            error = "TypeError"
+            success = False
+        
+        return success, error
 

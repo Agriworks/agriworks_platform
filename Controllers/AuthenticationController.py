@@ -1,4 +1,5 @@
-from flask import Blueprint, request, Response, make_response
+from flask import Blueprint, request, Response, make_response, jsonify
+from mongoengine import ValidationError
 from flask import current_app as app
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
@@ -6,6 +7,7 @@ from datetime import timedelta
 AuthenticationService = AuthenticationService()
 
 auth = Blueprint("AuthenticationController", __name__, url_prefix="/auth")
+
 
 @auth.route("/login", methods=["POST"])
 def login():
@@ -24,31 +26,18 @@ def login():
         """
         return response
 """
-TODO: KOAH
-Create signup API endpoint
 Request params: first name, last name, email (will be used as username), password
 Return: Success or failure codes    
 """
-@auth.route("/signup", methods=["POST"])
+@auth.route("/signup", methods=["GET","POST"])
 def signup():
     if request.method == "POST":
-        # document = {"firstName": request.form["firstName"],
-        #             "lastName": request.form["lastName"],
-        #             "email": request.form["email"],
-        #             "password": request.form["password"
-        #             }s
-        # doc = Document(values=document)
-        user = User(
-            firstName=request.form["firstName"], lastName=request.form["lastName"], email=request.form["email"],
-            password=request.form["password"])
-        # try:
-        # if user.validate():
-        # save user to database
-        # try:
-        if user.validate() != "":
-            return "It DOES work"
-        # except:
-        #     return "error"
-
-    else:
-        return "Hello"
+        user = {"firstName": request.form["firstName"], 
+                "lastName": request.form["lastName"], 
+                "email": request.form["email"],
+                "password": request.form["password"]}
+        success,error = AuthenticationService.signup(user)  # Authenticate signup route
+        if not success:
+            return error
+        return "Placeholder POST"  # redirect if successful
+    return "Placeholder GET"  # render template of signup page for Get
