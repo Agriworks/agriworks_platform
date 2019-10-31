@@ -37,8 +37,10 @@ class AuthenticationService():
     Authenticate the user
     """
     def authenticate(self,email,password):
-        hashed = saltPassword(user.password)
+        hashed = self.saltPassword(password)
         user = self.getUser(email)   
+        print(hashed)
+        print(user.password)
         if not user:
             return False
         if hashed != user.password:
@@ -51,8 +53,6 @@ class AuthenticationService():
 
         sessionId = Session(user=user)
         Session.objects(user=user).update(upsert=True, sessionId=sessionId.sessionId, date_created=sessionId.date_created)
-        print(Session.objects.count())
-        print(Session.objects.filter(user=user))
         return sessionId
     
     """
@@ -62,7 +62,7 @@ class AuthenticationService():
         if self.getUser(user.email): 
             return False
         else:
-            user.password = saltPassword(user.password)
+            user.password = self.saltPassword(user.password)
             user.save()
             return True
           

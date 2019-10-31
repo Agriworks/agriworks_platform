@@ -8,7 +8,7 @@ admin = Blueprint("AdminController", __name__, url_prefix="/admin")
 
 @admin.route("/", methods=["GET"])
 def index():
-    return {"status": "Congradulations, Agriworks is now running on your machine."}
+    return {"status": "Congratulations, Agriworks is now running on your machine."}
 
 @admin.route("/account", methods=["GET"])
 @Authentication.login_required
