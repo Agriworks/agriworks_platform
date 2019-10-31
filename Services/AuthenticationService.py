@@ -3,6 +3,7 @@ from flask import current_app as app
 from flask import request, redirect, url_for
 from functools import wraps
 from app import db
+from uuid import uuid4
 from Models.User import User
 from Models.Session import Session 
 
@@ -35,7 +36,7 @@ class AuthenticationService():
     #TODO: SHAIVYA Hash the inputted password and compare with the password in the DB
     """
     def authenticate(self,email,password):
-        user = self.getUser(email)
+        user = self.getUser(email)   
         if not user:
             return False
         if password != user.password:
@@ -45,13 +46,18 @@ class AuthenticationService():
         create cookie 
         return cookie object here 
         """
-        return True
+
+        sessionId = Session(user=user)
+        Session.objects(user=user).update(upsert=True, sessionId=sessionId.sessionId, date_created=sessionId.date_created)
+        print(Session.objects.count())
+        print(Session.objects.filter(user=user))
+        return sessionId
     
     """
     Save the user to the database upon signup if they don't exist
     """
     def save(self, user): 
-        if getUser(user.email): 
+        if self.getUser(user.email): 
             return False
         else:
             user.save()
