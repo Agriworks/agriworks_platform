@@ -7,6 +7,8 @@ from uuid import uuid4
 from Models.User import User
 from Models.Session import Session 
 
+import hashlib
+
 class AuthenticationService():
     
     def __init__(self):
@@ -33,13 +35,13 @@ class AuthenticationService():
 
     """
     Authenticate the user
-    #TODO: SHAIVYA Hash the inputted password and compare with the password in the DB
     """
     def authenticate(self,email,password):
+        hashed = saltPassword(user.password)
         user = self.getUser(email)   
         if not user:
             return False
-        if password != user.password:
+        if hashed != user.password:
             return False
         """
         sessionId = create session 
@@ -60,8 +62,23 @@ class AuthenticationService():
         if self.getUser(user.email): 
             return False
         else:
+            user.password = saltPassword(user.password)
             user.save()
             return True
+          
+    """
+     Takes a password and returns a hashed version of it
+    """
+    def saltPassword(self, password):
+
+        yummyYummySalty = "dHw33Th"
+        db_password = password+yummyYummySalty
+        hasher = hashlib.sha256(db_password.encode())
+        hashLevelOne = hasher.hexdigest()
+        supaHasher = hashlib.sha256(hashLevelOne.encode())
+        hashLevelTwo = supaHasher.hexdigest()
+        
+        return hashLevelTwo
      
     """
     New user signup
@@ -83,4 +100,3 @@ class AuthenticationService():
             success = False
         
         return success, error
-
