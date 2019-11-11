@@ -100,3 +100,11 @@ class AuthenticationService():
             success = False
         
         return success, error
+
+    def changeEmail(self, oldEmail, newEmail):
+            User.objects.get(email=oldEmail).update(email=newEmail)
+
+    def changePassword(self, email, password):
+            User.objects.get(email=email).update(password=self.saltPassword(password))   
+
+            
