@@ -1,7 +1,6 @@
 from flask import Flask
 from mongoengine import connect
-import pandas as pd
-from pandas import DataFrame, read_csv
+
 
 
 db = connect('agriworks')
