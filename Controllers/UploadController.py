@@ -43,8 +43,10 @@ def upload_file():
             result = jsonify({"result":"No file selected"})
         #Checks if the file exists and if it is an acceptable type 
         if file and allowed_file(filename):
+            #convert from csv to pandas DataFrame
+            df = pd.read_csv("filename")
             #saves the file to the mongo database
-            mongo.save_file(filename, request.files['file'])
+            df.write.format("mongo").mode("append").save()
             result = jsonify({"result":"File successfully uploaded to database"})
         else:
             result = jsonify({"result":"Allowed file types are .pdf, .txt"})
