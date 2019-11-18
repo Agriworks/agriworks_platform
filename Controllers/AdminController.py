@@ -38,7 +38,7 @@ def account():
                 response.set_data("Wrong password")
                 #return an error saying that the password is not right
 
-        if form["submit"] == "password": #doing the change password form
+        elif form["submit"] == "password": #doing the change password form
 
             formPassword = form["inputCurrentPassword"]
 
