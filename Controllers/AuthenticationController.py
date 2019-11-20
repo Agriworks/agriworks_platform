@@ -11,19 +11,16 @@ auth = Blueprint("AuthenticationController", __name__, url_prefix="/auth")
 
 @auth.route("/login", methods=["POST"])
 def login():
+    print("Request data is")
+    print(request.form)
     auth = AuthenticationService.authenticate(request.form["email"], request.form["password"])
     if not auth:
-        return "Incorrect username or password"
+        return {"status": "Incorrect username or password"}
     else:
-        response = make_response()
         change = timedelta(days=30)
-        expries = auth.date_created + change
-        response.set_cookie(key="SID", value=str(auth.sessionId), expires=expries)
-        response.set_data("logged in")
-        """
-        add cookie to response object
-        return response 
-        """
+        expires = auth.date_created + change
+        print("Session id:", str(auth.sessionId))
+        response = {"key": "SID", "value": str(auth.sessionId), "expires": expires}
         return response
 """
 Request params: first name, last name, email (will be used as username), password
