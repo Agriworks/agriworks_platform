@@ -15,8 +15,10 @@ def create_app():
     with app.app_context():
         import Controllers.AdminController as admin
         import Controllers.AuthenticationController as auth
+        import Controllers.UploadController as upload
         
         app.register_blueprint(admin.admin)
         app.register_blueprint(auth.auth)
+        app.register_blueprint(upload.upload)
         return app
 
