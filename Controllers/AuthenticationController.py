@@ -16,7 +16,7 @@ def login():
     auth = AuthenticationService.authenticate(request.form["email"], request.form["password"])
     #auth = False
     if not auth:
-        print("This login is not authorized! 403 error code sent to be interpreted by fe!")
+        print("This login is not authorized! 403 forbidden")
         abort(403, {"message": "Incorrect username or password"})
         print("This was not authorized!")
         #return {"status": "Incorrect username or password"}
@@ -41,8 +41,10 @@ def signup():
         if not success:
             if error=="DuplicateError":
                 #Do something
+                abort(400, {"message": "Duplicate error"})
             else: #Must be TypeError
                 #Do something else
+                abort(400, {"Message": "Type error"})
             return error
         return "Placeholder POST"  # redirect if successful
     return "Placeholder GET"  # render template of signup page for Get
