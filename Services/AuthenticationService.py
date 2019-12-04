@@ -40,7 +40,7 @@ class AuthenticationService():
         hashed = self.saltPassword(password)
         user = self.getUser(email)   
         print(hashed)
-        print(user.password)
+        #print(user.password)
         if not user:
             return False
         if hashed != user.password:
