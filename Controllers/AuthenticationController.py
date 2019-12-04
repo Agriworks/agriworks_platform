@@ -39,6 +39,10 @@ def signup():
                 "password": request.form["password"]}
         success,error = AuthenticationService.signup(user)  # Authenticate signup route
         if not success:
+            if error=="DuplicateError":
+                #Do something
+            else: #Must be TypeError
+                #Do something else
             return error
         return "Placeholder POST"  # redirect if successful
     return "Placeholder GET"  # render template of signup page for Get
