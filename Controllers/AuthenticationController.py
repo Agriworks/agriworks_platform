@@ -14,8 +14,11 @@ def login():
     print("Request data is")
     print(request.form)
     auth = AuthenticationService.authenticate(request.form["email"], request.form["password"])
+    #auth = False
     if not auth:
-        abort(400, {"message": "Incorrect username or password"})
+        print("This login is not authorized! 403 error code sent to be interpreted by fe!")
+        abort(403, {"message": "Incorrect username or password"})
+        print("This was not authorized!")
         #return {"status": "Incorrect username or password"}
     else:
         change = timedelta(days=30)
