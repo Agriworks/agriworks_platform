@@ -1,4 +1,4 @@
-from flask import Blueprint, request, Response, make_response, jsonify
+from flask import Blueprint, request, Response, make_response, jsonify, abort
 from mongoengine import ValidationError
 from flask import current_app as app
 from Services.AuthenticationService import AuthenticationService
@@ -15,7 +15,8 @@ def login():
     print(request.form)
     auth = AuthenticationService.authenticate(request.form["email"], request.form["password"])
     if not auth:
-        return {"status": "Incorrect username or password"}
+        abort(400, {"message": "Incorrect username or password"})
+        #return {"status": "Incorrect username or password"}
     else:
         change = timedelta(days=30)
         expires = auth.date_created + change
