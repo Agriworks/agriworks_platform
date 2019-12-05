@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, request, redirect, jsonify, abort
+from flask import Blueprint, flash, request, redirect, jsonify, Response
 from flask import current_app as app
 from Services.UploadService import UploadService
 
@@ -8,11 +8,9 @@ UploadService = UploadService()
 @upload.route('/', methods=["POST"])
 def uploadNewFile():
     if ('file' not in request.files):
-        abort(400, {"Message": "No files were uploaded."})
-        return {"status": "No files were uploaded."} #Not sure if this return is still needed
+        return Response({"Message": "No files were uploaded."}, status=400)
 
     if (not UploadService.allowed_file(request.files["file"].filename)):
-        abort(400, {"Message": "Prohibited file type."})
-        return {"status": "Prohibited file type."} #TODO: Append to response: Dynamically return the types of allowed files
+        return Response({"Message": "Prohibited file type."}, status=400) #TODO: Append to response: Dynamically return the types of allowed files
 
     return UploadService.createDataSetAndDataObjects(request)
