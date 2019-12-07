@@ -11,8 +11,6 @@ auth = Blueprint("AuthenticationController", __name__, url_prefix="/auth")
 
 @auth.route("/login", methods=["POST"])
 def login():
-    print("Request data is")
-    print(request.form)
     auth = AuthenticationService.authenticate(request.form["email"], request.form["password"])
     #auth = False
     if not auth:
@@ -26,6 +24,14 @@ def login():
         print("Session id:", str(auth.sessionId))
         response = {"key": "SID", "value": str(auth.sessionId), "expires": expires}
         return response
+
+@auth.route("/logout", methods=["POST"])
+def logout():
+    print("Logout request received")
+    sessionId = request.form["sessionId"]
+    AuthenticationService.logout(sessionId)
+    return {"status": "User logged out"}
+
 """
 Request params: first name, last name, email (will be used as username), password
 Return: Success or failure codes    

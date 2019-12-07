@@ -38,9 +38,7 @@ class AuthenticationService():
     """
     def authenticate(self,email,password):
         hashed = self.saltPassword(password)
-        user = self.getUser(email)   
-        print(hashed)
-        #print(user.password)
+        user = self.getUser(email)
         if not user:
             return False
         if hashed != user.password:
@@ -110,4 +108,8 @@ class AuthenticationService():
     def getSession(self, sessionID):
         return Session.objects.get(sessionId=sessionID)
 
+    def logout(self, sessionID):
+        session = self.getSession(sessionID)
+        session.delete()
+        return True
             
