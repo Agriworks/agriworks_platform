@@ -5,8 +5,11 @@ from Models.DataObject import DataObject
 import pandas as pd
 import numpy
 from mongoengine import ValidationError
+import boto3
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
+
+s3 = boto3.resource('s3')
 
 class UploadService():
 
@@ -50,3 +53,9 @@ class UploadService():
 
         except ValidationError:
             return {"status": "Mongoengine validation error" }
+    
+    def uploadToAWS(self, file, filename):
+
+        bucketName = "agriworks-user-datasets"
+        s3.Object(bucketName, filename).upload_file(Filename=file)
+
