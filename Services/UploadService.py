@@ -6,6 +6,7 @@ import pandas as pd
 import numpy
 from mongoengine import ValidationError
 import boto3
+import os.path
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
@@ -55,7 +56,14 @@ class UploadService():
             return {"status": "Mongoengine validation error" }
     
     def uploadToAWS(self, file, filename):
-
         bucketName = "agriworks-user-datasets"
         s3.Object(bucketName, filename).upload_file(Filename=file)
+
+    def uploadToAWS(self, file): #same method execpt that if you don't have to give it a file name 
+        bucketName = "agriworks-user-datsets"
+        filename = os.path.basename(file) #take the last part of the path to the file
+        s3.Object(bucketName, filename).upload_file(Filename=file)
+
+
+    
 
