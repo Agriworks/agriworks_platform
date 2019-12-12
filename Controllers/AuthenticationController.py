@@ -25,6 +25,7 @@ def login():
         response = {"key": "SID", "value": str(auth.sessionId), "expires": expires}
         return response
 
+#TODO: check if user session is valid
 @auth.route("/logout", methods=["POST"])
 def logout():
     print("Logout request received")

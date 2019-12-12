@@ -1,0 +1,36 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.15.2/libexec/bin/yarn.js add @fortawesome
+
+PATH: 
+  /Users/manujadesilva/.opam/default/bin:/Users/manujadesilva/Desktop/hack4impact/agriworks_platform/env/bin:/usr/local/bin/:/Users/manujadesilva/Desktop/packages/apache-maven-3.6.0/bin/:/Users/manujadesilva/Downloads/:/Users/manujadesilva/Library/Python/2.7/bin:/Applications/MAMP/Library/bin/:/Users/manujadesilva/TerminalUtilities/dart-sass:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Applications/Wireshark.app/Contents/MacOS:/Users/manujadesilva/.opam/default/bin:/Users/manujadesilva/.sdkman/candidates/java/current/bin:/Users/manujadesilva/.sdkman/candidates/grails/current/bin:/usr/local/bin/:/Users/manujadesilva/Desktop/packages/apache-maven-3.6.0/bin/:/Users/manujadesilva/Downloads/:/Users/manujadesilva/Library/Python/2.7/bin:/Applications/MAMP/Library/bin/:/Users/manujadesilva/TerminalUtilities/dart-sass
+
+Yarn version: 
+  1.15.2
+
+Node version: 
+  8.12.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@fortawesome: Request "https://registry.yarnpkg.com/@fortawesome" returned a 405
+      at Request.params.callback [as _callback] (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:66067:18)
+      at Request.self.callback (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:129541:22)
+      at emitTwo (events.js:126:13)
+      at Request.emit (events.js:214:7)
+      at Request.<anonymous> (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:130513:10)
+      at emitOne (events.js:116:13)
+      at Request.emit (events.js:211:7)
+      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:130435:12)
+      at Object.onceWrapper (events.js:313:30)
+      at emitNone (events.js:111:20)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
