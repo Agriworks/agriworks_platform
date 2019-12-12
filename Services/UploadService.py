@@ -49,6 +49,9 @@ class UploadService():
                         currentItem = int(currentItem) #cast int64 objects to ints 
                     dataObject[keys[j]] = currentItem
                 dataObject.save()
+
+            #Save to S3
+            self.uploadToAWS(uploadedFile, "")
             
             return {"status": (dataSetName + " was successfully uploaded")}
 
