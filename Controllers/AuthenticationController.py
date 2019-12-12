@@ -1,4 +1,4 @@
-from flask import Blueprint, request, Response, make_response, jsonify, abort
+from flask import Blueprint, request, Response, make_response, jsonify
 from mongoengine import ValidationError
 from flask import current_app as app
 from Services.AuthenticationService import AuthenticationService
@@ -15,9 +15,7 @@ def login():
     #auth = False
     if not auth:
         print("This login is not authorized! 403 forbidden")
-        abort(403, {"message": "Incorrect username or password"})
-        print("This was not authorized!")
-        #return {"status": "Incorrect username or password"}
+        return Response({"message": "Incorrect username or password"}, status=403)
     else:
         change = timedelta(days=30)
         expires = auth.date_created + change
@@ -47,10 +45,9 @@ def signup():
         if not success:
             if error=="DuplicateError":
                 #Do something
-                abort(400, {"message": "Duplicate error"})
+                return Response({"message": "Duplicate error"}, status=400)
             else: #Must be TypeError
                 #Do something else
-                abort(400, {"Message": "Type error"})
-            return error
+                return Response({"message": "Type error"}, status=400)
         return "Placeholder POST"  # redirect if successful
     return "Placeholder GET"  # render template of signup page for Get
