@@ -1,8 +1,12 @@
+import yaml
 from flask import Flask
 from mongoengine import connect
 from flask_cors import CORS
 
-db = connect('agriworks')
+dbCreds = yaml.safe_load(open("creds.yaml", "r")) #read in remote db username and password
+dbHostUri = "mongodb+srv://" + dbCreds["db_user"] + ":" + dbCreds["db_password"] + "@cluster0-ollas.mongodb.net/test?retryWrites=true&w=majority"
+
+db = connect(host=dbHostUri)
 
 def create_app():
     app = Flask(__name__)
