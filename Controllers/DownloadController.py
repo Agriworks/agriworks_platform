@@ -1,18 +1,20 @@
 from flask import Blueprint, jsonify, send_file, request, make_response
 from flask import current_app as app
+import app
 import json
 from gridfs import GridFS
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
-from Controllers.DownloadController import DownloadController
-from Services.AuthenticationService import Authentication
+#from Controllers.DownloadController import DownloadController
+#from Services.AuthenticationService import Authentication
+from Models.DataObject import DataObject
+from Models.Dataset import Dataset
 
 
-Authentication = Authentication()
+#Authentication = Authentication()
 
 #MongoDB Configuration
-mongo_client = MongoClient('mongodb://localhost:27017/fileupload')
-db = mongo_client['fileupload']
+db = app.db.test
 
 #Module that makes it easier to read files from the database using chunks
 grid_fs = GridFS(db)
@@ -21,12 +23,11 @@ download = Blueprint("DownloadEndpoints",__name__, url_prefix="/download")
 
 @download.route("/", methods=["GET"])
 def index():
-    return DownloadController.get()
+    cursor = db.collection.find()
+    print(cursor.showRecordId())
+    return "download controller"
+    #return DownloadController.get()
 
-#Function to get dataset
-def getDataset(id) {
-    
-}
 
 #Displays all of the available files
 @download.route("/data", methods=["GET"])
@@ -51,3 +52,8 @@ def file(request):
     response.headers['Content-Type'] = 'application/octet-stream'
     response.headers["Content-Disposition"] = "attachment; filename={}".format(request)
     return response
+
+@download.route("/<dataset_id>")
+def getDataset(dataset_id):
+    data = db.dataset.find_one({"_id":dataset_id})
+    return data
