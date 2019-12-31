@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, send_file, request, make_response
 from flask import current_app as app
 import app
 import json
+from bson.objectid import ObjectId
 from gridfs import GridFS
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
@@ -25,9 +26,8 @@ download = Blueprint("DownloadEndpoints",__name__, url_prefix="/download")
 @download.route("/", methods=["GET"])
 def index():
     collection = db.dataset
-    print(collection.find_one())
-    return "download controller"
-    #return DownloadController.get()
+    print(str(collection.find().count()))
+    return "number of items in dataset collection: "+str(collection.find().count())
 
 
 #Displays all of the available files
@@ -56,8 +56,8 @@ def file(request):
 
 @download.route("/<dataset_id>")
 def getDataset(dataset_id):
-    data = db.dataset.find_one({"_id":dataset_id})
+    data = db.dataset.find_one({"_id":ObjectId(dataset_id)})
     if data==None:
         return "dataset not found"
     else:
-        return data
+        return str(data)
