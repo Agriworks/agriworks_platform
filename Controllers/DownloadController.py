@@ -15,6 +15,7 @@ from Models.Dataset import Dataset
 
 #MongoDB Configuration
 db = app.db.test
+print("test db configured")
 
 #Module that makes it easier to read files from the database using chunks
 grid_fs = GridFS(db)
@@ -23,8 +24,8 @@ download = Blueprint("DownloadEndpoints",__name__, url_prefix="/download")
 
 @download.route("/", methods=["GET"])
 def index():
-    cursor = db.collection.find()
-    print(cursor.showRecordId())
+    collection = db.dataset
+    print(collection.find_one())
     return "download controller"
     #return DownloadController.get()
 
@@ -56,4 +57,7 @@ def file(request):
 @download.route("/<dataset_id>")
 def getDataset(dataset_id):
     data = db.dataset.find_one({"_id":dataset_id})
-    return data
+    if data==None:
+        return "dataset not found"
+    else:
+        return data
