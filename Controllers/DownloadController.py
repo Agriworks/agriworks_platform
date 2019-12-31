@@ -23,6 +23,11 @@ download = Blueprint("DownloadEndpoints",__name__, url_prefix="/download")
 def index():
     return DownloadController.get()
 
+#Function to get dataset
+def getDataset(id) {
+    
+}
+
 #Displays all of the available files
 @download.route("/data", methods=["GET"])
 def getAll():
