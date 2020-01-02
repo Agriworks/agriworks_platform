@@ -62,8 +62,11 @@ def getDataset(dataset_id):
     #Find all data_objects that belong to dataset
     data_object = db.data_object.find({"dataSetId":ObjectId(dataset_id)})
     ret2 = "Data_objects that belong to dataset:<p>"
+    arr = []
     for record in data_object:
-        ret2 = ret2+str(record)+"<p>"
+        arr.append(record)
+    for item in arr:
+        ret2 = ret2+str(item)+"<p>"
     if data==None:
         return "dataset not found"
     else:
