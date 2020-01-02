@@ -3,6 +3,7 @@ from flask import current_app as app
 import app
 import json
 from bson.objectid import ObjectId
+from bson.json_util import dumps
 from gridfs import GridFS
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
@@ -55,19 +56,18 @@ def file(request):
 
 @download.route("/<dataset_id>")
 def getDataset(dataset_id):
-    #Get the dataset
+    #Get the dataset as json object
     data = db.dataset.find_one({"_id":ObjectId(dataset_id)})
-    ret1 = "Dataset:<p>"
-    ret1 = ret1 + str(data)
-    #Find all data_objects that belong to dataset
-    data_object = db.data_object.find({"dataSetId":ObjectId(dataset_id)})
-    ret2 = "Data_objects that belong to dataset:<p>"
-    arr = []
-    for record in data_object:
-        arr.append(record)
-    for item in arr:
-        ret2 = ret2+str(item)+"<p>"
     if data==None:
         return "dataset not found"
-    else:
-        return ret1 + "<p>" + ret2
+    json_1 = dumps(data)
+    
+    #Get all data_objects that belong to dataset
+    data_object = db.data_object.find({"dataSetId":ObjectId(dataset_id)})
+    #Put all data_objects into one json object
+    json_2 = dumps(data_object)
+    
+    #Combine the 2 json objects
+    ret = {"dataset":json_1, "data_objects":json_2}
+    
+    return str(ret)
