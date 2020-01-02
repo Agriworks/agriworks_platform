@@ -25,9 +25,8 @@ download = Blueprint("DownloadEndpoints",__name__, url_prefix="/download")
 
 @download.route("/", methods=["GET"])
 def index():
-    collection = db.dataset
-    print(str(collection.find().count()))
-    return "number of items in dataset collection: "+str(collection.find().count())
+    datasetCollection = db.dataset
+    return "number of items in dataset collection: "+str(datasetCollection.find().count())
 
 
 #Displays all of the available files
@@ -56,8 +55,15 @@ def file(request):
 
 @download.route("/<dataset_id>")
 def getDataset(dataset_id):
+    #Get the dataset
     data = db.dataset.find_one({"_id":ObjectId(dataset_id)})
+    #Find all data_objects that belong to dataset
+    data_object = db.data_object.find({"dataSetId":ObjectId(dataset_id)})
+    ret = ""
+    for record in data_object:
+        ret = ret+"\n"+str(record)+"\n"
+        ret = ret+"\n"
     if data==None:
         return "dataset not found"
     else:
-        return str(data)
+        return ret
