@@ -57,13 +57,14 @@ def file(request):
 def getDataset(dataset_id):
     #Get the dataset
     data = db.dataset.find_one({"_id":ObjectId(dataset_id)})
+    ret1 = "Dataset:<p>"
+    ret1 = ret1 + str(data)
     #Find all data_objects that belong to dataset
     data_object = db.data_object.find({"dataSetId":ObjectId(dataset_id)})
-    ret = ""
+    ret2 = "Data_objects that belong to dataset:<p>"
     for record in data_object:
-        ret = ret+"\n"+str(record)+"\n"
-        ret = ret+"\n"
+        ret2 = ret2+str(record)+"<p>"
     if data==None:
         return "dataset not found"
     else:
-        return ret
+        return ret1 + "<p>" + ret2
