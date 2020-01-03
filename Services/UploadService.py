@@ -50,10 +50,11 @@ class UploadService():
                     dataObject[keys[j]] = currentItem
                 dataObject.save()
 
+            #Go back to the front of the file
             uploadedFile.seek(0)
 
             #Save to S3
-            self.uploadToAWS(uploadedFile, "test4.csv")
+            self.uploadToAWS(uploadedFile, None)
             
             return {"status": (dataSetName + " was successfully uploaded")}
 
@@ -66,8 +67,6 @@ class UploadService():
         if filename == None:
             filename = file.filename
         bucket.Object(filename).put(Body=file)
-       #s3.Object(bucketName, filename).upload_file(Filename=file)
-
 
 
     
