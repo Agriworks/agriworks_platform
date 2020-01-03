@@ -50,8 +50,10 @@ class UploadService():
                     dataObject[keys[j]] = currentItem
                 dataObject.save()
 
+            uploadedFile.seek(0)
+
             #Save to S3
-            self.uploadToAWS(uploadedFile, "")
+            self.uploadToAWS(uploadedFile, "test4.csv")
             
             return {"status": (dataSetName + " was successfully uploaded")}
 
@@ -60,12 +62,12 @@ class UploadService():
     
     def uploadToAWS(self, file, filename):
         bucketName = "agriworks-user-datasets"
-        s3.Object(bucketName, filename).upload_file(Filename=file)
+        bucket = s3.Bucket(bucketName)
+        if filename == None:
+            filename = file.filename
+        bucket.Object(filename).put(Body=file)
+       #s3.Object(bucketName, filename).upload_file(Filename=file)
 
-    def uploadToAWS(self, file): #same method execpt that if you don't have to give it a file name 
-        bucketName = "agriworks-user-datsets"
-        filename = os.path.basename(file) #take the last part of the path to the file
-        s3.Object(bucketName, filename).upload_file(Filename=file)
 
 
     
