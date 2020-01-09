@@ -59,7 +59,7 @@ def getDataset(dataset_id):
     #Get the dataset as json object
     data = db.dataset.find_one({"_id":ObjectId(dataset_id)})
     if data==None:
-        return "dataset not found"
+        return "Dataset with specified id not found."
     json_1 = dumps(data)
     
     #Get all data_objects that belong to dataset
@@ -68,6 +68,7 @@ def getDataset(dataset_id):
     json_2 = dumps(data_object)
     
     #Combine the 2 json objects
-    ret = {"dataset":json_1, "data_objects":json_2}
-    
-    return str(ret)
+    #ret = {"dataset":json_1, "data_objects":json_2}
+    ret = json_1
+
+    return ret
