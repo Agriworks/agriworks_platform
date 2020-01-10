@@ -19,8 +19,13 @@ def login():
     else:
         change = timedelta(days=30)
         expires = auth.date_created + change
+        
+        session = AuthenticationService.getSession(auth.sessionId) # gets session from db
+        user = session["user"] #gets user from session
+        sessionAdmin = user["admin"] #boolean to determine whether a user is an admin or not
+
         print("Session id:", str(auth.sessionId))
-        response = {"key": "SID", "value": str(auth.sessionId), "expires": expires}
+        response = {"key": "SID", "value": str(auth.sessionId), "expires": expires, "admin": sessionAdmin}
         return response
 
 @auth.route("/logout", methods=["POST"])
