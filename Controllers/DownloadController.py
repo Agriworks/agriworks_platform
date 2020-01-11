@@ -26,8 +26,29 @@ download = Blueprint("DownloadEndpoints",__name__, url_prefix="/download")
 
 @download.route("/", methods=["GET"])
 def index():
+    #Returns list of datasets
+    ret_list = []
     datasetCollection = db.dataset
-    return "number of items in dataset collection: "+str(datasetCollection.find().count())
+    for data in datasetCollection.find():
+        if data==None:
+            return "Dataset with specified id not found."
+        data_name = data["name"]
+        data_type = data["type"]
+        data_author = data["author"]
+        data_id = str(data["_id"])
+        json_1 = {"name":data_name, "type":data_type, "author":data_author, "id":data_id}
+        json_str = dumps(json_1)
+        ret_list.append(json_str)
+    ret = "["
+    first = True
+    for item in ret_list:
+        if first:
+            ret += item
+            first = False
+        else:
+            ret += ","+item
+    ret += "]"
+    return ret
 
 
 #Displays all of the available files
@@ -56,19 +77,43 @@ def file(request):
 
 @download.route("/<dataset_id>")
 def getDataset(dataset_id):
-    #Get the dataset as json object
+    ret = "{"
+
+    #Get the dataset data
     data = db.dataset.find_one({"_id":ObjectId(dataset_id)})
     if data==None:
         return "Dataset with specified id not found."
-    json_1 = dumps(data)
-    
+    data_name = data["name"]
+    data_type = data["type"]
+    data_author = data["author"]
+    data_id = str(data["_id"])
+    json_1 = {"name":data_name, "type":data_type, "author":data_author, "id":data_id}
+    json1_str = dumps(json_1)
+    ret += json1_str[1:-1]+","
+
+    #Get first data_object to populate the header
+    data_object_first = db.data_object.find_one({"dataSetId":ObjectId(dataset_id)})
+    first_object = dumps(data_object_first)
+    headers = []
+    for key in first_object:
+        if key != "_id" and key != "dataSetId":
+                headers.append({"text": key, "value": key})
+    ret += "\"headers\": ["
+    ret += str(headers) + "],"
+
     #Get all data_objects that belong to dataset
     data_object = db.data_object.find({"dataSetId":ObjectId(dataset_id)})
-    #Put all data_objects into one json object
-    json_2 = dumps(data_object)
-    
-    #Combine the 2 json objects
-    #ret = {"dataset":json_1, "data_objects":json_2}
-    ret = json_1
+    data_objects = dumps(data_object)
+    data = []
 
+    for row in data_objects:
+        for key in row:
+            data_items = {}
+            #if key != "_id" and key != "dataSetId":
+                #data_items[key] = row[key]
+            data.append(data_items)
+    ret += "\"data\": ["
+    ret += str(data)+"]"
+
+    ret += "}"
     return ret
