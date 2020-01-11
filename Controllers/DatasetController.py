@@ -3,6 +3,8 @@ from flask import current_app as app
 from app import db
 from Models.Dataset import Dataset
 import json
+from bson import ObjectId
+
 db = db.test
 
 
@@ -32,3 +34,19 @@ def filter():
             datasets.append(dataset)
         return json.dumps(datasets)
     
+@dataset.route("/data", methods=["GET","POST"])
+def getData():
+    try:
+        if request.form['id'] == "" or request.form['id'] == " ":
+            raise 
+        else:
+            datasetId = ObjectId(request.form['id'])
+            data = []
+            cursors = db.data_object.find({"dataSetId":datasetId})
+            for doc in cursors:
+                doc["_id"] = str(doc["_id"])
+                doc["dataSetId"] = str(doc["dataSetId"])
+                data.append(doc)
+            return json.dumps(data)
+    except:
+        return Response(status=400)
