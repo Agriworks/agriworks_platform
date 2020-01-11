@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, send_file, request, make_response
 from flask import current_app as app
 import app
 import json
+import math
 from bson.objectid import ObjectId
 from bson.json_util import dumps
 from gridfs import GridFS
@@ -94,26 +95,34 @@ def getDataset(dataset_id):
     #Get first data_object to populate the header
     data_object_first = db.data_object.find_one({"dataSetId":ObjectId(dataset_id)})
     first_object = dumps(data_object_first)
+    print(first_object)
     headers = []
-    for key in first_object:
+    for key in data_object_first.keys():
+        print (key)
         if key != "_id" and key != "dataSetId":
-                headers.append({"text": key, "value": key})
-    ret += "\"headers\": ["
-    ret += str(headers) + "],"
+            headers.append({"text": key, "value": key})
+    ret += "\"headers\": "
+    ret += dumps(headers) + ","
 
     #Get all data_objects that belong to dataset
     data_object = db.data_object.find({"dataSetId":ObjectId(dataset_id)})
-    data_objects = dumps(data_object)
     data = []
 
-    for row in data_objects:
+    for row in data_object:
+        data_items = {}
         for key in row:
-            data_items = {}
-            #if key != "_id" and key != "dataSetId":
-                #data_items[key] = row[key]
-            data.append(data_items)
-    ret += "\"data\": ["
-    ret += str(data)+"]"
+            if key != "_id" and key != "dataSetId":
+                if key == "Status":
+                    data_items[key] = "HC"
+                else:
+                    data_items[key] = row[key]
+        data.append(data_items)
+
+    ret += "\"data\": "
+    ret += dumps(data)
 
     ret += "}"
+    #print(dumps(headers,indent=4))
+    #print(dumps(data,indent=4))
+    print (ret)
     return ret
