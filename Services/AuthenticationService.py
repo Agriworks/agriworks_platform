@@ -6,6 +6,7 @@ from app import db
 from uuid import uuid4
 from Models.User import User
 from Models.Session import Session 
+from mongoengine import ValidationError
 
 import hashlib
 
@@ -83,7 +84,7 @@ class AuthenticationService():
     """
     def signup(self, document):
         user = User(
-            firstName=document["firstName"], lastName=document["lastName"], email=document["email"],
+            firstName=document["firstName"], lastName=document["lastName"], email=document["email"], admin = False,
             password=document["password"])
         error = None
         try:
