@@ -18,7 +18,6 @@ from Models.Dataset import Dataset
 
 #MongoDB Configuration
 db = app.db.test
-print("test db configured")
 
 #Module that makes it easier to read files from the database using chunks
 grid_fs = GridFS(db)
@@ -32,25 +31,15 @@ def index():
     datasetCollection = db.dataset
     for data in datasetCollection.find():
         if data==None:
-            return "Dataset with specified id not found."
+            return "No datasets found"
         data_name = data["name"]
         data_type = data["type"]
         data_author = data["author"]
         data_id = str(data["_id"])
-        json_1 = {"name":data_name, "type":data_type, "author":data_author, "id":data_id}
-        json_str = dumps(json_1)
-        ret_list.append(json_str)
-    ret = "["
-    first = True
-    for item in ret_list:
-        if first:
-            ret += item
-            first = False
-        else:
-            ret += ","+item
-    ret += "]"
-    return ret
-
+        datasetObject = {"name":data_name, "type":data_type, "author":data_author, "id":data_id}
+        ret_list.append(datasetObject)
+        
+    return {"datasets": ret_list}
 
 #Displays all of the available files
 @download.route("/data", methods=["GET"])
