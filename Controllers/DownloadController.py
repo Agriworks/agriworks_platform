@@ -1,45 +1,80 @@
 from flask import Blueprint, jsonify, send_file, request, make_response
-from flask import current_app as app
-import app
-import json
-import math
-from bson.objectid import ObjectId
-from bson.json_util import dumps
+from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
-#from Controllers.DownloadController import DownloadController
-#from Services.AuthenticationService import Authentication
+from Services.AuthenticationService import AuthenticationService
 from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 
 
-#Authentication = Authentication()
-
-#MongoDB Configuration
-db = app.db.test
-
-#Module that makes it easier to read files from the database using chunks
-grid_fs = GridFS(db)
+AuthenticationService = AuthenticationService()
 
 download = Blueprint("DownloadEndpoints",__name__, url_prefix="/download")
 
+#TODO: return only public datasets and datasets which the user owns
 @download.route("/", methods=["GET"])
 def index():
-    #Returns list of datasets
+    #Returns list of datasets 
     ret_list = []
-    datasetCollection = db.dataset
-    for data in datasetCollection.find():
-        if data==None:
-            return "No datasets found"
-        data_name = data["name"]
-        data_type = data["type"]
-        data_author = data["author"]
-        data_id = str(data["_id"])
-        datasetObject = {"name":data_name, "type":data_type, "author":data_author, "id":data_id}
+    datasets = Dataset.objects
+    for dataset in datasets:
+        if dataset == None:
+            return Response("No datasets found", status=400)
+
+        datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
+        datasetObject = {"name":dataset.name, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "id":str(dataset.id)}
         ret_list.append(datasetObject)
-        
-    return {"datasets": ret_list}
+
+    return jsonify(ret_list)
+
+
+#TODO: ensure that only authorized users can access a dataset
+@download.route("/<dataset_id>")
+def getDataset(dataset_id):
+
+    dataset = Dataset.objects.get(id=dataset_id)
+    
+    if dataset==None:
+        return Response("Dataset with specified id not found.", status=400)
+
+    headers = []
+
+    #v-table requires headers to be in this format
+    #TODO: Update v-table so that we can just pass the headers in as normal without performing any extra work
+    for header in dataset["keys"]: 
+        headerObj = {"text": header, "value": header}
+        headers.append(headerObj)
+
+    datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
+
+    datasetObj = {"name":dataset.name, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "id": str(dataset.id), "headers": headers}
+
+    #Get all data_objects that belong to dataset
+    data_objects = DataObject.objects(dataSetId=dataset_id)
+    data = []
+
+    for row in data_objects:
+        data_items = {}
+        for key in row:
+            if key != "id" and key != "dataSetId":
+                if key == "Status":
+                    data_items[key] = "HC"
+                else:
+                    data_items[key] = row[key]
+        data.append(data_items)
+
+    datasetObj["data"] = data
+    return jsonify(datasetObj)
+
+#--------------------------------------------------------------------
+# TODO: This needs to be modified to query S3, not gridfs in mongodb
+
+#MongoDB Configuration
+#db = app.db.test
+
+#Module that makes it easier to read files from the database using chunks
+#grid_fs = GridFS(db)
 
 #Displays all of the available files
 @download.route("/data", methods=["GET"])
@@ -64,54 +99,3 @@ def file(request):
     response.headers['Content-Type'] = 'application/octet-stream'
     response.headers["Content-Disposition"] = "attachment; filename={}".format(request)
     return response
-
-@download.route("/<dataset_id>")
-def getDataset(dataset_id):
-    ret = "{"
-
-    #Get the dataset data
-    data = db.dataset.find_one({"_id":ObjectId(dataset_id)})
-    if data==None:
-        return "Dataset with specified id not found."
-    data_name = data["name"]
-    data_type = data["type"]
-    data_author = data["author"]
-    data_id = str(data["_id"])
-    json_1 = {"name":data_name, "type":data_type, "author":data_author, "id":data_id}
-    json1_str = dumps(json_1)
-    ret += json1_str[1:-1]+","
-
-    #Get first data_object to populate the header
-    data_object_first = db.data_object.find_one({"dataSetId":ObjectId(dataset_id)})
-    first_object = dumps(data_object_first)
-    print(first_object)
-    headers = []
-    for key in data_object_first.keys():
-        print (key)
-        if key != "_id" and key != "dataSetId":
-            headers.append({"text": key, "value": key})
-    ret += "\"headers\": "
-    ret += dumps(headers) + ","
-
-    #Get all data_objects that belong to dataset
-    data_object = db.data_object.find({"dataSetId":ObjectId(dataset_id)})
-    data = []
-
-    for row in data_object:
-        data_items = {}
-        for key in row:
-            if key != "_id" and key != "dataSetId":
-                if key == "Status":
-                    data_items[key] = "HC"
-                else:
-                    data_items[key] = row[key]
-        data.append(data_items)
-
-    ret += "\"data\": "
-    ret += dumps(data)
-
-    ret += "}"
-    #print(dumps(headers,indent=4))
-    #print(dumps(data,indent=4))
-    print (ret)
-    return ret
