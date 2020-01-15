@@ -46,3 +46,28 @@ def file(request):
     response.headers['Content-Type'] = 'application/octet-stream'
     response.headers["Content-Disposition"] = "attachment; filename={}".format(request)
     return response
+
+@dataset.route("/filter", methods=['POST'])
+def filter():
+    datasets = []
+    try:
+        if request.form["search"] == "" or request.form["search"] == " ":
+            raise
+        else:
+            cursors = db.dataset.find({ "$text": { "$search": request.form["search"] } },{ "score": { "$meta": "textScore" } }).sort([('score', {'$meta': 'textScore'})])
+            for doc in cursors:
+                dataset = {
+                    'id':str(doc["_id"]),
+                    'name':doc["name"],
+                    'type':doc['type'],
+                    'description':doc["description"],
+                    'author':doc['author']
+                }
+                datasets.append(dataset)
+            return json.dumps(datasets)
+    except:
+        cursors = db.dataset.find({})
+        for doc in cursors:
+            dataset = {'id':str(doc["_id"]),'name':doc["name"],'type':doc['type'],'description':doc["description"],'author':doc['author']}
+            datasets.append(dataset)
+        return json.dumps(datasets)
