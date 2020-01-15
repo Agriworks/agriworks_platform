@@ -49,23 +49,23 @@ class UploadService():
                         currentItem = int(currentItem) #cast int64 objects to ints 
                     dataObject[keys[j]] = currentItem
                 dataObject.save()
+            
 
             #Go back to the front of the file
             uploadedFile.seek(0)
 
             #Save to S3
-            self.uploadToAWS(uploadedFile, None)
+            self.uploadToAWS(uploadedFile)
             
             return {"status": (dataSetName + " was successfully uploaded")}
 
         except ValidationError:
             return {"status": "Mongoengine validation error" }
     
-    def uploadToAWS(self, file, filename):
+    def uploadToAWS(self, file):
         bucketName = "agriworks-user-datasets"
         bucket = s3.Bucket(bucketName)
-        if filename == None:
-            filename = file.filename
+        filename = file.filename
         bucket.Object(filename).put(Body=file)
 
 
