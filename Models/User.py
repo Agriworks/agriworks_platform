@@ -9,3 +9,5 @@ class User(Document):
 
     def getFullname(self):
         return self.firstName + " " + self.lastName
+    
+    meta = {'indexes': [{'fields': ['$firstName', "$lastName"]}]}

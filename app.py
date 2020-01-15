@@ -4,9 +4,10 @@ from mongoengine import connect
 from flask_cors import CORS
 
 dbCreds = yaml.safe_load(open("creds.yaml", "r")) #read in remote db username and password
-dbHostUri = "mongodb+srv://" + dbCreds["db_user"] + ":" + dbCreds["db_password"] + "@cluster0-ollas.mongodb.net/test?retryWrites=true&w=majority"
+dbHostUri = "mongodb+srv://" + dbCreds["db_user"] + ":" + dbCreds["db_password"] + "@cluster0-ollas.mongodb.net/test?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
 
 db = connect(host=dbHostUri)
+
 
 def create_app():
     app = Flask(__name__)
@@ -20,11 +21,11 @@ def create_app():
         import Controllers.AdminController as admin
         import Controllers.AuthenticationController as auth
         import Controllers.UploadController as upload
-        import Controllers.DownloadController as download
+        import Controllers.DatasetController as dataset
         
         app.register_blueprint(admin.admin)
         app.register_blueprint(auth.auth)
         app.register_blueprint(upload.upload)
-        app.register_blueprint(download.download)
+        app.register_blueprint(dataset.dataset)
         return app
 

@@ -1,20 +1,20 @@
-from flask import Blueprint, jsonify, send_file, request, make_response
+from flask import Blueprint,jsonify, send_file, request, make_response
 from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
-from Services.AuthenticationService import AuthenticationService
 from Models.DataObject import DataObject
 from Models.Dataset import Dataset
+from Services.DatasetService import DatasetService
+from Models.User import User
 
+DatasetService = DatasetService()
 
-AuthenticationService = AuthenticationService()
-
-download = Blueprint("DownloadEndpoints",__name__, url_prefix="/download")
+dataset = Blueprint("DatasetEndpoints",__name__, url_prefix="/dataset")
 
 #TODO: return only public datasets and datasets which the user owns
-@download.route("/", methods=["GET"])
-def index():
+@dataset.route("/", methods=["GET"])
+def get():
     #Returns list of datasets 
     ret_list = []
     datasets = Dataset.objects
@@ -22,15 +22,13 @@ def index():
         if dataset == None:
             return Response("No datasets found", status=400)
 
-        datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
-        datasetObject = {"name":dataset.name, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "id":str(dataset.id)}
-        ret_list.append(datasetObject)
+        ret_list.append(DatasetService.createDatasetInfoObject(dataset))
 
     return jsonify(ret_list)
 
 
 #TODO: ensure that only authorized users can access a dataset
-@download.route("/<dataset_id>")
+@dataset.route("/<dataset_id>")
 def getDataset(dataset_id):
 
     dataset = Dataset.objects.get(id=dataset_id)
@@ -46,9 +44,7 @@ def getDataset(dataset_id):
         headerObj = {"text": header, "value": header}
         headers.append(headerObj)
 
-    datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
-
-    datasetObj = {"name":dataset.name, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "id": str(dataset.id), "headers": headers}
+    datasetObj = DatasetService.createDatasetInfoObject(dataset)
 
     #Get all data_objects that belong to dataset
     data_objects = DataObject.objects(dataSetId=dataset_id)
@@ -67,6 +63,30 @@ def getDataset(dataset_id):
     datasetObj["data"] = data
     return jsonify(datasetObj)
 
+#TODO: only return public datasets and the datasets that belong to the user
+@dataset.route("/search/<searchQuery>", methods=['GET'])
+def search(searchQuery):
+    datasets = []
+    try:
+        if searchQuery == "" or searchQuery == " ":
+            raise
+        else:
+            matchedAuthors = User.objects.search_text(searchQuery)
+            for user in matchedAuthors:
+                try:
+                    correspondingDataset = Dataset.objects.get(author=user.id)
+                    datasets.append(DatasetService.createDatasetInfoObject(correspondingDataset))
+                except:
+                    pass
+
+            matchedDatasets = Dataset.objects.search_text(searchQuery).order_by('$text_score')
+            for dataset in matchedDatasets:
+                datasets.append(DatasetService.createDatasetInfoObject(dataset))
+
+            return jsonify(datasets)
+    except:
+        return Response("No matching datasets found for query")
+
 #--------------------------------------------------------------------
 # TODO: This needs to be modified to query S3, not gridfs in mongodb
 
@@ -77,7 +97,7 @@ def getDataset(dataset_id):
 #grid_fs = GridFS(db)
 
 #Displays all of the available files
-@download.route("/data", methods=["GET"])
+@dataset.route("/data", methods=["GET"])
 def getAll():
     #set a variable for the database 
     data = mongo.db.fs.files
@@ -90,7 +110,7 @@ def getAll():
         result.append({'_id': str(field['_id']), 'filename': field['filename'], 'contentType': field['contentType'], 'md5':field['md5'], 'chunkSize': field['chunkSize'], 'time': field['uploadDate']})
     return jsonify(result)
 
-@download.route('/file/<request>', methods=['GET','POST'])
+@dataset.route('/file/<request>', methods=['GET','POST'])
 def file(request):
     #Finds the file in the database from the requested file (comes from the front end)
     grid_fs_file = grid_fs.find_one({'filename': request})
@@ -99,3 +119,5 @@ def file(request):
     response.headers['Content-Type'] = 'application/octet-stream'
     response.headers["Content-Disposition"] = "attachment; filename={}".format(request)
     return response
+
+
