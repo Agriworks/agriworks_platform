@@ -7,6 +7,7 @@ from uuid import uuid4
 from Models.User import User
 from Models.Session import Session 
 from datetime import datetime
+
 import hashlib
 
 class AuthenticationService():
@@ -82,14 +83,16 @@ class AuthenticationService():
         return hashLevelTwo
      
     """
-    New user signup
+    Currently, all users will not be administrators.
     """
     def signup(self, document):
         user = User(
             firstName=document["firstName"], 
             lastName=document["lastName"], 
             email=document["email"],
-            password=document["password"])
+            password=document["password"],
+            isAdmin=False
+            )
     
         user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
 

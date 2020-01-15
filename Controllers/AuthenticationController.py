@@ -14,7 +14,7 @@ def login():
     if not session:
         return Response("Incorrect username or password", status=403)
     else:
-        return {"key": "SID", "value": str(session.sessionId), "expires": session.dateExpires}
+        return {"key": "SID", "value": str(session.sessionId), "expires": session.dateExpires, "admin": session["user"]["isAdmin"]}
         
 
 @auth.route("/logout", methods=["POST"])

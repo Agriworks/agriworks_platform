@@ -1,13 +1,14 @@
-from mongoengine import (Document, StringField, EmailField, ValidationError)
-
+from mongoengine import (Document, StringField, EmailField, ValidationError, BooleanField)
 
 class User(Document):
-    firstName = StringField(max_length=20, required=True)
+    firstName = StringField(max_length=40, required=True)
     lastName = StringField(max_length=40, required=True)
-    email = EmailField()
-    password = StringField()  # TODO: convert to encrypted password
+    email = EmailField(required=True)
+    isAdmin = BooleanField(default=False)
+    password = StringField(required=True)  # TODO: convert to binary field
 
     def getFullname(self):
         return self.firstName + " " + self.lastName
     
     meta = {'indexes': [{'fields': ['$firstName', "$lastName"]}]}
+
