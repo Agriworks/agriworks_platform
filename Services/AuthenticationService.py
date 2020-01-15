@@ -113,7 +113,6 @@ class AuthenticationService():
         return True
     
     def verifySessionAndReturnUser(self, sessionId):
-        print("The session id is " + sessionId)
         session = self.getSession(sessionId)
         if (datetime.utcnow() < session.dateExpires):
             return User.objects.get(id=session.user.id)
