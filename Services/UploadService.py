@@ -2,14 +2,17 @@ from werkzeug.datastructures import ImmutableMultiDict
 from werkzeug.utils import secure_filename
 from Models.Dataset import Dataset
 from Models.DataObject import DataObject
+from Services.AuthenticationService import AuthenticationService
+from mongoengine import ValidationError
 import pandas as pd
 import numpy
-from mongoengine import ValidationError
-from Services.AuthenticationService import AuthenticationService
+import boto3
 
 AuthenticationService = AuthenticationService()
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
+
+s3 = boto3.resource('s3')
 
 class UploadService():
 
@@ -63,8 +66,24 @@ class UploadService():
                     dataObject[keys[j]] = currentItem
                 dataObject.save()
 
-            return {"id": str(dataSet.id)} #TODO: How do we automatically get a string rep of a mongo object id ?
+            #Go back to the front of the file
+            uploadedFile.seek(0)
 
+            #Save to S3
+            self.uploadToAWS(dataSet.id, uploadedFile)
+
+            return {"id": str(dataSet.id)} #TODO: How do we automatically get a string rep of a mongo object id ?
+        
         except ValidationError as e:
             print(e)
             return None
+
+    def uploadToAWS(self, datasetId, file):
+        bucketName = "agriworks-user-datasets"
+        bucket = s3.Bucket(bucketName)
+        filename = str(datasetId) + "." + file.filename.split(".")[1] #filename === datasetId for easy lookups
+        bucket.Object(filename).put(Body=file)
+
+
+    
+
