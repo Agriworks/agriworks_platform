@@ -1,4 +1,4 @@
-from flask import Blueprint,jsonify, send_file, request, make_response
+from flask import Blueprint, jsonify, send_file, request, make_response
 from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
