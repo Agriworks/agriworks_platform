@@ -84,7 +84,7 @@ class AuthenticationService():
     """
     def signup(self, document):
         user = User(
-            firstName=document["firstName"], lastName=document["lastName"], email=document["email"], admin = False,
+            firstName=document["firstName"], lastName=document["lastName"], email=document["email"], isAdmin = False,
             password=document["password"])
         error = None
         try:
