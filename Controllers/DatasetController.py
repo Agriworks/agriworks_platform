@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, send_file, request, make_response
+from flask import Blueprint,jsonify, send_file, request, make_response
 from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
@@ -14,7 +14,7 @@ dataset = Blueprint("DatasetEndpoints",__name__, url_prefix="/dataset")
 
 #TODO: return only public datasets and datasets which the user owns
 @dataset.route("/", methods=["GET"])
-def index():
+def get():
     #Returns list of datasets 
     ret_list = []
     datasets = Dataset.objects
@@ -63,6 +63,7 @@ def getDataset(dataset_id):
     datasetObj["data"] = data
     return jsonify(datasetObj)
 
+#TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
 def search(searchQuery):
     datasets = []

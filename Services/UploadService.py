@@ -34,7 +34,7 @@ class UploadService():
             uploadedFile = request.files['file']
             dataSetName = request.form.get("name")
             dataSetAuthor = user
-            dataSetVisibility = True if request.form.get("visibility") == "Public" else False
+            dataSetIsPublic = True if request.form.get("permissions") == "Public" else False
             dataSetTags = request.form.get("tags")
             dataSetType = request.form.get("type")
 
@@ -47,7 +47,7 @@ class UploadService():
                 name=dataSetName,
                 author=dataSetAuthor,
                 keys=keys,
-                visibility=dataSetVisibility,
+                public=dataSetIsPublic,
                 tags=dataSetTags,
                 datasetType=dataSetType
             )

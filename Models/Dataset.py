@@ -7,7 +7,7 @@ class Dataset(Document):
     author = ReferenceField(User, required=True)
     keys = ListField(required=True)
     dateCreated = DateTimeField(default=datetime.now())
-    visibility = BooleanField(required=True) #true == public, false == private
+    public = BooleanField(required=True)
     tags = StringField()
     datasetType = StringField(required=True)
     
