@@ -10,4 +10,5 @@ class Dataset(Document):
     visibility = BooleanField(required=True) #true == public, false == private
     tags = StringField()
     datasetType = StringField(required=True)
-        
+    
+    meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"],'weights': {'title': 5, 'keys':3, 'tags': 3, 'datasetType': 2 }}]}

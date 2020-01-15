@@ -6,6 +6,7 @@ from pymongo import MongoClient
 from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
+from Models.User import User
 
 DatasetService = DatasetService()
 
@@ -69,6 +70,14 @@ def search(searchQuery):
         if searchQuery == "" or searchQuery == " ":
             raise
         else:
+            matchedAuthors = User.objects.search_text(searchQuery)
+            for user in matchedAuthors:
+                try:
+                    correspondingDataset = Dataset.objects.get(author=user.id)
+                    datasets.append(DatasetService.createDatasetInfoObject(correspondingDataset))
+                except:
+                    pass
+
             matchedDatasets = Dataset.objects.search_text(searchQuery).order_by('$text_score')
             for dataset in matchedDatasets:
                 datasets.append(DatasetService.createDatasetInfoObject(dataset))
