@@ -6,7 +6,7 @@ from app import db
 from uuid import uuid4
 from Models.User import User
 from Models.Session import Session 
-
+from datetime import datetime
 import hashlib
 
 class AuthenticationService():
@@ -28,36 +28,39 @@ class AuthenticationService():
     """ 
     Return the user
     """ 
-    def getUser(self,email):
-        if not User.objects(email=email):
+    def getUser(self, **kwargs):
+        if not User.objects(**kwargs):
             return False
-        return User.objects.get(email=email) #use objects.get to retreive one result
+
+        user = User.objects.get(**kwargs) #use objects.get to retreive one result
+        
+        return user
 
     """
-    Authenticate the user
+    Authenticate the user (Login). 
+    @param: email 
+    @param: password
+    @return: unique session id
     """
     def authenticate(self,email,password):
-        hashed = self.saltPassword(password)
-        user = self.getUser(email)
+        hashedPassword = self.saltPassword(password)
+        user = self.getUser(email=email)
+
         if not user:
             return False
-        if hashed != user.password:
-            return False
-        """
-        sessionId = create session 
-        create cookie 
-        return cookie object here 
-        """
 
-        sessionId = Session(user=user)
-        Session.objects(user=user).update(upsert=True, sessionId=sessionId.sessionId, date_created=sessionId.date_created)
-        return sessionId
+        if hashedPassword != user.password:
+            return False
+
+        session = Session(user=user)
+        session.save()
+        return session
     
     """
     Save the user to the database upon signup if they don't exist
     """
     def save(self, user): 
-        if self.getUser(user.email): 
+        if self.getUser(email=user.email): 
             return False
         else:
             user.password = self.saltPassword(user.password)
@@ -83,21 +86,17 @@ class AuthenticationService():
     """
     def signup(self, document):
         user = User(
-            firstName=document["firstName"], lastName=document["lastName"], email=document["email"],
+            firstName=document["firstName"], 
+            lastName=document["lastName"], 
+            email=document["email"],
             password=document["password"])
-        error = None
-        try:
-            user.validate()  # check if its an error with the type entered
-            if (self.save(user)):
-                success = True
-            else:
-                success = False
-                error = "DuplicateError"
-        except ValidationError:  # If error occurs, it means its an error in the typing
-            error = "TypeError"
-            success = False
-        
-        return success, error
+    
+        user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
+
+        if (self.save(user)):
+            return True
+        else:
+            return False
 
     def changeEmail(self, oldEmail, newEmail):
         User.objects.get(email=oldEmail).update(email=newEmail)
@@ -112,4 +111,11 @@ class AuthenticationService():
         session = self.getSession(sessionID)
         session.delete()
         return True
-            
+    
+    def verifySessionAndReturnUser(self, sessionId):
+        print("The session id is " + sessionId)
+        session = self.getSession(sessionId)
+        if (datetime.utcnow() < session.dateExpires):
+            return User.objects.get(id=session.user.id)
+        else:
+            return False

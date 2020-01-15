@@ -6,3 +6,6 @@ class User(Document):
     lastName = StringField(max_length=40, required=True)
     email = EmailField()
     password = StringField()  # TODO: convert to encrypted password
+
+    def getFullname(self):
+        return self.firstName + " " + self.lastName

@@ -1,52 +1,113 @@
-from flask import Blueprint, flash, request, redirect, jsonify, Response
-from flask import current_app as app
-from app import db
+from flask import Blueprint, jsonify, send_file, request, make_response
+from Response import Response
+from gridfs import GridFS
+from flask_pymongo import PyMongo
+from pymongo import MongoClient
+from Models.DataObject import DataObject
 from Models.Dataset import Dataset
-import json
-from bson import ObjectId
+from Services.DatasetService import DatasetService
 
-db = db.test
+DatasetService = DatasetService()
+
+dataset = Blueprint("DatasetEndpoints",__name__, url_prefix="/dataset")
+
+#TODO: return only public datasets and datasets which the user owns
+@dataset.route("/", methods=["GET"])
+def index():
+    #Returns list of datasets 
+    ret_list = []
+    datasets = Dataset.objects
+    for dataset in datasets:
+        if dataset == None:
+            return Response("No datasets found", status=400)
+
+        ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+
+    return jsonify(ret_list)
 
 
-dataset = Blueprint("DatasetController", __name__, url_prefix="/dataset")
-@dataset.route("/filter", methods=["GET","POST"])
-def filter():
+#TODO: ensure that only authorized users can access a dataset
+@dataset.route("/<dataset_id>")
+def getDataset(dataset_id):
+
+    dataset = Dataset.objects.get(id=dataset_id)
+    
+    if dataset==None:
+        return Response("Dataset with specified id not found.", status=400)
+
+    headers = []
+
+    #v-table requires headers to be in this format
+    #TODO: Update v-table so that we can just pass the headers in as normal without performing any extra work
+    for header in dataset["keys"]: 
+        headerObj = {"text": header, "value": header}
+        headers.append(headerObj)
+
+    datasetObj = DatasetService.createDatasetInfoObject(dataset)
+
+    #Get all data_objects that belong to dataset
+    data_objects = DataObject.objects(dataSetId=dataset_id)
+    data = []
+
+    for row in data_objects:
+        data_items = {}
+        for key in row:
+            if key != "id" and key != "dataSetId":
+                if key == "Status":
+                    data_items[key] = "HC"
+                else:
+                    data_items[key] = row[key]
+        data.append(data_items)
+
+    datasetObj["data"] = data
+    return jsonify(datasetObj)
+
+@dataset.route("/search/<searchQuery>", methods=['GET'])
+def search(searchQuery):
     datasets = []
     try:
-        if request.form["search"] == "" or request.form["search"] == " ":
+        if searchQuery == "" or searchQuery == " ":
             raise
         else:
-            cursors = db.dataset.find({ "$text": { "$search": request.form["search"] } },{ "score": { "$meta": "textScore" } }).sort([('score', {'$meta': 'textScore'})])
-            for doc in cursors:
-                dataset = {
-                    'id':str(doc["_id"]),
-                    'name':doc["name"],
-                    'type':doc['type'],
-                    'description':doc["description"],
-                    'author':doc['author']
-                }
-                datasets.append(dataset)
-            return json.dumps(datasets)
+            matchedDatasets = Dataset.objects.search_text(searchQuery).order_by('$text_score')
+            for dataset in matchedDatasets:
+                datasets.append(DatasetService.createDatasetInfoObject(dataset))
+
+            return jsonify(datasets)
     except:
-        cursors = db.dataset.find({})
-        for doc in cursors:
-            dataset = {'id':str(doc["_id"]),'name':doc["name"],'type':doc['type'],'description':doc["description"],'author':doc['author']}
-            datasets.append(dataset)
-        return json.dumps(datasets)
-    
-@dataset.route("/data", methods=["GET","POST"])
-def getData():
-    try:
-        if request.form['id'] == "" or request.form['id'] == " ":
-            raise 
-        else:
-            datasetId = ObjectId(request.form['id'])
-            data = []
-            cursors = db.data_object.find({"dataSetId":datasetId})
-            for doc in cursors:
-                doc["_id"] = str(doc["_id"])
-                doc["dataSetId"] = str(doc["dataSetId"])
-                data.append(doc)
-            return json.dumps(data)
-    except:
-        return Response(status=400)
+        return Response("No matching datasets found for query")
+
+#--------------------------------------------------------------------
+# TODO: This needs to be modified to query S3, not gridfs in mongodb
+
+#MongoDB Configuration
+#db = app.db.test
+
+#Module that makes it easier to read files from the database using chunks
+#grid_fs = GridFS(db)
+
+#Displays all of the available files
+@dataset.route("/data", methods=["GET"])
+def getAll():
+    #set a variable for the database 
+    data = mongo.db.fs.files
+
+    #Empty array that collects all of the file information to display
+    result = []
+
+    #Loop to gather all of the file information to display 
+    for field in data.find():
+        result.append({'_id': str(field['_id']), 'filename': field['filename'], 'contentType': field['contentType'], 'md5':field['md5'], 'chunkSize': field['chunkSize'], 'time': field['uploadDate']})
+    return jsonify(result)
+
+@dataset.route('/file/<request>', methods=['GET','POST'])
+def file(request):
+    #Finds the file in the database from the requested file (comes from the front end)
+    grid_fs_file = grid_fs.find_one({'filename': request})
+    #Function from flask that makes it easy to create a response to send to the user requesting the download
+    response = make_response(grid_fs_file.read())
+    response.headers['Content-Type'] = 'application/octet-stream'
+    response.headers["Content-Disposition"] = "attachment; filename={}".format(request)
+    return response
+
+

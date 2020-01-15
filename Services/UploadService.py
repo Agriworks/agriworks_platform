@@ -5,6 +5,9 @@ from Models.DataObject import DataObject
 import pandas as pd
 import numpy
 from mongoengine import ValidationError
+from Services.AuthenticationService import AuthenticationService
+
+AuthenticationService = AuthenticationService()
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
@@ -19,23 +22,37 @@ class UploadService():
     
     #TODO: Catch errors (ex. Catching a mongovalidation error. We don't want to present the client with the raw error but instead we
     #want to process the error and return the appropriate error message.
-    #TODO: Attach dataset to user. Verify that the user that is uploading this dataset is logged in. 
-    #TODO: Add private/public field to Dataset object 
+    #TODO: Verify that the user that is uploading this dataset is logged in. 
     def createDataSetAndDataObjects(self, request):
         try:
-            #Get parameters
+            user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+
+            if (not user):
+                return {"message": "Invalid session", "status": 400}
+
+            #TODO: verify that these parameters exist
             uploadedFile = request.files['file']
             dataSetName = request.form.get("name")
-            dataSetDescription = request.form.get("description")
-            
+            dataSetAuthor = user
+            dataSetVisibility = True if request.form.get("visibility") == "Public" else False
+            dataSetTags = request.form.get("tags")
+            dataSetType = request.form.get("type")
+
             #Read the data in 
             data = pd.read_csv(uploadedFile)
             keys = list(data.columns)
 
             #Create dataset object
-            dataSet = Dataset(Name=dataSetName,Description=dataSetDescription,Keys=keys)
+            dataSet = Dataset(
+                name=dataSetName,
+                author=dataSetAuthor,
+                keys=keys,
+                visibility=dataSetVisibility,
+                tags=dataSetTags,
+                datasetType=dataSetType
+            )
             dataSet.save()
-
+            
             #Populate data into database #TODO: How do we read data in without having to convert to mongodb acceptable types ? 
             for i in range(len(data)):
                 dataObject = DataObject(dataSetId=dataSet)
@@ -45,8 +62,9 @@ class UploadService():
                         currentItem = int(currentItem) #cast int64 objects to ints 
                     dataObject[keys[j]] = currentItem
                 dataObject.save()
-            
-            return {"status": (dataSetName + " was successfully uploaded")}
 
-        except ValidationError:
-            return {"status": "Mongoengine validation error" }
+            return {"id": str(dataSet.id)} #TODO: How do we automatically get a string rep of a mongo object id ?
+
+        except ValidationError as e:
+            print(e)
+            return None
