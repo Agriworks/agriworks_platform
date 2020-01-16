@@ -15,7 +15,7 @@ def create_app():
     #CORS for the backend server and frontend to communicate with each other
     app.config['SECRET_KEY'] = 'secret'
     app.config['CORS_HEADERS'] = 'Content-Type'
-    CORS(app, resources={r"*": {"origins": "http://localhost:8080"}})
+    CORS(app, resources={r"*": {"origins": "*"}})
 
     with app.app_context():
         import Controllers.AdminController as admin
