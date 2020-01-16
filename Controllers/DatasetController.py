@@ -36,15 +36,7 @@ def getDataset(dataset_id):
     if dataset==None:
         return Response("Dataset with specified id not found.", status=400)
 
-    headers = []
-
-    #v-table requires headers to be in this format
-    #TODO: Update v-table so that we can just pass the headers in as normal without performing any extra work
-    for header in dataset["keys"]: 
-        headerObj = {"text": header, "value": header}
-        headers.append(headerObj)
-
-    datasetObj = DatasetService.createDatasetInfoObject(dataset)
+    datasetObj = DatasetService.createDatasetInfoObject(dataset, withHeaders=True)
 
     #Get all data_objects that belong to dataset
     data_objects = DataObject.objects(dataSetId=dataset_id)
