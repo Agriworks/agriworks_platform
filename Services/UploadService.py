@@ -28,22 +28,44 @@ class UploadService():
     #TODO: Verify that the user that is uploading this dataset is logged in. 
     def createDataSetAndDataObjects(self, request):
         try:
-            user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+            # Verify that the user that is uploading this dataset is logged in.
+            if (not request.cookies["SID"]):
+                return { "message": "Please login to continue."}
 
+            user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
             if (not user):
                 return {"message": "Invalid session", "status": 400}
 
-            #TODO: verify that these parameters exist
+            #Verify that these parameters exist
             uploadedFile = request.files['file']
+            if (not uploadedFile):
+                return { "message": "Please select a file to upload."} 
+
             dataSetName = request.form.get("name")
+            if (not dataSetName):
+                return { "message": "Please select a file to upload."}
+
             dataSetAuthor = user
+
             dataSetIsPublic = True if request.form.get("permissions") == "Public" else False
+            if (not dataSetIsPublic):
+                return { "message": "Please select a file to upload."}
+
             dataSetTags = request.form.get("tags")
+            if (not dataSetTags):
+                return { "message": "Please select data set tags."}
+
             dataSetType = request.form.get("type")
+            if (not dataSetType):
+                return { "message": "Please select a data set type."}
 
             #Read the data in 
             data = pd.read_csv(uploadedFile)
             keys = list(data.columns)
+
+            # Check to see if for some reason data and keys caused an error
+            if (not data or not keys):
+                return {"message": "Data could not be read."}
 
             #Create dataset object
             dataSet = Dataset(
@@ -54,6 +76,8 @@ class UploadService():
                 tags=dataSetTags,
                 datasetType=dataSetType
             )
+            if (not dataSet): 
+                return { "message": "Data set could not be created. Please try again."}
             dataSet.save()
             
             #Populate data into database #TODO: How do we read data in without having to convert to mongodb acceptable types ? 
@@ -64,6 +88,8 @@ class UploadService():
                     if (isinstance(currentItem, numpy.int64)):
                         currentItem = int(currentItem) #cast int64 objects to ints 
                     dataObject[keys[j]] = currentItem
+                if (not dataObject):
+                    return {"message": "Data object cannot be created, check dataset."}
                 dataObject.save()
 
             #Go back to the front of the file
