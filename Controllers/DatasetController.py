@@ -7,6 +7,8 @@ from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
 from Models.User import User
+import boto3
+import botocore
 
 DatasetService = DatasetService()
 
@@ -85,6 +87,10 @@ def search(searchQuery):
 #MongoDB Configuration
 #db = app.db.test
 
+#s3 configuration using boto3
+s3 = boto3.resource('s3')
+
+
 #Module that makes it easier to read files from the database using chunks
 #grid_fs = GridFS(db)
 
@@ -102,14 +108,22 @@ def getAll():
         result.append({'_id': str(field['_id']), 'filename': field['filename'], 'contentType': field['contentType'], 'md5':field['md5'], 'chunkSize': field['chunkSize'], 'time': field['uploadDate']})
     return jsonify(result)
 
+
+
 @dataset.route('/file/<request>', methods=['GET','POST'])
 def file(request):
+    
     #Finds the file in the database from the requested file (comes from the front end)
-    grid_fs_file = grid_fs.find_one({'filename': request})
+    try:
+        s3.download_file('agriworks-user-datasets', request.form.get("name"), request.form.get("name"))
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return Response("The object does not exist.")
+        else:
+            raise
+
     #Function from flask that makes it easy to create a response to send to the user requesting the download
-    response = make_response(grid_fs_file.read())
-    response.headers['Content-Type'] = 'application/octet-stream'
-    response.headers["Content-Disposition"] = "attachment; filename={}".format(request)
-    return response
-
-
+    #response = make_response(grid_fs_file.read())
+    #response.headers['Content-Type'] = 'application/octet-stream'
+    #response.headers["Content-Disposition"] = "attachment; filename={}".format(request)
+    return Response("Successfully downloaded.")
