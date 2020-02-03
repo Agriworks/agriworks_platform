@@ -44,12 +44,26 @@ class UploadService():
             #Read the data in 
             data = pd.read_csv(uploadedFile)
             keys = list(data.columns)
+            legend = {} #contains same column values
+
+            #Combine repeated column data into legend
+            if len(keys) > 1:
+                for i in keys:
+                    if len(data[i]) <= 1: #if only one value exists in column, then quit
+                        break
+                    elif data[i].nunique() == 1: #if all entries have the same value
+                        if str(data[i][0]) != 'nan': #checking to make sure value in not nan
+                            legend[i] = data[i][0]
+                            del data[i]
+            if len(legend) == 0: #if nothing in legend, fill 'None': 'None'
+                legend['None'] = 'None'
 
             #Create dataset object
             dataSet = Dataset(
                 name=dataSetName,
                 author=dataSetAuthor,
                 keys=keys,
+                legend=legend,
                 public=dataSetIsPublic,
                 tags=dataSetTags,
                 datasetType=dataSetType

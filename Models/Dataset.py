@@ -6,6 +6,7 @@ class Dataset(Document):
     name = StringField(required=True)
     author = ReferenceField(User, required=True)
     keys = ListField(required=True)
+    legend = DictField(required=True)
     dateCreated = DateTimeField(default=datetime.now())
     public = BooleanField(required=True)
     tags = StringField()
