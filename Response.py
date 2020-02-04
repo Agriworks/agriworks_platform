@@ -21,7 +21,9 @@ class Response(FlaskResponse):
             kwargs["status"] = response["status"]
             response.pop("status")
 
-        kwargs["content_type"] = "application/json"
+        if(kwargs["content_type"] == None):
+            kwargs["content_type"] = "application/json"
+        
         kwargs["headers"] = {"Access-Control-Allow-Credentials": "true"}
         return super(Response, self).__init__(response,**kwargs)
 

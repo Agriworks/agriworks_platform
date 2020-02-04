@@ -15,6 +15,9 @@ DatasetService = DatasetService()
 
 dataset = Blueprint("DatasetEndpoints",__name__, url_prefix="/dataset")
 
+#s3 configuration using boto3
+s3 = boto3.client('s3')
+
 #TODO: return only public datasets and datasets which the user owns
 @dataset.route("/", methods=["GET"])
 def get():
@@ -83,22 +86,16 @@ def search(searchQuery):
         return Response("No matching datasets found for query")
 
 
-#s3 configuration using boto3
-s3 = boto3.client('s3')
-
+#TODO: Get any type of file, not just csv. May just need to encode the files without filename. But then need to determine what content_type the file is
 @dataset.route('/download/<id>', methods=['GET'])
 def file(id):
-    
-    #Finds the file in the database from the requested file (comes from the front end)
     try:
         filename = id + ".csv"
-        bucket = "agriworks-user-datasets"
+        fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
 
-        return Response(
-        s3.get_object(Bucket=bucket, Key=filename)
+        #Body is the content of the file itself
+        return Response(fileFromS3["Body"], content_type="text/csv") 
 
-        )
-        
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             return Response("The object does not exist.")
