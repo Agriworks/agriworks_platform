@@ -1,6 +1,7 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, 
 from flask import current_app as app
 from Services.AuthenticationService import AuthenticationService
+from Response import Response
 
 Authentication = AuthenticationService()
 
@@ -13,7 +14,6 @@ def index():
 @admin.route("/account", methods=["POST"])
 @Authentication.login_required
 def account():
-    response = make_response() #what returns
 
     #This is the stuff from the cookie, getting the email and password of the person who is logged in
     SID = request.cookies["SID"] #gets SID from cookie
@@ -31,10 +31,10 @@ def account():
         if Authentication.saltPassword(formPassword) == sessionPassword: #make sure that the password is right
             formEmail = form["inputEmail"] #email from form
             Authentication.changeEmail(sessionEmail, formEmail)
-            response.set_data("Done")
+            return Response("Email Updated", status=200)
             #updated email
         else:
-            response.set_data("Wrong password")
+            return Response("Wrong password", status=405)
             #return an error saying that the password is not right
 
     elif form["submit"] == "password": #doing the change password form
@@ -47,13 +47,13 @@ def account():
 
             if formConfirmNewPassword == formNewPassword:
                 Authentication.changePassword(sessionEmail, formNewPassword)
-                response.set_data("Done")
+                return Response("Updated Password", status=200)
                 #updated password
             else:
-                response.set_data("Password does not match confirm password")
+                return Response("Password does not match confirm password", status=406)
                 #error password does not match confirm password
         else:
-            response.set_data("Wrong password")
+            return Response("Wrong password", status=405)
             #error password inputted is not correct
 
-    return response
+    return Response("No form submitted", status=408)
