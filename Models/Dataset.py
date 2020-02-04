@@ -1,6 +1,7 @@
-from mongoengine import *
+from mongoengine import Document, StringField, ReferenceField, ListField, DateTimeField, BooleanField, DictField
 from datetime import datetime
 from Models.User import User
+
 
 class Dataset(Document):
     name = StringField(required=True)
@@ -11,5 +12,6 @@ class Dataset(Document):
     public = BooleanField(required=True)
     tags = StringField()
     datasetType = StringField(required=True)
-    
-    meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"],'weights': {'title': 5, 'keys':3, 'tags': 3, 'datasetType': 2 }}]}
+
+    meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"], 'weights': {
+        'title': 5, 'keys': 3, 'tags': 3, 'datasetType': 2}}]}
