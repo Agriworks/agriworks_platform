@@ -7,10 +7,16 @@ from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
 from Models.User import User
+from io import StringIO
+import boto3
+import botocore
 
 DatasetService = DatasetService()
 
 dataset = Blueprint("DatasetEndpoints",__name__, url_prefix="/dataset")
+
+#s3 configuration using boto3
+s3 = boto3.client('s3')
 
 #TODO: return only public datasets and datasets which the user owns
 @dataset.route("/", methods=["GET"])
@@ -79,37 +85,19 @@ def search(searchQuery):
     except:
         return Response("No matching datasets found for query")
 
-#--------------------------------------------------------------------
-# TODO: This needs to be modified to query S3, not gridfs in mongodb
 
-#MongoDB Configuration
-#db = app.db.test
+#TODO: Get any type of file, not just csv. May just need to encode the files without filename. But then need to determine what content_type the file is
+@dataset.route('/download/<id>', methods=['GET'])
+def file(id):
+    try:
+        filename = id + ".csv"
+        fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
 
-#Module that makes it easier to read files from the database using chunks
-#grid_fs = GridFS(db)
+        #Body is the content of the file itself
+        return Response(fileFromS3["Body"], content_type="text/csv") 
 
-#Displays all of the available files
-@dataset.route("/data", methods=["GET"])
-def getAll():
-    #set a variable for the database 
-    data = mongo.db.fs.files
-
-    #Empty array that collects all of the file information to display
-    result = []
-
-    #Loop to gather all of the file information to display 
-    for field in data.find():
-        result.append({'_id': str(field['_id']), 'filename': field['filename'], 'contentType': field['contentType'], 'md5':field['md5'], 'chunkSize': field['chunkSize'], 'time': field['uploadDate']})
-    return jsonify(result)
-
-@dataset.route('/file/<request>', methods=['GET','POST'])
-def file(request):
-    #Finds the file in the database from the requested file (comes from the front end)
-    grid_fs_file = grid_fs.find_one({'filename': request})
-    #Function from flask that makes it easy to create a response to send to the user requesting the download
-    response = make_response(grid_fs_file.read())
-    response.headers['Content-Type'] = 'application/octet-stream'
-    response.headers["Content-Disposition"] = "attachment; filename={}".format(request)
-    return response
-
-
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return Response("The object does not exist.")
+        else:
+            raise
