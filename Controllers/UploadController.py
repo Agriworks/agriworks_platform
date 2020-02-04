@@ -7,6 +7,7 @@ upload = Blueprint("UploadController", __name__, url_prefix="/upload")
 UploadService = UploadService()
     
 @upload.route('/', methods=["POST"])
+#TODO: verify that the required upload parameters exist
 def uploadNewFile():
     if ("SID" not in request.cookies):
         return Response("No session detected", status=400)
