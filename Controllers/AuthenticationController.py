@@ -20,17 +20,19 @@ def login():
     session = AuthenticationService.authenticate(
         request.form["email"], request.form["password"])
     if not session:
-        return Response("Incorrect username or password", status=403)
+        return Response("Incorrect username or password. Please check your credentials and try again.", status=403)
     else:
         return {"key": "SID", "value": str(session.sessionId), "expires": session.dateExpires, "admin": session["user"]["isAdmin"]}
 
 
 @auth.route("/logout", methods=["POST"])
 def logout():
-    print("Logout request received")
-    sessionId = request.form["sessionId"]
-    AuthenticationService.logout(sessionId)
-    return Response("User logged out", status=200)
+    try:
+        sessionId = request.form["sessionId"]
+        AuthenticationService.logout(sessionId)
+        return Response("Successfully logged out.", status=200)
+    except:
+        return Response("Unable to process request. Please reload and try again later.", status=400)
 
 
 """
@@ -46,9 +48,9 @@ def signup():
             }
 
     if (not AuthenticationService.signup(user)):
-        return Response(status=400)
+        return Response("There's already an account with the provided email.", status=400)
 
-    return Response(status=200)
+    return Response("Signup successful", status=200)
 
 
 @auth.route("/forgot-password", methods=["POST"])
@@ -69,9 +71,9 @@ def forgotPassword():
                 mail.send(msg)
                 return Response(status=200)
             except:
-                return Response("Unable to send email", status=400)
+                return Response("Unable to send password reset email.", status=400)
     except:
-        return Response("Invalid header", status=400)
+        return Response("The server could not understand your request. Please reload and try again later.", status=400)
 
 
 @auth.route("/reset-password/<sessionId>", methods=["POST"])
@@ -89,8 +91,8 @@ def resetPassword(sessionId):
             if user != False:
                 newPassword = request.form["password"]
                 AuthenticationService.changePassword(user.email, newPassword)
-                return Response(status=200)
+                return Response("Password sucessfully updated", status=200)
             else:
-                return Response("Invalid sessionId", status=403)
+                return Response("Your password reset link is either invalid or is expired. Please request a new one.", status=403)
         except:
-            return Response("Invalid header", status=400)
+            return Response("The server could not understand your request. Please reload and try again later.", status=400)
