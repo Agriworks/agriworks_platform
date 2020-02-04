@@ -10,7 +10,7 @@ admin = Blueprint("AdminController", __name__, url_prefix="/admin")
 def index():
     return {"status": "Congratulations, Agriworks is now running on your machine."}
 
-@admin.route("/account", methods=["GET", "POST"])
+@admin.route("/account", methods=["POST"])
 @Authentication.login_required
 def account():
     if request.method == "POST":
