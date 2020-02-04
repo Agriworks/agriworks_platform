@@ -23,6 +23,7 @@ class UploadService():
     def allowed_file(self, filename):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
     
+    #TODO: Create function to convert all non-compatible data types to compatibles
     #TODO: Catch errors (ex. Catching a mongovalidation error. We don't want to present the client with the raw error but instead we
     #want to process the error and return the appropriate error message.
     #TODO: Verify that the user that is uploading this dataset is logged in. 
@@ -45,24 +46,27 @@ class UploadService():
             data = pd.read_csv(uploadedFile)
             keys = list(data.columns)
             legend = {} #contains same column values
+            nonRepeatedKeys = []
 
             #Combine repeated column data into legend
-            if len(keys) > 1:
-                for i in keys:
-                    if len(data[i]) <= 1: #if only one value exists in column, then quit
-                        break
-                    elif data[i].nunique() == 1: #if all entries have the same value
-                        if str(data[i][0]) != 'nan': #checking to make sure value in not nan
-                            legend[i] = data[i][0]
-                            del data[i]
-            if len(legend) == 0: #if nothing in legend, fill 'None': 'None'
-                legend['None'] = 'None'
+            for i in keys:
+                if len(data[i]) <= 1: #if only one row of values, then quit
+                    break
+                if data[i].nunique() == 1: #if all entries have the same value
+                    if str(data[i][0]) != 'nan': #checking to make sure value in not nan
+                        legend[i] = data[i][0]
+                    if isinstance(data[i][0], numpy.int64):
+                        legend[i] = int(data[i][0])
+                else:
+                    #TODO: Optimize
+                    currentNonRepeatedKeyIndex = keys.index(i)
+                    nonRepeatedKeys.append(keys[currentNonRepeatedKeyIndex])                    
 
             #Create dataset object
             dataSet = Dataset(
                 name=dataSetName,
                 author=dataSetAuthor,
-                keys=keys,
+                keys=nonRepeatedKeys,
                 legend=legend,
                 public=dataSetIsPublic,
                 tags=dataSetTags,
@@ -70,14 +74,15 @@ class UploadService():
             )
             dataSet.save()
             
-            #Populate data into database #TODO: How do we read data in without having to convert to mongodb acceptable types ? 
+            #Populate data into database 
             for i in range(len(data)):
                 dataObject = DataObject(dataSetId=dataSet)
                 for j in range(len(keys)):
                     currentItem = data.iloc[i][j]
-                    if (isinstance(currentItem, numpy.int64)):
-                        currentItem = int(currentItem) #cast int64 objects to ints 
-                    dataObject[keys[j]] = currentItem
+                    if (keys[j] not in legend):                      
+                        if (isinstance(currentItem, numpy.int64)):
+                            currentItem = int(currentItem) #cast int64 objects to ints 
+                        dataObject[keys[j]] = currentItem
                 dataObject.save()
 
             #Go back to the front of the file

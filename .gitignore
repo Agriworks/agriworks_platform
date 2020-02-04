@@ -5,3 +5,4 @@ __pycache__/*
 .vscode/
 config
 creds.yaml
+manuja_temp_files/
