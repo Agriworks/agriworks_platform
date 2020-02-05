@@ -9,6 +9,7 @@ from Models.Session import Session
 from datetime import datetime
 
 import hashlib
+import uuid
 
 class AuthenticationService():
     
@@ -107,13 +108,17 @@ class AuthenticationService():
     def changePassword(self, email, password):
         User.objects.get(email=email).update(password=self.saltPassword(password))   
 
-    def getSession(self, sessionID):
-        return Session.objects.get(sessionId=sessionID)
+    def getSession(self, sessionId):
+        sessionUUID = uuid.UUID(sessionId)
+        return Session.objects.get(sessionId=sessionUUID)
 
-    def logout(self, sessionID):
-        session = self.getSession(sessionID)
-        session.delete()
-        return True
+    def logout(self, sessionId):
+        session = self.getSession(sessionId)
+        if (session):
+            session.delete()
+        else:
+            raise
+            
     
     def verifySessionAndReturnUser(self, sessionId):
         session = self.getSession(sessionId)
