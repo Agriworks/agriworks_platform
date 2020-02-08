@@ -57,23 +57,20 @@ def signup():
 def forgotPassword():
     try:
         userObject = User.objects.get(email=request.form["email"])
-        if userObject == None:
-            return Response("No account with given email found", status=403)
-        else:
-            session = Session(user=userObject)
-            session.save()
-            try:
-                subject = "[Agriworks] Reset password"
-                html = "<p>Hi there,</p><p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}\">http://localhost:8080/reset-password/{0}</a><br/><p>Thanks,</p><p>Agriworks Team</p>".format(
-                    session.sessionId)
-                msg = Message(recipients=[userObject.email],
-                              subject=subject, html=html)
-                mail.send(msg)
-                return Response(status=200)
-            except:
-                return Response("Unable to send password reset email.", status=400)
+        session = Session(user=userObject)
+        session.save()
+        try:
+            subject = "[Agriworks] Reset password"
+            html = "<p>Hi there,</p><p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}\">http://localhost:8080/reset-password/{0}</a><br/><p>Thanks,</p><p>Agriworks Team</p>".format(
+                session.sessionId)
+            msg = Message(recipients=[userObject.email],
+                          subject=subject, html=html)
+            mail.send(msg)
+            return Response("An email with instructions to reset your password has been sent to the provided email.", status=200)
+        except:
+            return Response("Unable to send password reset email. Please try again later.", status=400)
     except:
-        return Response("The server could not understand your request. Please reload and try again later.", status=400)
+        return Response("No account with given email found. Please try creating a new account.", status=403)
 
 
 @auth.route("/reset-password/<sessionId>", methods=["POST"])
