@@ -3,10 +3,9 @@ from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 from Models.Session import Session
-from flask_mail import Message
 from flask import current_app as app
-from flask_mail import Mail
-import os
+from flask_mail import Mail, Message
+
 
 mail = Mail(app)
 AuthenticationService = AuthenticationService()
