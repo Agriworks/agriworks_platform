@@ -100,7 +100,7 @@ def file(id):
 
         # Body is the content of the file itself
         return Response(fileFromS3["Body"], content_type="text/csv")
-
+    
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             return Response("The object does not exist.")

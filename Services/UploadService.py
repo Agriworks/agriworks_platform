@@ -91,7 +91,7 @@ class UploadService():
             #Save to S3
             self.uploadToAWS(dataSet.id, uploadedFile)
 
-            return {"id": str(dataSet.id)} #TODO: How do we automatically get a string rep of a mongo object id ?
+            return dataSet #TODO: How do we automatically get a string rep of a mongo object id ?
         
         except ValidationError as e:
             print(e)

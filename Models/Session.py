@@ -3,6 +3,7 @@ from uuid import uuid4
 from Models.User import User
 from datetime import datetime, timedelta
 
+
 class Session(Document):
     user = ReferenceField(User, required=True)
     sessionId = UUIDField(binary=False, default=uuid4(), required=True)
