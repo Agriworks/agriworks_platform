@@ -6,12 +6,16 @@ from pymongo import MongoClient
 from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
+from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 from io import StringIO
 import boto3
 import botocore
 
+from bson.objectid import ObjectId
+
 DatasetService = DatasetService()
+AuthenticationService = AuthenticationService()
 
 dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/dataset")
 
@@ -89,6 +93,17 @@ def search(searchQuery):
     except:
         return Response("Unable to retrieve datasets with the given search parameter.", status=400)
 
+@dataset.route("/user", methods=['GET'])
+def getUserDatasets():
+    try:
+        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        print(user.id)
+        userDatasets = Dataset.objects.get(author=ObjectId(user.id))
+        print("datasets")
+        print(len(userDatasets))
+        return Response("Check server")
+    except:
+        return Response("Error", status=400)
 
 # TODO: Get any type of file, not just csv. May just need to encode the files without filename. But then need to determine what content_type the file is
 @dataset.route('/download/<id>', methods=['GET'])
