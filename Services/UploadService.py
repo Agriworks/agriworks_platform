@@ -48,6 +48,10 @@ class UploadService():
             legend = {} #contains same column values
             nonRepeatedKeys = []
 
+            #Verify that no empty fields exist. 
+            if (data.isnull().values.sum() > 0):
+                raise ValueError
+
             #Combine repeated column data into legend
             for i in keys:
                 if len(data[i]) <= 1: #if only one row of values, then quit
@@ -73,7 +77,7 @@ class UploadService():
                 datasetType=dataSetType
             )
             dataSet.save()
-            
+
             #Populate data into database 
             for i in range(len(data)):
                 dataObject = DataObject(dataSetId=dataSet)
