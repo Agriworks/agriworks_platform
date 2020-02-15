@@ -101,6 +101,9 @@ class AuthenticationService():
         else:
             return False
 
+    def emailIsAlreadyInUse(self, email):
+        return User.objects(email=email)
+        
     def changeEmail(self, oldEmail, newEmail):
         User.objects.get(email=oldEmail).update(email=newEmail)
 
