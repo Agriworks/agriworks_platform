@@ -14,6 +14,9 @@ db = connect(host=dbHostUri)
 def create_app():
     app = Flask(__name__)
 
+    # Maximum size allowed for dataset
+    app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024  # max 10GB allowed
+
     # CORS for the backend server and frontend to communicate with each other
     app.config['SECRET_KEY'] = 'secret'
     app.config['CORS_HEADERS'] = 'Content-Type'
