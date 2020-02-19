@@ -42,6 +42,11 @@ class UploadService():
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
 
+            #Remove empty tag
+            if (len(dataSetTags) == 1):
+                if (dataSetTags[0] == ""):
+                    dataSetTags.pop()
+
             #Read the data in 
             data = pd.read_csv(uploadedFile)
             keys = list(data.columns)
