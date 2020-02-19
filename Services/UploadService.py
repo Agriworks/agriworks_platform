@@ -7,6 +7,7 @@ from mongoengine import ValidationError
 import pandas as pd
 import numpy
 import boto3
+import json
 
 AuthenticationService = AuthenticationService()
 
@@ -39,7 +40,7 @@ class UploadService():
             dataSetName = request.form.get("name")
             dataSetAuthor = user
             dataSetIsPublic = True if request.form.get("permissions") == "Public" else False
-            dataSetTags = request.form.get("tags")
+            dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
 
             #Read the data in 
