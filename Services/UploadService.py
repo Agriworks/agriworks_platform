@@ -7,7 +7,6 @@ from mongoengine import ValidationError
 import pandas as pd
 import numpy
 import boto3
-import json
 
 AuthenticationService = AuthenticationService()
 
