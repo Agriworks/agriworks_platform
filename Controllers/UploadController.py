@@ -8,6 +8,7 @@ UploadService = UploadService()
     
 @upload.route('/', methods=["POST"])
 def uploadNewFile():
+    
     if ("SID" not in request.cookies):
         return Response("No session detected", status=400)
     if ('file' not in request.files):

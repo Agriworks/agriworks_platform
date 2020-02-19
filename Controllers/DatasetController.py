@@ -6,12 +6,15 @@ from pymongo import MongoClient
 from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
+from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 from io import StringIO
 import boto3
 import botocore
 
 DatasetService = DatasetService()
+AuthenticationService = AuthenticationService()
+
 
 dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/dataset")
 
@@ -32,9 +35,21 @@ def get():
 
     return jsonify(ret_list)
 
+@dataset.route("/user/", methods=["GET"])
+def getUsersDataset(): 
+    ret_list = []
+    user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+    datasets = Dataset.objects.filter(author=user)
+    for dataset in datasets: 
+        if dataset == None:
+            return Response("No datasets found", status=400)
+        ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        print(len(ret_list))
+    return jsonify(ret_list)
+
 
 # TODO: ensure that only authorized users can access a dataset
-@dataset.route("/<dataset_id>")
+@dataset.route("/<dataset_id>", methods = ["GET"])
 def getDataset(dataset_id):
 
     dataset = Dataset.objects.get(id=dataset_id)
@@ -61,6 +76,23 @@ def getDataset(dataset_id):
 
     datasetObj["data"] = data
     return jsonify(datasetObj)
+
+
+# Delete a specific dataset
+@dataset.route("/<dataset_id>", methods = ["DELETE"])
+def deleteDataset(dataset_id):
+
+    dataset = Dataset.objects.get(id=dataset_id)
+
+    if dataset == None:
+        return Response("Unable to retrieve dataset information. Please try again later.", status=400)
+    else: 
+        dataset.delete() 
+
+    # Get all data_objects that belong to dataset
+    data_objects = DataObject.objects(dataSetId=dataset_id).delete()
+    return Response("Succesfully deleted your dataset", status=200)
+
 
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
