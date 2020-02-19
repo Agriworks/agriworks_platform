@@ -10,7 +10,7 @@ class Dataset(Document):
     legend = DictField(required=False)
     dateCreated = DateTimeField(default=datetime.now())
     public = BooleanField(required=True)
-    tags = StringField()
+    tags = ListField()
     datasetType = StringField(required=True)
 
     meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"], 'weights': {
