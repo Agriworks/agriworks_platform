@@ -30,7 +30,7 @@ def get():
 
         ret_list.append(DatasetService.createDatasetInfoObject(dataset))
 
-    return jsonify(ret_list)
+    return Response(ret_list)
 
 
 # TODO: ensure that only authorized users can access a dataset
@@ -60,7 +60,7 @@ def getDataset(dataset_id):
         data.append(data_items)
 
     datasetObj["data"] = data
-    return jsonify(datasetObj)
+    return Response(datasetObj)
 
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
@@ -85,7 +85,7 @@ def search(searchQuery):
                 datasets.append(
                     DatasetService.createDatasetInfoObject(dataset))
 
-            return jsonify(datasets)
+            return Response(datasets)
     except:
         return Response("Unable to retrieve datasets with the given search parameter.", status=400)
 
