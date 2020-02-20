@@ -44,7 +44,6 @@ def getUsersDataset():
         if dataset == None:
             return Response("No datasets found", status=400)
         ret_list.append(DatasetService.createDatasetInfoObject(dataset))
-        print(len(ret_list))
     return jsonify(ret_list)
 
 
@@ -83,6 +82,21 @@ def getDataset(dataset_id):
 def deleteDataset(dataset_id):
 
     dataset = Dataset.objects.get(id=dataset_id)
+
+    if dataset == None:
+        return Response("Unable to retrieve dataset information. Please try again later.", status=400)
+    else: 
+        dataset.delete() 
+
+    # Get all data_objects that belong to dataset
+    data_objects = DataObject.objects(dataSetId=dataset_id).delete()
+    return Response("Succesfully deleted your dataset", status=200)
+
+# update your dataset 
+@dataset.route("/<dataset_id>", methods = ["PUT"])
+def updateDataset(dataset_id):
+
+    dataset = Dataset.objects.update()
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
