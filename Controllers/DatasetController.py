@@ -93,20 +93,6 @@ def deleteDataset(dataset_id):
     data_objects = DataObject.objects(dataSetId=dataset_id).delete()
     return Response("Succesfully deleted your dataset", status=200)
 
-# update your dataset 
-@dataset.route("/<dataset_id>", methods = ["PUT"])
-def updateDataset(dataset_id):
-
-    dataset = Dataset.objects.update()
-
-    if dataset == None:
-        return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-    else: 
-        dataset.delete() 
-
-    # Get all data_objects that belong to dataset
-    data_objects = DataObject.objects(dataSetId=dataset_id).delete()
-    return Response("Succesfully deleted your dataset", status=200)
 
 
 # TODO: only return public datasets and the datasets that belong to the user
