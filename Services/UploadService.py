@@ -2,11 +2,13 @@ from werkzeug.datastructures import ImmutableMultiDict
 from werkzeug.utils import secure_filename
 from Models.Dataset import Dataset
 from Models.DataObject import DataObject
+from Models.Tag import Tag
 from Services.AuthenticationService import AuthenticationService
 from mongoengine import ValidationError
 import pandas as pd
 import numpy
 import boto3
+
 
 AuthenticationService = AuthenticationService()
 
@@ -46,6 +48,16 @@ class UploadService():
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
                     dataSetTags.pop()
+            
+            #Add new tags to collection
+            for tag in dataSetTags:
+                newTag = Tag(
+                    name=tag,
+                    datasetType=dataSetType
+                )
+                newTag.validate()
+                if not self.tagExist(newTag):
+                    newTag.save()
 
             #Read the data in 
             data = pd.read_csv(uploadedFile)
@@ -105,6 +117,11 @@ class UploadService():
         except ValidationError as e:
             print(e)
             return None
+    
+    def tagExist(self, tag):
+        if Tag.objects(name=tag.name):
+            return True
+        return False
 
     def uploadToAWS(self, datasetId, file):
         bucketName = "agriworks-user-datasets"
