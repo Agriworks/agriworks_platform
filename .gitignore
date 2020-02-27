@@ -6,3 +6,6 @@ __pycache__/*
 config
 creds.yaml
 manuja_temp_files/
+*.pem
+.DS_Store
+connectToDb.sh
