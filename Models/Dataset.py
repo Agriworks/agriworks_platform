@@ -12,7 +12,7 @@ class Dataset(Document):
     public = BooleanField(required=True)
     tags = ListField()
     datasetType = StringField(required=True)
-    viewCounter = IntField(required = True)
+    views = IntField(required = True)
 
     meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"], 'weights': {
         'title': 5, 'keys': 3, 'tags': 3, 'datasetType': 2}}]}

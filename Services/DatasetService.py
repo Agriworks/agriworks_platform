@@ -12,7 +12,7 @@ class DatasetService():
     """
     def createDatasetInfoObject(self, dataset, withHeaders=False):
         datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
-        datasetInfoObject = {"name":dataset.name, "legend":dataset.legend, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "tags": dataset.tags, "id":str(dataset.id), "viewCounter": 1}
+        datasetInfoObject = {"name":dataset.name, "legend":dataset.legend, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "tags": dataset.tags, "id":str(dataset.id), "views": 1}
        
         if (withHeaders):
             headers = []

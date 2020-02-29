@@ -52,8 +52,11 @@ def getUsersDataset():
 @dataset.route("/<dataset_id>", methods = ["GET"])
 def getDataset(dataset_id):
 
-    dataset = Dataset.objects.get(id=dataset_id)
+    # increase the views counter by 1 because this dataset has been retrieved
+    Dataset.objects(id=dataset_id).update_one(inc__views=1)
 
+    dataset = Dataset.objects.get(id=dataset_id)
+    
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
 
@@ -101,12 +104,15 @@ def deleteDataset(dataset_id):
 def popular(): 
     ret_list = []
     # sorts the datasets by ascending order 
-    datasets = Dataset.objects.order_by("-viewCounter")[:5]
+    datasets = Dataset.objects.order_by("-views")[:5]
     for dataset in datasets: 
         if dataset == None:
             return Response("No datasets found", status=400)
         ret_list.append(DatasetService.createDatasetInfoObject(dataset))
     return jsonify(ret_list)
+
+
+
 
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
