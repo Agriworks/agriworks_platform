@@ -104,17 +104,35 @@ def deleteDataset(dataset_id):
 
 @dataset.route("/popular/", methods=["GET"])
 def popular(): 
-    ret_list = []
-    # sorts the datasets by ascending order 
-    datasets = Dataset.objects.order_by("-views")[:5]
-    for dataset in datasets: 
-        if dataset == None:
-            return Response("No datasets found", status=400)
-        ret_list.append(DatasetService.createDatasetInfoObject(dataset))
-    return jsonify(ret_list)
+    try: 
+        ret_list = []
+        # sorts the datasets by ascending order 
+        datasets = Dataset.objects.order_by("-views")[:5]
+        for dataset in datasets: 
+            if dataset == None:
+                returdn Response("No datasets found", status=400)
+            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        return Response(ret_list)
+    except: 
+        return Response("Couldn't retrieve popular datasets", status=400)
 
 
+# return the users most recent datasets 
 
+@dataset.route("/recent/", methods=["GET"])
+def recent(): 
+    try: 
+        ret_list = []
+        # use cookies to retrieve user
+        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        recentDatasets = user.recentDatasets
+        for dataset in datasets: 
+            if dataset == None: 
+                return Response("No datasets found", status=400)
+            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        return Response(ret_list)
+    except: 
+        return Response("Couldn't retrieve recent datasets", status-400)
 
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
