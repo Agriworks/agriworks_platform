@@ -95,6 +95,19 @@ def deleteDataset(dataset_id):
 
 
 
+# return the most popular datasets
+
+@dataset.route("/popular/", methods=["GET"])
+def popular(): 
+    ret_list = []
+    # sorts the datasets by ascending order 
+    datasets = Dataset.objects.order_by("-viewCounter")[:5]
+    for dataset in datasets: 
+        if dataset == None:
+            return Response("No datasets found", status=400)
+        ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+    return jsonify(ret_list)
+
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
 def search(searchQuery):
