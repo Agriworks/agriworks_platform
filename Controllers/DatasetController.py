@@ -36,6 +36,7 @@ def get():
 
     return Response(ret_list)
 
+# returns the users datasets
 @dataset.route("/user/", methods=["GET"])
 def getUsersDataset(): 
     ret_list = []
@@ -110,7 +111,7 @@ def popular():
         datasets = Dataset.objects.order_by("-views")[:5]
         for dataset in datasets: 
             if dataset == None:
-                returdn Response("No datasets found", status=400)
+                return Response("No datasets found", status=400)
             ret_list.append(DatasetService.createDatasetInfoObject(dataset))
         return Response(ret_list)
     except: 
@@ -132,7 +133,24 @@ def recent():
             ret_list.append(DatasetService.createDatasetInfoObject(dataset))
         return Response(ret_list)
     except: 
-        return Response("Couldn't retrieve recent datasets", status-400)
+        return Response("Couldn't retrieve recent datasets", status=400)
+
+# returns the newest datasets created by the user 
+@dataset.route("/new/", methods=["GET"])
+def new(): 
+    try: 
+        ret_list = []
+        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        # get users datasets by date created 
+        newDatasets = Dataset.objects(author=user).order_by("-dateCreated")
+        for dataset in newDatasets: 
+            if dataset == None: 
+                return Response("No datasets found", status=400)
+            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        return Response(ret_list)
+    except: 
+        return Response("Couldn't retrieve recent datasets", status=400)
+
 
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
