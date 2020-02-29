@@ -79,7 +79,8 @@ class UploadService():
                 legend=legend,
                 public=dataSetIsPublic,
                 tags=dataSetTags,
-                datasetType=dataSetType
+                datasetType=dataSetType, 
+                views=1
             )
             dataSet.save()
 

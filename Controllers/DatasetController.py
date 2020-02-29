@@ -55,6 +55,8 @@ def getDataset(dataset_id):
     # increase the views counter by 1 because this dataset has been retrieved
     Dataset.objects(id=dataset_id).update_one(inc__views=1)
 
+    AuthenticationService.updateRecentDatasets(request.cookies["SID"],dataset_id)
+
     dataset = Dataset.objects.get(id=dataset_id)
     
     if dataset == None:
