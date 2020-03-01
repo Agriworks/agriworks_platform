@@ -127,6 +127,10 @@ def recent():
         # use cookies to retrieve user
         user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
         recentDatasets = user.recentDatasets
+        # retrieve the actual datasets from these ids 
+        datasets = []
+        for dataId in recentDatasets: 
+            datasets.append(Dataset.objects.get(id=dataId))   
         for dataset in datasets: 
             if dataset == None: 
                 return Response("No datasets found", status=400)
@@ -141,7 +145,7 @@ def new():
     try: 
         ret_list = []
         user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
-        # get users datasets by date created 
+        # get users datasets by date created and sort by descending order
         newDatasets = Dataset.objects(author=user).order_by("-dateCreated")
         for dataset in newDatasets: 
             if dataset == None: 
