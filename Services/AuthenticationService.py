@@ -53,7 +53,6 @@ class AuthenticationService():
         if len(recentDatasets) > 5: 
             recentDatasets = recentDatasets[:5]
         user.update(recentDatasets=recentDatasets)
-        print(user.recentDatasets)
         return True
 
     """

@@ -6,7 +6,7 @@ class User(Document):
     email = EmailField(required=True)
     isAdmin = BooleanField(default=False)
     password = StringField(required=True)
-    recentDatasets = ListField(default=[]) # TODO: convert to binary field
+    recentDatasets = ListField(default=[])
 
     def getFullname(self):
         return self.firstName + " " + self.lastName
