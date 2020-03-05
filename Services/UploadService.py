@@ -87,6 +87,9 @@ class UploadService():
                     #TODO: Optimize
                     currentNonRepeatedKeyIndex = keys.index(i)
                     nonRepeatedKeys.append(keys[currentNonRepeatedKeyIndex])                    
+            
+            if len(legend) == 0:
+                legendRequired = False
 
             #Create dataset object
             dataSet = Dataset(
@@ -94,6 +97,7 @@ class UploadService():
                 author=dataSetAuthor,
                 keys=nonRepeatedKeys,
                 legend=legend,
+                legendRequired=legendRequired,
                 public=dataSetIsPublic,
                 tags=dataSetTags,
                 datasetType=dataSetType
