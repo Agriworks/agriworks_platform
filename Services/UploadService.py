@@ -46,18 +46,8 @@ class UploadService():
             dataSetIsPublic = True if request.form.get("permissions") == "Public" else False
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
-
-            size = len(request.files['file'].read())
-            # if size > 1:#,000,000: #if size more than 1MB
-            #     try:
-            #         subject = "[Agriworks] Dataset processing"
-            #         html = "<p>Hi there,</p><p>Thanks for uploading a dataset. Since it is a large dataset, we will email you after we have finished processing it so you can view the published data.</p><p>Thanks,<br>The Agriworks Team</p>"
-            #         msg = Message(recipients=[user.email],
-            #                     subject=subject, html=html)
-            #         mail.send(msg)
-            #         print("An email has been sent.")
-            #     except:
-            #         print("Unable to send email.")
+            
+            
 
 
             #Remove empty tag
@@ -67,6 +57,20 @@ class UploadService():
 
             #Read the data in 
             data = pd.read_csv(uploadedFile)
+
+            #Send email if processing will take long
+            if data.size > 1500:#if size more than 1500 individual column values
+                try:
+                    subject = "[Agriworks] Dataset processing"
+                    html = "<p>Hi there,</p><p>Thanks for uploading a dataset. Since it is a large dataset, we will email you after we have finished processing it so you can view the published data.</p><p>Thanks,<br>The Agriworks Team</p>"
+                    msg = Message(recipients=[user.email],
+                                subject=subject, html=html)
+                    mail.send(msg)
+                    print("Processing email has been sent.")
+                except:
+                    print("Unable to send email.")
+
+
             keys = list(data.columns)
             legend = {} #contains same column values
             nonRepeatedKeys = []
@@ -118,16 +122,17 @@ class UploadService():
             #Save to S3
             self.uploadToAWS(dataSet.id, uploadedFile)
 
-            try:
-                mail = Mail(app)
-                subject = "[Agriworks] Dataset uploaded"
-                html = "<p>Hi there,</p><p>We have finished processing your dataset. You can now view it.</p><p>Thanks,<br>The Agriworks Team</p>"
-                msg = Message(recipients=[user.email],
-                            subject=subject, html=html)
-                mail.send(msg)
-                print("An email has been sent.")
-            except:
-                print("Unable to send email.")
+            #Send email that data is ready
+            if data.size > 1500:
+                try:
+                    subject = "[Agriworks] Dataset uploaded"
+                    html = "<p>Hi there,</p><p>We have finished processing your dataset. You can now view it.</p><p>Thanks,<br>The Agriworks Team</p>"
+                    msg = Message(recipients=[user.email],
+                                subject=subject, html=html)
+                    mail.send(msg)
+                    print("Uploaded email has been sent.")
+                except:
+                    print("Unable to send email.")
 
             return dataSet #TODO: How do we automatically get a string rep of a mongo object id ?
         
