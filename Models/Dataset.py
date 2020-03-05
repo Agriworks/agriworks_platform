@@ -1,9 +1,10 @@
-from mongoengine import Document, StringField, ReferenceField, ListField, DateTimeField, BooleanField, DictField, IntField
+
+from mongoengine import DynamicDocument, Document, StringField, ReferenceField, ListField, DateTimeField, BooleanField, DictField
 from datetime import datetime
 from Models.User import User
 
 
-class Dataset(Document):
+class Dataset(DynamicDocument):
     name = StringField(required=True)
     author = ReferenceField(User, required=True)
     keys = ListField(required=True)
