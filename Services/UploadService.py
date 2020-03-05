@@ -90,6 +90,9 @@ class UploadService():
             
             if len(legend) == 0:
                 legendRequired = False
+            else:
+                legendRequired = True
+            print(legendRequired)
 
             #Create dataset object
             dataSet = Dataset(
