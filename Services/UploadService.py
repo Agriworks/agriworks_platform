@@ -11,9 +11,8 @@ from Response import Response
 from flask import current_app as app
 from flask_mail import Mail, Message
 
-
-AuthenticationService = AuthenticationService()
 mail = Mail(app)
+AuthenticationService = AuthenticationService()
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
