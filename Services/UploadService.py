@@ -92,7 +92,6 @@ class UploadService():
                 legendRequired = False
             else:
                 legendRequired = True
-            print(legendRequired)
 
             #Create dataset object
             dataSet = Dataset(
@@ -106,8 +105,6 @@ class UploadService():
                 datasetType=dataSetType
             )
             dataSet.save()
-
-            print(len(legend))
 
             #Populate data into database 
             for i in range(len(data)):
