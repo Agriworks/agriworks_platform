@@ -100,6 +100,8 @@ class UploadService():
             )
             dataSet.save()
 
+            print(len(legend))
+
             #Populate data into database 
             for i in range(len(data)):
                 dataObject = DataObject(dataSetId=dataSet)

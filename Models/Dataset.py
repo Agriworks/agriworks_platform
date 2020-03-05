@@ -8,6 +8,7 @@ class Dataset(DynamicDocument):
     author = ReferenceField(User, required=True)
     keys = ListField(required=True)
     legend = DictField(required=False)
+    legendRequired = BooleanField(required=True)
     dateCreated = DateTimeField(default=datetime.now())
     public = BooleanField(required=True)
     tags = ListField()
