@@ -3,16 +3,16 @@ from werkzeug.utils import secure_filename
 from Models.Dataset import Dataset
 from Models.DataObject import DataObject
 from Services.AuthenticationService import AuthenticationService
+from Services.MailService import MailService
 from mongoengine import ValidationError
 import pandas as pd
 import numpy
 import boto3
 from Response import Response
 from flask import current_app as app
-from flask_mail import Mail, Message
 
-mail = Mail(app)
 AuthenticationService = AuthenticationService()
+MailService = MailService()
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
@@ -54,15 +54,12 @@ class UploadService():
             #Read the data in 
             data = pd.read_csv(uploadedFile)
 
-            #Send email if processing will take long
-            if data.size > 1500:#if size more than 1500 individual column values
+            #Send email if processing is expected to take some arbitrarly significant amount of time
+            if data.size > 1500:
+                sendEmail = True
                 try:
-                    subject = "[Agriworks] Dataset processing"
-                    html = "<p>Hi there,</p><p>Thanks for uploading a dataset. Since it is a large dataset, we will email you after we have finished processing it so you can view the published data.</p><p>Thanks,<br>The Agriworks Team</p>"
-                    msg = Message(recipients=[user.email],
-                                subject=subject, html=html)
-                    mail.send(msg)
-                    print("Processing email has been sent.")
+                    MailService.sendMessage(user, "Processing Your Dataset", "Your dataset is currently being processed. You will be notified when it has finished processing.")
+                    print("Email sent")
                 except:
                     print("Unable to send email.")
 
@@ -117,15 +114,12 @@ class UploadService():
             #Save to S3
             self.uploadToAWS(dataSet.id, uploadedFile)
 
-            #Send email that data is ready
-            if data.size > 1500:
+
+            #Send email if finished 
+            if sendEmail:#if size more than 1500 individual column values
                 try:
-                    subject = "[Agriworks] Dataset uploaded"
-                    html = "<p>Hi there,</p><p>We have finished processing your dataset. You can now view it.</p><p>Thanks,<br>The Agriworks Team</p>"
-                    msg = Message(recipients=[user.email],
-                                subject=subject, html=html)
-                    mail.send(msg)
-                    print("Uploaded email has been sent.")
+                    MailService.sendMessage(user, """Dataset successfully finished processing. Visit Agriworks to access your dataset.", )
+                    print("Processing email has been sent.")
                 except:
                     print("Unable to send email.")
 
