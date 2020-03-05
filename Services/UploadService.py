@@ -46,9 +46,6 @@ class UploadService():
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
             
-            
-
-
             #Remove empty tag
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
@@ -68,7 +65,6 @@ class UploadService():
                     print("Processing email has been sent.")
                 except:
                     print("Unable to send email.")
-
 
             keys = list(data.columns)
             legend = {} #contains same column values
