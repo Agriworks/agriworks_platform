@@ -17,7 +17,7 @@ def create_app():
     # CORS for the server and frontend to communicate with each other
     app.config['SECRET_KEY'] = 'secret'
     app.config['CORS_HEADERS'] = 'Content-Type'
-    CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True)
+    CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials = True)
     # mail
     app.config.update(dict(
         MAIL_SERVER='smtp.gmail.com',

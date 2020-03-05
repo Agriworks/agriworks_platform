@@ -5,7 +5,8 @@ class User(DynamicDocument):
     lastName = StringField(max_length=40, required=True)
     email = EmailField(required=True)
     isAdmin = BooleanField(default=False)
-    password = StringField(required=True)  # TODO: convert to binary field
+    password = StringField(required=True)
+    recentDatasets = ListField(default=[])
 
     def getFullname(self):
         return self.firstName + " " + self.lastName

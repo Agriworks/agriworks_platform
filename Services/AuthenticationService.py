@@ -38,12 +38,30 @@ class AuthenticationService():
         
         return user
 
+
+    """
+    append their recent datasets they've opened
+    """
+    def updateRecentDatasets(self, sessionId, datasetId): 
+        user = self.verifySessionAndReturnUser(sessionId) 
+        if not user: 
+            return False 
+        
+        # first get the array of datasets and 
+        recentDatasets = user.recentDatasets
+        recentDatasets.insert(0, datasetId)
+        if len(recentDatasets) > 5: 
+            recentDatasets = recentDatasets[:5]
+        user.update(recentDatasets=recentDatasets)
+        return True
+
     """
     Authenticate the user (Login). 
     @param: email 
     @param: password
     @return: unique session id
     """
+
     def authenticate(self,email,password):
         hashedPassword = self.saltPassword(password)
         user = self.getUser(email=email)
@@ -92,7 +110,8 @@ class AuthenticationService():
             lastName=document["lastName"], 
             email=document["email"],
             password=document["password"],
-            isAdmin=False
+            isAdmin=False, 
+            recentDatasets=[]
             )
     
         user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
