@@ -146,7 +146,7 @@ def new():
         ret_list = []
         user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
         # get users datasets by date created and sort by descending order
-        newDatasets = Dataset.objects(author=user).order_by("-dateCreated")
+        newDatasets = Dataset.objects(author=user).order_by("-dateCreated")[:5]
         for dataset in newDatasets: 
             if dataset == None: 
                 return Response("No datasets found", status=400)
