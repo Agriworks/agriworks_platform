@@ -126,7 +126,7 @@ def recent():
         ret_list = []
         # use cookies to retrieve user
         user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
-        recentDatasets = user.recentDatasets
+        recentDatasets = user.recentDatasets[:5]
         # retrieve the actual datasets from these ids 
         datasets = []
         for dataId in recentDatasets: 
