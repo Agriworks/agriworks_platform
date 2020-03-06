@@ -21,6 +21,7 @@ s3 = boto3.resource('s3')
 class UploadService():
 
     def __init__(self):
+        self.largeFileThreshold = 1500
         return
     
     #Function that checks the file type 
@@ -54,15 +55,6 @@ class UploadService():
             #Read the data in 
             data = pd.read_csv(uploadedFile)
 
-            #Send email if processing is expected to take some arbitrarly significant amount of time
-            if data.size > 1500:
-                sendEmail = True
-                try:
-                    MailService.sendMessage(user, "Processing Your Dataset", "Your dataset is currently being processed. You will be notified when it has finished processing.")
-                    print("Email sent")
-                except:
-                    print("Unable to send email.")
-
             keys = list(data.columns)
             legend = {} #contains same column values
             nonRepeatedKeys = []
@@ -71,6 +63,15 @@ class UploadService():
             if (data.isnull().values.sum() > 0):
                 raise ValueError
 
+            #Send email if processing is expected to take some arbitrarly significant amount of time.
+            #Size = cols * rows
+            if data.size > self.largeFileThreshold:
+                try:
+                    MailService.sendMessage(user, "Processing Your Dataset", "Your dataset is currently being processed. You will be notified when it has finished processing.")
+                    print("Email sent")
+                except:
+                    print("Unable to send email.")
+                
             #Combine repeated column data into legend
             for i in keys:
                 if len(data[i]) <= 1: #if only one row of values, then quit
@@ -116,9 +117,9 @@ class UploadService():
 
 
             #Send email if finished 
-            if sendEmail:#if size more than 1500 individual column values
+            if data.size > self.largeFileThreshold:
                 try:
-                    MailService.sendMessage(user, """Dataset successfully finished processing. Visit Agriworks to access your dataset.", )
+                    MailService.sendMessage(user, "Dataset successfully uploaded", "Dataset successfully finished processing. Visit Agriworks to access your dataset.")
                     print("Processing email has been sent.")
                 except:
                     print("Unable to send email.")
