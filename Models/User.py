@@ -1,4 +1,4 @@
-from mongoengine import (DynamicDocument, Document, StringField, EmailField, ValidationError, BooleanField)
+from mongoengine import (DynamicDocument, Document, StringField, EmailField, ListField, ValidationError, BooleanField)
 
 class User(DynamicDocument):
     firstName = StringField(max_length=40, required=True)

@@ -1,5 +1,5 @@
 
-from mongoengine import DynamicDocument, Document, StringField, ReferenceField, ListField, DateTimeField, BooleanField, DictField
+from mongoengine import DynamicDocument, Document, StringField, ReferenceField, ListField, IntField, DateTimeField, BooleanField, DictField
 from datetime import datetime
 from Models.User import User
 

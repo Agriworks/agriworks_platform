@@ -9,3 +9,4 @@ manuja_temp_files/
 *.pem
 .DS_Store
 connectToDb.sh
+connectToAws.sh
