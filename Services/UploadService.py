@@ -68,7 +68,6 @@ class UploadService():
             if data.size > self.largeFileThreshold:
                 try:
                     MailService.sendMessage(user, "Processing Your Dataset", "Your dataset is currently being processed. You will be notified when it has finished processing.")
-                    print("Email sent")
                 except:
                     print("Unable to send email.")
                 
@@ -120,7 +119,7 @@ class UploadService():
             if data.size > self.largeFileThreshold:
                 try:
                     MailService.sendMessage(user, "Dataset successfully uploaded", "Dataset successfully finished processing. Visit Agriworks to access your dataset.")
-                    print("Processing email has been sent.")
+                    print("Dataset finished processing email sent")
                 except:
                     print("Unable to send email.")
 
