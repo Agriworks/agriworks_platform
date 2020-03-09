@@ -10,7 +10,12 @@ dbHostUri = "mongodb+srv://" + creds["db_user"] + ":" + creds["db_password"] + \
 
 db = connect(host=dbHostUri)
 
+
 application = Flask(__name__)
+
+@application.route("/")
+def index():
+    return "Agriworks is online"
 
 # CORS for the server and frontend to communicate with each other
 application.config['SECRET_KEY'] = 'secret'
@@ -39,6 +44,7 @@ def importControllers():
         application.register_blueprint(upload.upload)
         application.register_blueprint(dataset.dataset)
 
+importControllers()
+
 if __name__ == "__main__":
-    importControllers()
-    application.run(port=80)
+    application.run()
