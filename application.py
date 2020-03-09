@@ -20,7 +20,7 @@ def index():
 # CORS for the server and frontend to communicate with each other
 application.config['SECRET_KEY'] = 'secret'
 application.config['CORS_HEADERS'] = 'Content-Type'
-CORS(application, resources={r"*": {"origins": "*"}}, supports_credentials = True)
+CORS(application, resources={r"*": {"origins": "http://localhost:8080"}}, supports_credentials = True)
 # mail
 application.config.update(dict(
     MAIL_SERVER='smtp.gmail.com',
