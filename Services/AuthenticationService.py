@@ -2,7 +2,6 @@ from flask import Blueprint
 from flask import current_app as app 
 from flask import request, redirect, url_for
 from functools import wraps
-from app import db
 from uuid import uuid4
 from Models.User import User
 from Models.Session import Session 

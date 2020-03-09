@@ -10,3 +10,8 @@ manuja_temp_files/
 .DS_Store
 connectToDb.sh
 connectToAws.sh
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
