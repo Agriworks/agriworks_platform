@@ -5,7 +5,7 @@ from Services.UploadService import UploadService
 from Services.MailService import MailService 
 from Services.AuthenticationService import AuthenticationService
 
-upload = Blueprint("UploadController", __name__, url_prefix="/upload")
+upload = Blueprint("UploadController", __name__, url_prefix="/api/upload")
 UploadService = UploadService()
 MailService = MailService()
 AuthenticationService = AuthenticationService()

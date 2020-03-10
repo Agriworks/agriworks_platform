@@ -10,18 +10,12 @@ dbHostUri = "mongodb+srv://" + creds["db_user"] + ":" + creds["db_password"] + \
 
 db = connect(host=dbHostUri)
 
-
 application = Flask(__name__)
 
 @application.route("/")
 def index():
     return "Agriworks is online"
 
-# CORS for the server and frontend to communicate with each other
-application.config['SECRET_KEY'] = 'secret'
-application.config['CORS_HEADERS'] = 'Content-Type'
-CORS(application, resources={r"*": {"origins": "http://localhost:8080"}}, supports_credentials = True)
-# mail
 application.config.update(dict(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=587,

@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
@@ -6,14 +6,11 @@ from Models.Session import Session
 from flask import current_app as app
 from flask_mail import Mail, Message
 
-
 mail = Mail(app)
 AuthenticationService = AuthenticationService()
 
-auth = Blueprint("AuthenticationController", __name__, url_prefix="/auth")
+auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
 
-
-# TODO: Send cookies as SET-COOKIE header
 @auth.route("/login", methods=["POST"])
 def login():
     session = AuthenticationService.authenticate(
@@ -21,8 +18,9 @@ def login():
     if not session:
         return Response("Incorrect username or password. Please check your credentials and try again.", status=403)
     else:
-        return {"key": "SID", "value": str(session.sessionId), "expires": session.dateExpires, "admin": session["user"]["isAdmin"]}
-
+        ret = make_response("Success")
+        ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
+        return ret
 
 @auth.route("/logout", methods=["POST"])
 def logout():

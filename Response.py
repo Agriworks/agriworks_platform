@@ -30,6 +30,7 @@ class Response(FlaskResponse):
         if("content_type" not in kwargs):
             kwargs["content_type"] = "application/json"
         
+        
         return super(Response, self).__init__(response,**kwargs)
 
     """

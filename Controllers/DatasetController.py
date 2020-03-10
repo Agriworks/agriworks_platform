@@ -17,7 +17,7 @@ DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
 
 
-dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/dataset")
+dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
 
 # s3 configuration using boto3
 s3 = boto3.client('s3')
