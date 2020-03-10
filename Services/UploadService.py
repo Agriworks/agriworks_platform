@@ -7,16 +7,15 @@ from Services.MailService import MailService
 from mongoengine import ValidationError
 import pandas as pd
 import numpy
-import boto3
 from Response import Response
-from flask import current_app as app
+from application import awsSession
 
 AuthenticationService = AuthenticationService()
 MailService = MailService()
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
-s3 = boto3.resource('s3')
+s3 = awsSession.resource('s3')
 
 class UploadService():
 
