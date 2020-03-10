@@ -23,6 +23,9 @@ application = Flask(__name__)
 def index():
     return "Agriworks is online"
 
+# Link aws session to application object
+application.awsSession = awsSession
+
 # Setup mail 
 application.config.update(dict(
     MAIL_SERVER='smtp.gmail.com',
@@ -48,3 +51,6 @@ def importControllers():
         application.register_blueprint(dataset.dataset)
 
 importControllers()
+
+if __name__ == "__main__":
+    application.run()

@@ -5,17 +5,16 @@ from Models.DataObject import DataObject
 from Services.AuthenticationService import AuthenticationService
 from Services.MailService import MailService
 from mongoengine import ValidationError
+from flask import current_app
 import pandas as pd
 import numpy
-from Response import Response
-from application import awsSession
 
 AuthenticationService = AuthenticationService()
 MailService = MailService()
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
-s3 = awsSession.resource('s3')
+s3 = current_app.awsSession.resource('s3')
 
 class UploadService():
 
