@@ -100,62 +100,6 @@ def deleteDataset(dataset_id):
     return Response("Succesfully deleted your dataset", status=200)
 
 
-
-# return the most popular datasets
-
-@dataset.route("/popular/", methods=["GET"])
-def popular(): 
-    try: 
-        ret_list = []
-        # sorts the datasets by ascending order 
-        datasets = Dataset.objects.order_by("-views")[:5]
-        for dataset in datasets: 
-            if dataset == None:
-                return Response("No datasets found", status=400)
-            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
-        return Response(ret_list)
-    except: 
-        return Response("Couldn't retrieve popular datasets", status=400)
-
-
-# return the users most recent datasets 
-
-@dataset.route("/recent/", methods=["GET"])
-def recent(): 
-    try: 
-        ret_list = []
-        # use cookies to retrieve user
-        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
-        recentDatasets = user.recentDatasets[:5]
-        # retrieve the actual datasets from these ids 
-        datasets = []
-        for dataId in recentDatasets: 
-            datasets.append(Dataset.objects.get(id=dataId))   
-        for dataset in datasets: 
-            if dataset == None: 
-                return Response("No datasets found", status=400)
-            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
-        return Response(ret_list)
-    except: 
-        return Response("Couldn't retrieve recent datasets", status=400)
-
-# returns the newest datasets created by the user 
-@dataset.route("/new/", methods=["GET"])
-def new(): 
-    try: 
-        ret_list = []
-        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
-        # get users datasets by date created and sort by descending order
-        newDatasets = Dataset.objects(author=user).order_by("-dateCreated")[:5]
-        for dataset in newDatasets: 
-            if dataset == None: 
-                return Response("No datasets found", status=400)
-            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
-        return Response(ret_list)
-    except: 
-        return Response("Couldn't retrieve recent datasets", status=400)
-
-
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
 def search(searchQuery):
@@ -200,3 +144,56 @@ def file(id):
             return Response("The object does not exist.")
         else:
             raise
+
+
+# return the most popular datasets
+@dataset.route("/popular/", methods=["GET"])
+def popular(): 
+    try: 
+        ret_list = []
+        # sorts the datasets by ascending order 
+        datasets = Dataset.objects.order_by("-views")[:5]
+        for dataset in datasets: 
+            if dataset == None:
+                return Response("No datasets found", status=400)
+            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        return Response(ret_list)
+    except: 
+        return Response("Couldn't retrieve popular datasets", status=400)
+
+
+# return the users most recent datasets 
+@dataset.route("/recent/", methods=["GET"])
+def recent(): 
+    try: 
+        ret_list = []
+        # use cookies to retrieve user
+        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        recentDatasetIds = user.recentDatasets[:5]
+        # retrieve the actual datasets from these ids 
+        for datasetId in recentDatasetIds: 
+            try:
+                ret_list.append(DatasetService.createDatasetInfoObject(Dataset.objects.get(id=datasetId)))
+            except:
+                continue
+        return Response(ret_list)
+
+    except Exception as e:
+        return Response("Couldn't retrieve recent datasets", status=400)
+
+# returns the newest datasets created by the user 
+@dataset.route("/new/", methods=["GET"])
+def new(): 
+    try: 
+        ret_list = []
+        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        # get users datasets by date created and sort by descending order
+        newDatasets = Dataset.objects(author=user).order_by("-dateCreated")[:5]
+        for dataset in newDatasets: 
+            if dataset == None: 
+                return Response("No datasets found", status=404)
+            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        return Response(ret_list)
+    except Exception as e:
+        print(e) 
+        return Response("Couldn't retrieve recent datasets", status=400)
