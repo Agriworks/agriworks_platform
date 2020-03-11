@@ -7,8 +7,8 @@ from Models.User import User
 from Models.Session import Session 
 from datetime import datetime
 
-import hashlib
 import uuid
+import hashlib
 
 class AuthenticationService():
     
@@ -71,7 +71,8 @@ class AuthenticationService():
         if hashedPassword != user.password:
             return False
 
-        session = Session(user=user)
+        sessionId = uuid4()
+        session = Session(user=user, sessionId=sessionId)
         session.save()
         return session
     
