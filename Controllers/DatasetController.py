@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, send_file, request, make_response
+from flask import Blueprint, jsonify, send_file, request, make_response, current_app
 from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
@@ -12,15 +12,12 @@ from io import StringIO
 import boto3
 import botocore
 
-
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
 
-
 dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
 
-# s3 configuration using boto3
-s3 = boto3.client('s3')
+s3 = current_app.awsSession.client('s3')
 
 # TODO: return only public datasets and datasets which the user owns
 @dataset.route("/", methods=["GET"])
