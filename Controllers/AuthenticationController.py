@@ -5,6 +5,7 @@ from Models.User import User
 from Models.Session import Session
 from flask import current_app as app
 from flask_mail import Mail, Message
+from mongoengine import DoesNotExist
 
 mail = Mail(app)
 AuthenticationService = AuthenticationService()
@@ -90,3 +91,14 @@ def resetPassword(sessionId):
                 return Response("Your password reset link is either invalid or is expired. Please request a new one.", status=403)
         except:
             return Response("The server could not understand your request. Please reload and try again later.", status=400)
+
+@auth.route("/verifySession", methods=["POST"])
+def verifySession():
+    try:
+        sessionId = request.form["sessionId"]
+        if not AuthenticationService.verifySessionAndReturnUser(sessionId):
+            return Response("Your session has expired. Please login again.",status=401)
+        else:
+            return Response(status=200)
+    except DoesNotExist as e:
+        return Response("Your session was not found. Please login again.",status=401)
