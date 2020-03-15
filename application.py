@@ -1,6 +1,8 @@
-import yaml
-from flask import Flask
+from flask import Flask, make_response, send_file
+from flask_socketio import SocketIO
+#from Controllers.StreamingDatasetController import stream
 from mongoengine import connect
+import yaml
 import boto3
 
 # Instantiate connection to database
@@ -17,6 +19,17 @@ awsSession = boto3.Session(
 
 # Instantiate application 
 application = Flask(__name__)
+
+# Instantiate socket server
+io = SocketIO(application)
+
+@io.on("connect")
+def test_connect():
+    print("USER CONNECTED")
+
+@io.on("message")
+def handle_message(message):
+    print("received message" + message)
 
 # Default route to test if backend is online
 @application.route("/")
@@ -53,4 +66,4 @@ def importControllers():
 importControllers()
 
 if __name__ == "__main__":
-    application.run()
+    io.run(application, port=4000, debug=True)
