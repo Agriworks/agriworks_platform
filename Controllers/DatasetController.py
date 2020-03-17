@@ -81,6 +81,21 @@ def getDataset(dataset_id):
     return Response(datasetObj)
 
 
+# Method that returns the number of rows in the dataset to get an idea of the size of the dataset
+# This helps with both what loading message to give and the maximum number of row options to give
+# Ideally this would be intregrated with the get dataset method so that the dataset is being retrieved
+# from the database twice, but I do not currently know how to do that
+@dataset.route("/<dataset_id>/size", methods = ["GET"])
+def sizeOfDataset(dataset_id):
+
+    dataset = Dataset.objects.get(id=dataset_id)
+
+    if dataset == None:
+        return Response("Unable to retrieve dataset information. Please try again later.", status=400)
+
+    return Response(str(dataset.numRows), status=200) 
+
+
 # Delete a specific dataset
 @dataset.route("/<dataset_id>", methods = ["DELETE"])
 def deleteDataset(dataset_id):

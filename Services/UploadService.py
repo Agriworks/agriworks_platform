@@ -83,6 +83,8 @@ class UploadService():
                     currentNonRepeatedKeyIndex = keys.index(i)
                     nonRepeatedKeys.append(keys[currentNonRepeatedKeyIndex])                    
 
+           
+
             #Create dataset object
             dataSet = Dataset(
                 name=dataSetName,
@@ -92,7 +94,8 @@ class UploadService():
                 public=dataSetIsPublic,
                 tags=dataSetTags,
                 datasetType=dataSetType, 
-                views=1
+                views=1,
+                numRows=len(data)
             )
             dataSet.save()
 

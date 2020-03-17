@@ -14,6 +14,7 @@ class Dataset(DynamicDocument):
     tags = ListField()
     datasetType = StringField(required=True)
     views = IntField(required = True)
+    numRows = IntField(required=True)
 
     meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"], 'weights': {
         'title': 5, 'keys': 3, 'tags': 3, 'datasetType': 2}}]}
