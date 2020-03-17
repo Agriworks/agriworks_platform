@@ -1,19 +1,17 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 from Models.Session import Session
 from flask import current_app as app
 from flask_mail import Mail, Message
-
+from mongoengine import DoesNotExist
 
 mail = Mail(app)
 AuthenticationService = AuthenticationService()
 
-auth = Blueprint("AuthenticationController", __name__, url_prefix="/auth")
+auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
 
-
-# TODO: Send cookies as SET-COOKIE header
 @auth.route("/login", methods=["POST"])
 def login():
     session = AuthenticationService.authenticate(
@@ -21,8 +19,9 @@ def login():
     if not session:
         return Response("Incorrect username or password. Please check your credentials and try again.", status=403)
     else:
-        return {"key": "SID", "value": str(session.sessionId), "expires": session.dateExpires, "admin": session["user"]["isAdmin"]}
-
+        ret = make_response("Success")
+        ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
+        return ret
 
 @auth.route("/logout", methods=["POST"])
 def logout():
@@ -92,3 +91,14 @@ def resetPassword(sessionId):
                 return Response("Your password reset link is either invalid or is expired. Please request a new one.", status=403)
         except:
             return Response("The server could not understand your request. Please reload and try again later.", status=400)
+
+@auth.route("/verifySession", methods=["POST"])
+def verifySession():
+    try:
+        sessionId = request.form["sessionId"]
+        if not AuthenticationService.verifySessionAndReturnUser(sessionId):
+            return Response("Your session has expired. Please login again.",status=401)
+        else:
+            return Response(status=200)
+    except DoesNotExist as e:
+        return Response("Your session was not found. Please login again.",status=401)

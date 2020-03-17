@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, send_file, request, make_response
+from flask import Blueprint, jsonify, send_file, request, make_response, current_app
 from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
@@ -12,15 +12,12 @@ from io import StringIO
 import boto3
 import botocore
 
-
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
 
+dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
 
-dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/dataset")
-
-# s3 configuration using boto3
-s3 = boto3.client('s3')
+s3 = current_app.awsSession.client('s3')
 
 # TODO: return only public datasets and datasets which the user owns
 @dataset.route("/", methods=["GET"])
@@ -36,6 +33,7 @@ def get():
 
     return Response(ret_list)
 
+# returns the users datasets
 @dataset.route("/user/", methods=["GET"])
 def getUsersDataset(): 
     ret_list = []
@@ -52,8 +50,13 @@ def getUsersDataset():
 @dataset.route("/<dataset_id>", methods = ["GET"])
 def getDataset(dataset_id):
 
-    dataset = Dataset.objects.get(id=dataset_id)
+    # increase the views counter by 1 because this dataset has been retrieved
+    Dataset.objects(id=dataset_id).update_one(inc__views=1)
 
+    AuthenticationService.updateRecentDatasets(request.cookies["SID"],dataset_id)
+
+    dataset = Dataset.objects.get(id=dataset_id)
+    
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
 
@@ -92,7 +95,6 @@ def deleteDataset(dataset_id):
     # Get all data_objects that belong to dataset
     data_objects = DataObject.objects(dataSetId=dataset_id).delete()
     return Response("Succesfully deleted your dataset", status=200)
-
 
 
 # TODO: only return public datasets and the datasets that belong to the user
@@ -139,3 +141,56 @@ def file(id):
             return Response("The object does not exist.")
         else:
             raise
+
+
+# return the most popular datasets
+@dataset.route("/popular/", methods=["GET"])
+def popular(): 
+    try: 
+        ret_list = []
+        # sorts the datasets by ascending order 
+        datasets = Dataset.objects.order_by("-views")[:5]
+        for dataset in datasets: 
+            if dataset == None:
+                return Response("No datasets found", status=400)
+            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        return Response(ret_list)
+    except: 
+        return Response("Couldn't retrieve popular datasets", status=400)
+
+
+# return the users most recent datasets 
+@dataset.route("/recent/", methods=["GET"])
+def recent(): 
+    try: 
+        ret_list = []
+        # use cookies to retrieve user
+        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        recentDatasetIds = user.recentDatasets[:5]
+        # retrieve the actual datasets from these ids 
+        for datasetId in recentDatasetIds: 
+            try:
+                ret_list.append(DatasetService.createDatasetInfoObject(Dataset.objects.get(id=datasetId)))
+            except:
+                continue
+        return Response(ret_list)
+
+    except Exception as e:
+        return Response("Couldn't retrieve recent datasets", status=400)
+
+# returns the newest datasets created by the user 
+@dataset.route("/new/", methods=["GET"])
+def new(): 
+    try: 
+        ret_list = []
+        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        # get users datasets by date created and sort by descending order
+        newDatasets = Dataset.objects(author=user).order_by("-dateCreated")[:5]
+        for dataset in newDatasets: 
+            if dataset == None: 
+                return Response("No datasets found", status=404)
+            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        return Response(ret_list)
+    except Exception as e:
+        print(e) 
+        return Response("Couldn't retrieve recent datasets", status=400)

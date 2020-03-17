@@ -5,7 +5,7 @@ from Response import Response
 
 Authentication = AuthenticationService()
 
-admin = Blueprint("AdminController", __name__, url_prefix="/admin")
+admin = Blueprint("AdminController", __name__, url_prefix="/api/admin")
 
 @admin.route("/", methods=["GET"])
 def index():
