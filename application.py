@@ -1,6 +1,5 @@
-from flask import Flask, make_response, send_file
-from flask_socketio import SocketIO
-#from Controllers.StreamingDatasetController import stream
+import yaml
+from flask import Flask, send_file
 from mongoengine import connect
 import yaml
 import boto3
@@ -34,7 +33,9 @@ def handle_message(message):
 # Default route to test if backend is online
 @application.route("/")
 def index():
-    return "Agriworks is online"
+    #return "Agriworks is online"
+    return send_file("index.html")
+
 
 # Link aws session to application object
 application.awsSession = awsSession
