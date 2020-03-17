@@ -20,17 +20,23 @@ dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
 s3 = current_app.awsSession.client('s3')
 
 # TODO: return only public datasets and datasets which the user owns
-@dataset.route("/", methods=["GET"])
-def get():
-    # Returns list of datasets
+@dataset.route("/<pageNumber>", methods=["GET"])
+def get(pageNumber):
     ret_list = []
-    datasets = Dataset.objects
+    datasets = []
+    if pageNumber == "all":
+    # Returns list of datasets
+        datasets = Dataset.objects
+        print(len(datasets))
+    elif pageNumber == "0":
+        datasets = Dataset.objects[:16]
+    else:
+        datasetIndex = 16 + 12 * (int(pageNumber) - 1)
+        datasets = Dataset.objects[datasetIndex: datasetIndex + 12]
     for dataset in datasets:
-        if dataset == None:
-            return Response("No datasets found", status=400)
-
-        ret_list.append(DatasetService.createDatasetInfoObject(dataset))
-
+            if dataset == None:
+                return Response("No datasets found", status=400)
+            ret_list.append(DatasetService.createDatasetInfoObject(dataset))
     return Response(ret_list)
 
 # returns the users datasets
