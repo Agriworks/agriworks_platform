@@ -10,7 +10,7 @@
     </body>
     <script type="text/javascript">
     var targetContainer = document.getElementById("events");
-    var eventSource = new EventSource("http://localhost:4000/api/dataset/stream/5e6ac61b9a20cba4cf10d71c");
+    var eventSource = new EventSource("http://localhost:4000/api/dataset/stream/5e72426c840e570707e0dc77");
     eventSource.onmessage = function(e) {
         if (e.data == "stop") {
             eventSource.close();
@@ -19,7 +19,6 @@
             var content = document.createTextNode(e.data);
             liNode.appendChild(content);
             document.getElementById("events").appendChild(liNode);
-            data_objects_count++;
         }
     }
     </script>

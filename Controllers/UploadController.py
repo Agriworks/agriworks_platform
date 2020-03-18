@@ -20,7 +20,7 @@ def uploadNewFile():
         if (not UploadService.allowed_file(request.files["file"].filename)):
             return Response("Prohibited file type", status=400) #TODO: Append to response: Dynamically return the types of allowed files
         
-        dataset = UploadService.createDataSetAndDataObjects(request)
+        dataset = UploadService.createDataset(request)
         
         return Response(str(dataset.id))
     except ValueError:

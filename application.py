@@ -19,17 +19,6 @@ awsSession = boto3.Session(
 # Instantiate application 
 application = Flask(__name__)
 
-# Instantiate socket server
-io = SocketIO(application)
-
-@io.on("connect")
-def test_connect():
-    print("USER CONNECTED")
-
-@io.on("message")
-def handle_message(message):
-    print("received message" + message)
-
 # Default route to test if backend is online
 @application.route("/")
 def index():
@@ -67,4 +56,4 @@ def importControllers():
 importControllers()
 
 if __name__ == "__main__":
-    io.run(application, port=4000, debug=True)
+    application.run(port=4000, debug=True)

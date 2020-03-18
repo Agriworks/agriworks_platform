@@ -54,8 +54,8 @@ def getDataset(dataset_id):
 
     # increase the views counter by 1 because this dataset has been retrieved
     Dataset.objects(id=dataset_id).update_one(inc__views=1)
-
-    AuthenticationService.updateRecentDatasets(request.cookies["SID"],dataset_id)
+    
+    #AuthenticationService.updateRecentDatasets(request.cookies["SID"],dataset_id)
 
     dataset = Dataset.objects.get(id=dataset_id)
     
@@ -65,21 +65,6 @@ def getDataset(dataset_id):
     datasetObj = DatasetService.createDatasetInfoObject(
         dataset, withHeaders=True)
 
-    # Get all data_objects that belong to dataset
-    data_objects = DataObject.objects(dataSetId=dataset_id)
-    data = []
-
-    for row in data_objects:
-        data_items = {}
-        for key in row:
-            if key != "id" and key != "dataSetId":
-                if key == "Status":
-                    data_items[key] = "HC"
-                else:
-                    data_items[key] = row[key]
-        data.append(data_items)
-
-    datasetObj["data"] = data
     return Response(datasetObj)
 
 
@@ -196,7 +181,6 @@ def new():
     except Exception as e:
         print(e) 
         return Response("Couldn't retrieve recent datasets", status=400)
-
         
 @dataset.route("/stream/<id>", methods=["GET"])
 def stream(id):
