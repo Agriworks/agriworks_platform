@@ -110,6 +110,8 @@ class AuthenticationService():
             lastName=document["lastName"], 
             email=document["email"],
             password=document["password"],
+            organization=document["organization"],
+            userType=document["userType"],
             isAdmin=False, 
             recentDatasets=[]
             )

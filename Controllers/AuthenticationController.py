@@ -43,7 +43,8 @@ def signup():
             "lastName": request.form["lastName"],
             "email": request.form["email"],
             "password": request.form["password"],
-            "organization": request.form["organization"]
+            "organization": request.form["organization"],
+            "userType": request.form["userType"]
             }
 
     if (not AuthenticationService.signup(user)):
