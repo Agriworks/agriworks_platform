@@ -141,9 +141,22 @@ class UploadService():
             return None
     
     def tagExist(self, tag):
-        if Tag.objects(name=tag.name):
+        try:        
+            tag = Tag.objects.get(name=tag.name, datasetType=tag.datasetType)
+            tag.noOfEntries += 1
+            tag.save()
             return True
-        return False
+        except:
+            return False
+    
+    def getTags(self, datasetType):
+        tags = []  
+
+        # get first 10 most used tags for the datasetType
+        for tag in Tag.objects(datasetType=datasetType).order_by('noOfEntries')[:10]:
+            tags.append(tag.name)
+        return tags
+            
 
     def uploadToAWS(self, datasetId, file):
         bucketName = "agriworks-user-datasets"
