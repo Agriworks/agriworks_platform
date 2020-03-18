@@ -22,26 +22,35 @@ dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
 s3 = current_app.awsSession.client('s3')
 
 # TODO: return only public datasets and datasets which the user owns
-@dataset.route("/", methods=["GET"])
-def get():
-    # Returns list of datasets
+@dataset.route("/list/<pageNumber>", methods=["GET"])
+def get(pageNumber):
     ret_list = []
-    datasets = Dataset.objects
-    for dataset in datasets:
-        if dataset == None:
-            return Response("No datasets found", status=400)
+    datasets = []
 
+    if pageNumber == "all":
+        datasets = Dataset.objects
+    elif pageNumber == "0":
+        datasets = Dataset.objects[:16]
+    else:
+        datasetIndex = 16 + 12 * (int(pageNumber) - 1)
+        datasets = Dataset.objects[datasetIndex: datasetIndex + 12]
+
+    if len(datasets) == 0:
+        return Response("No datasets matching the query were found", status=400)
+        
+    for dataset in datasets:
         ret_list.append(DatasetService.createDatasetInfoObject(dataset))
 
     return Response(ret_list)
 
 # returns the users datasets
 @dataset.route("/user/", methods=["GET"])
-def getUsersDataset(): 
+def getUsersDataset():
     ret_list = []
-    user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+    user = AuthenticationService.verifySessionAndReturnUser(
+        request.cookies["SID"])
     datasets = Dataset.objects.filter(author=user)
-    for dataset in datasets: 
+    for dataset in datasets:
         if dataset == None:
             return Response("No datasets found", status=400)
         ret_list.append(DatasetService.createDatasetInfoObject(dataset))
@@ -49,7 +58,7 @@ def getUsersDataset():
 
 
 # TODO: ensure that only authorized users can access a dataset
-@dataset.route("/<dataset_id>", methods = ["GET"])
+@dataset.route("/<dataset_id>", methods=["GET"])
 def getDataset(dataset_id):
 
     # increase the views counter by 1 because this dataset has been retrieved
@@ -58,7 +67,7 @@ def getDataset(dataset_id):
     #AuthenticationService.updateRecentDatasets(request.cookies["SID"],dataset_id)
 
     dataset = Dataset.objects.get(id=dataset_id)
-    
+
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
 
@@ -69,15 +78,15 @@ def getDataset(dataset_id):
 
 
 # Delete a specific dataset
-@dataset.route("/<dataset_id>", methods = ["DELETE"])
+@dataset.route("/<dataset_id>", methods=["DELETE"])
 def deleteDataset(dataset_id):
 
     dataset = Dataset.objects.get(id=dataset_id)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-    else: 
-        dataset.delete() 
+    else:
+        dataset.delete()
 
     # Get all data_objects that belong to dataset
     data_objects = DataObject.objects(dataSetId=dataset_id).delete()
@@ -122,7 +131,7 @@ def file(id):
 
         # Body is the content of the file itself
         return Response(fileFromS3["Body"], content_type="text/csv")
-    
+
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             return Response("The object does not exist.")
@@ -135,14 +144,14 @@ def file(id):
 def popular(): 
     try: 
         ret_list = []
-        # sorts the datasets by ascending order 
+        # sorts the datasets by ascending order
         datasets = Dataset.objects.order_by("-views")[:5]
-        for dataset in datasets: 
+        for dataset in datasets:
             if dataset == None:
                 return Response("No datasets found", status=400)
             ret_list.append(DatasetService.createDatasetInfoObject(dataset))
         return Response(ret_list)
-    except: 
+    except:
         return Response("Couldn't retrieve popular datasets", status=400)
 
 
@@ -152,12 +161,14 @@ def recent():
     try: 
         ret_list = []
         # use cookies to retrieve user
-        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        user = AuthenticationService.verifySessionAndReturnUser(
+            request.cookies["SID"])
         recentDatasetIds = user.recentDatasets[:5]
-        # retrieve the actual datasets from these ids 
-        for datasetId in recentDatasetIds: 
+        # retrieve the actual datasets from these ids
+        for datasetId in recentDatasetIds:
             try:
-                ret_list.append(DatasetService.createDatasetInfoObject(Dataset.objects.get(id=datasetId)))
+                ret_list.append(DatasetService.createDatasetInfoObject(
+                    Dataset.objects.get(id=datasetId)))
             except:
                 continue
         return Response(ret_list)
@@ -170,16 +181,17 @@ def recent():
 def new(): 
     try: 
         ret_list = []
-        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+        user = AuthenticationService.verifySessionAndReturnUser(
+            request.cookies["SID"])
         # get users datasets by date created and sort by descending order
         newDatasets = Dataset.objects(author=user).order_by("-dateCreated")[:5]
-        for dataset in newDatasets: 
-            if dataset == None: 
+        for dataset in newDatasets:
+            if dataset == None:
                 return Response("No datasets found", status=404)
             ret_list.append(DatasetService.createDatasetInfoObject(dataset))
         return Response(ret_list)
     except Exception as e:
-        print(e) 
+        print(e)
         return Response("Couldn't retrieve recent datasets", status=400)
         
 @dataset.route("/stream/<id>", methods=["GET"])
