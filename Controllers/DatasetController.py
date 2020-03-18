@@ -95,12 +95,35 @@ def sizeOfDataset(dataset_id):
 
     return Response(str(dataset.numRows), status=200) 
 
+@dataset.route("/addSize", methods=["GET"])
+def addSize():
+
+    #get all the datasets
+    datasets = Dataset.objects.filter()
+
+    #loop through them
+    for dataset in datasets:
+
+        print(dataset.numRows)
+        print(dataset.name)
+
+        if(dataset.name == "50K Sales"):
+            #if there no size already put it there
+            if str(dataset.numRows) == 'None': 
+                print("here")
+                data_objects = DataObject.objects(dataSetId=dataset)
+                size = len(data_objects)
+                print(size)
+                Dataset.objects.get(name=dataset.name).update(numRows=size)
+
+            print(Dataset.objects.get(name=dataset.name).numRows)
+
 
 # Delete a specific dataset
 @dataset.route("/<dataset_id>", methods = ["DELETE"])
 def deleteDataset(dataset_id):
 
-    dataset = Dataset.objects.get(id=dataset_id)
+    dataset = Dataset.get(id=dataset_id)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
