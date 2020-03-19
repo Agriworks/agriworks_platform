@@ -2,12 +2,14 @@ from werkzeug.datastructures import ImmutableMultiDict
 from werkzeug.utils import secure_filename
 from Models.Dataset import Dataset
 from Models.DataObject import DataObject
+from Models.Tag import Tag
 from Services.AuthenticationService import AuthenticationService
 from Services.MailService import MailService
 from mongoengine import ValidationError
 from flask import current_app
 import pandas as pd
 import numpy
+
 
 AuthenticationService = AuthenticationService()
 MailService = MailService()
@@ -49,6 +51,16 @@ class UploadService():
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
                     dataSetTags.pop()
+            
+            #Add new tags to collection
+            for tag in dataSetTags:
+                newTag = Tag(
+                    name=tag,
+                    datasetType=dataSetType
+                )
+                newTag.validate()
+                if not self.tagExist(newTag):
+                    newTag.save()
 
             #Read the data in 
             data = pd.read_csv(uploadedFile)
@@ -127,6 +139,24 @@ class UploadService():
         except ValidationError as e:
             print(e)
             return None
+    
+    def tagExist(self, tag):
+        try:        
+            tag = Tag.objects.get(name=tag.name, datasetType=tag.datasetType)
+            tag.noOfEntries += 1
+            tag.save()
+            return True
+        except:
+            return False
+    
+    def getTags(self, datasetType):
+        tags = []  
+
+        # get first 10 most used tags for the datasetType
+        for tag in Tag.objects(datasetType=datasetType).order_by('noOfEntries')[:10]:
+            tags.append(tag.name)
+        return tags
+            
 
     def uploadToAWS(self, datasetId, file):
         bucketName = "agriworks-user-datasets"

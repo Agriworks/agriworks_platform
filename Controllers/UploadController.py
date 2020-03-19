@@ -34,3 +34,11 @@ def testEmail():
     except:
         return Response("Unable to send email")
     return Response("Check server")
+
+
+@upload.route("/getTags/<datasetType>", methods=["GET"])
+def getTags(datasetType):
+    try:
+        return Response(UploadService.getTags(datasetType))
+    except:
+        return Response("Unable to get tags")
