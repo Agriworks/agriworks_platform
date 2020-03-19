@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, send_file, request, make_response, current_app
+from flask import Blueprint, jsonify, send_file, request, make_response, current_app, json
 from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
@@ -193,16 +193,24 @@ def new():
     except Exception as e:
         print(e)
         return Response("Couldn't retrieve recent datasets", status=400)
-        
+
 @dataset.route("/stream/<id>", methods=["GET"])
 def stream(id):
     filename = id + ".csv"
     fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
-    dataset = pd.read_csv(fileFromS3["Body"])
+    dataset = pd.read_csv(fileFromS3["Body"], dtype=str)
     def eventStream():
         for i in range(len(dataset)):
             if i == len(dataset) - 1:
                 yield 'data: stop\n\n'
-            data_object = dict(dataset.iloc[i])
+            data_object = json.dumps(dict(dataset.iloc[i]))
             yield 'data: {}\n\n'.format(data_object)
     return Response(eventStream(), content_type="text/event-stream")
+
+@dataset.route("/test/<id>", methods=["GET"])
+def test(id):
+    filename = id + ".csv"
+    fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
+    dataset = pd.read_csv(fileFromS3["Body"], dtype=str)
+    data_object = dict(dataset.iloc[0])
+    return Response(data_object)

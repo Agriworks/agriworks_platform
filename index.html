@@ -10,7 +10,7 @@
     </body>
     <script type="text/javascript">
     var targetContainer = document.getElementById("events");
-    var eventSource = new EventSource("http://localhost:4000/api/dataset/stream/5e72426c840e570707e0dc77");
+    var eventSource = new EventSource("http://localhost:4000/api/dataset/stream/5e443e5e04bb05d20a82ab7b");
     eventSource.onmessage = function(e) {
         if (e.data == "stop") {
             eventSource.close();
