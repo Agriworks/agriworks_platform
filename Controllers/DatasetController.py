@@ -3,6 +3,7 @@ from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
+from mongoengine.queryset.visitor import Q
 from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
@@ -25,13 +26,16 @@ def get(pageNumber):
     ret_list = []
     datasets = []
 
+    user = AuthenticationService.verifySessionAndReturnUser(
+        request.cookies["SID"])
+
     if pageNumber == "all":
-        datasets = Dataset.objects
+        datasets = Dataset.objects.filter( Q(public=True) | Q(author=user))
     elif pageNumber == "0":
-        datasets = Dataset.objects[:16]
+        datasets =  Dataset.objects.filter( Q(public=True) | Q(author=user))[:16]
     else:
         datasetIndex = 16 + 12 * (int(pageNumber) - 1)
-        datasets = Dataset.objects[datasetIndex: datasetIndex + 12]
+        datasets =  Dataset.objects.filter( Q(public=True) | Q(author=user)) [datasetIndex: datasetIndex + 12]
 
     if len(datasets) == 0:
         return Response("No datasets matching the query were found", status=400)
@@ -119,6 +123,9 @@ def search(searchQuery):
             for user in matchedAuthors:
                 try:
                     correspondingDataset = Dataset.objects.get(author=user.id)
+                    #creator = Dataset.object.get(correspondingDataset.author)
+                    #fullName = creator.object.get()
+                    #if (Dataset.object.get(correspondingDataset.public) == True or Dataset.object.get(correspondingDataset.author).getFullName() ):
                     datasets.append(
                         DatasetService.createDatasetInfoObject(correspondingDataset))
                 except:
