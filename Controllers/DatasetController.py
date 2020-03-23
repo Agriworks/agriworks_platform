@@ -122,6 +122,7 @@ def search(searchQuery):
         if searchQuery == "" or searchQuery == " ":
             raise
         else:
+            #Perform search only on user datasets
             if referrerURL == manageURL:
                 user = AuthenticationService.verifySessionAndReturnUser(
                     request.cookies["SID"])
@@ -129,17 +130,8 @@ def search(searchQuery):
                 matchedDatasets = userDatasets.search_text(
                     searchQuery).order_by('$text_score')
                 typeUser = True
-
+            #Perform search on all datasets
             elif referrerURL == browseURL:
-                matchedAuthors = User.objects.search_text(searchQuery)
-                for user in matchedAuthors:
-                    try:
-                        correspondingDataset = Dataset.objects.get(
-                            author=user.id)
-                        datasets.append(
-                            DatasetService.createDatasetInfoObject(correspondingDataset))
-                    except:
-                        pass
                 matchedDatasets = Dataset.objects.search_text(
                     searchQuery).order_by('$text_score')
                 typeUser = False
