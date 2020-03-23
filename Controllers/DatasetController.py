@@ -111,26 +111,43 @@ def deleteDataset(dataset_id):
 @dataset.route("/search/<searchQuery>", methods=['GET'])
 def search(searchQuery):
     datasets = []
+    expectedBrowseReferrer = "http://localhost:8080/browse"
+    expectedManageReferrer = "http://localhost:8080/browse/manage"
+    referrerURL = request.headers["Referer"]
+    
     try:
         if searchQuery == "" or searchQuery == " ":
             raise
         else:
-            matchedAuthors = User.objects.search_text(searchQuery)
-            for user in matchedAuthors:
-                try:
-                    correspondingDataset = Dataset.objects.get(author=user.id)
+            if referrerURL == expectedManageReferrer:
+                user = AuthenticationService.verifySessionAndReturnUser(
+                request.cookies["SID"])
+                userDatasets = Dataset.objects.filter(author=user)
+                matchedDatasets = userDatasets.search_text(searchQuery).order_by('$text_score')
+                for dataset in matchedDatasets:
                     datasets.append(
-                        DatasetService.createDatasetInfoObject(correspondingDataset))
-                except:
-                    pass
+                        DatasetService.createDatasetInfoObject(dataset))
+                return Response(datasets)
 
-            matchedDatasets = Dataset.objects.search_text(
-                searchQuery).order_by('$text_score')
-            for dataset in matchedDatasets:
-                datasets.append(
-                    DatasetService.createDatasetInfoObject(dataset))
+            elif referrerURL == expectedBrowseReferrer:
+                matchedAuthors = User.objects.search_text(searchQuery)
+                for user in matchedAuthors:
+                    try:
+                        correspondingDataset = Dataset.objects.get(author=user.id)
+                        datasets.append(
+                            DatasetService.createDatasetInfoObject(correspondingDataset))
+                    except:
+                        pass
 
-            return Response(datasets)
+                matchedDatasets = Dataset.objects.search_text(
+                    searchQuery).order_by('$text_score')
+                for dataset in matchedDatasets:
+                    datasets.append(
+                        DatasetService.createDatasetInfoObject(dataset))
+
+                return Response(datasets)
+            else:
+                return Response("Unable to process request with the given URL. Please try again later.", status=400)
     except:
         return Response("Unable to retrieve datasets with the given search parameter.", status=400)
 
