@@ -111,25 +111,22 @@ def deleteDataset(dataset_id):
 @dataset.route("/search/<searchQuery>", methods=['GET'])
 def search(searchQuery):
     datasets = []
-    expectedBrowseReferrer = "http://localhost:8080/browse"
-    expectedManageReferrer = "http://localhost:8080/browse/manage"
-    referrerURL = request.headers["Referer"]
-    
+    browseURL = "http://localhost:8080/browse"
+    manageURL = "http://localhost:8080/browse/manage"
+    referrerURL = request.headers["referer"]
     try:
         if searchQuery == "" or searchQuery == " ":
             raise
         else:
-            if referrerURL == expectedManageReferrer:
-                user = AuthenticationService.verifySessionAndReturnUser(
-                request.cookies["SID"])
+            if referrerURL == manageURL:
+                user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
                 userDatasets = Dataset.objects.filter(author=user)
                 matchedDatasets = userDatasets.search_text(searchQuery).order_by('$text_score')
                 for dataset in matchedDatasets:
-                    datasets.append(
-                        DatasetService.createDatasetInfoObject(dataset))
-                return Response(datasets)
-
-            elif referrerURL == expectedBrowseReferrer:
+                    datasets.append(DatasetService.createDatasetInfoObject(dataset))
+                return Response({"datasets":datasets, "type":"user"})
+                
+            elif referrerURL == browseURL:
                 matchedAuthors = User.objects.search_text(searchQuery)
                 for user in matchedAuthors:
                     try:
@@ -138,16 +135,14 @@ def search(searchQuery):
                             DatasetService.createDatasetInfoObject(correspondingDataset))
                     except:
                         pass
-
                 matchedDatasets = Dataset.objects.search_text(
                     searchQuery).order_by('$text_score')
                 for dataset in matchedDatasets:
                     datasets.append(
                         DatasetService.createDatasetInfoObject(dataset))
-
-                return Response(datasets)
+                return Response({"datasets":datasets, "type":"all"})
             else:
-                return Response("Unable to process request with the given URL. Please try again later.", status=400)
+                return Response("Error processing request. Please try again later.", status=400) #invalid referrer url
     except:
         return Response("Unable to retrieve datasets with the given search parameter.", status=400)
 
