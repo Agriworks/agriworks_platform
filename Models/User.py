@@ -4,6 +4,8 @@ class User(DynamicDocument):
     firstName = StringField(max_length=40, required=True)
     lastName = StringField(max_length=40, required=True)
     email = EmailField(required=True)
+    organization = StringField(max_length=40, required=True)
+    userType = StringField(max_length=40, required=True)
     isAdmin = BooleanField(default=False)
     password = StringField(required=True)
     recentDatasets = ListField(default=[])
