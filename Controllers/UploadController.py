@@ -26,16 +26,6 @@ def uploadNewFile():
     except ValueError:
         return Response("Empty fields detected. Please remove empty values from your dataset and try again.", status=400)
 
-@upload.route("/testEmail", methods=["GET"])
-def testEmail():
-    try:
-        MailService.sendMessage(AuthenticationService.getUser(email="mdesilva@bu.edu"), "Test email", "This is test email")
-        return Response("Sent email")
-    except:
-        return Response("Unable to send email")
-    return Response("Check server")
-
-
 @upload.route("/getTags/<datasetType>", methods=["GET"])
 def getTags(datasetType):
     try:
