@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title> Testing Server sent events: </title>
+    </head>
+    <body>
+        <h1> Events: </h1>
+        <h5> Dataset size: <span id="datasetSize"></span> </h5>
+        <ul id="events">
+        </ul>
+    </body>
+    <script type="text/javascript">
+    var targetContainer = document.getElementById("events");
+    var eventSource = new EventSource("http://localhost:4000/api/dataset/stream/5e443e5e04bb05d20a82ab7b");
+    eventSource.onmessage = function(e) {
+        if (e.data == "stop") {
+            eventSource.close();
+        } else {
+            var liNode = document.createElement("li");
+            var content = document.createTextNode(e.data);
+            liNode.appendChild(content);
+            document.getElementById("events").appendChild(liNode);
+        }
+    }
+    </script>
+</html>

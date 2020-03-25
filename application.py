@@ -1,6 +1,7 @@
 import yaml
-from flask import Flask
+from flask import Flask, send_file
 from mongoengine import connect
+import yaml
 import boto3
 
 # Instantiate connection to database
@@ -21,7 +22,9 @@ application = Flask(__name__)
 # Default route to test if backend is online
 @application.route("/")
 def index():
-    return "Agriworks is online"
+    #return "Agriworks is online"
+    return send_file("index.html")
+
 
 # Link aws session to application object
 application.awsSession = awsSession
@@ -53,4 +56,4 @@ def importControllers():
 importControllers()
 
 if __name__ == "__main__":
-    application.run()
+    application.run(port=4000, debug=True)

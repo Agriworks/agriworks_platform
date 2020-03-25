@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, send_file, request, make_response, current_app
+from flask import Blueprint, jsonify, send_file, request, make_response, current_app, json
 from Response import Response
 from gridfs import GridFS
 from flask_pymongo import PyMongo
@@ -11,6 +11,9 @@ from Models.User import User
 from io import StringIO
 import boto3
 import botocore
+import time
+import pandas as pd
+from uuid import uuid4
 
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
@@ -18,6 +21,8 @@ AuthenticationService = AuthenticationService()
 dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
 
 s3 = current_app.awsSession.client('s3')
+
+DatasetCache = {}
 
 # TODO: return only public datasets and datasets which the user owns
 @dataset.route("/list/<pageNumber>", methods=["GET"])
@@ -54,42 +59,17 @@ def getUsersDataset():
         ret_list.append(DatasetService.createDatasetInfoObject(dataset))
     return jsonify(ret_list)
 
-
 # TODO: ensure that only authorized users can access a dataset
-@dataset.route("/<dataset_id>", methods=["GET"])
+@dataset.route("/metadata/<dataset_id>", methods=["GET"])
 def getDataset(dataset_id):
-
-    # increase the views counter by 1 because this dataset has been retrieved
-    Dataset.objects(id=dataset_id).update_one(inc__views=1)
-
-    AuthenticationService.updateRecentDatasets(
-        request.cookies["SID"], dataset_id)
-
     dataset = Dataset.objects.get(id=dataset_id)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
 
-    datasetObj = DatasetService.createDatasetInfoObject(
-        dataset, withHeaders=True)
-
-    # Get all data_objects that belong to dataset
-    data_objects = DataObject.objects(dataSetId=dataset_id)
-    data = []
-
-    for row in data_objects:
-        data_items = {}
-        for key in row:
-            if key != "id" and key != "dataSetId":
-                if key == "Status":
-                    data_items[key] = "HC"
-                else:
-                    data_items[key] = row[key]
-        data.append(data_items)
-
-    datasetObj["data"] = data
-    return Response(datasetObj)
-
+    Dataset.objects(id=dataset_id).update_one(inc__views=1)
+    AuthenticationService.updateRecentDatasets(request.cookies["SID"],dataset_id)
+    return Response(DatasetService.createDatasetInfoObject(dataset, withHeaders=True))
 
 # Delete a specific dataset
 @dataset.route("/<dataset_id>", methods=["DELETE"])
@@ -169,9 +149,9 @@ def file(id):
 
 
 # return the most popular datasets
-@dataset.route("/popular/", methods=["GET"])
-def popular():
-    try:
+@dataset.route("/popular", methods=["GET"])
+def popular(): 
+    try: 
         ret_list = []
         # sorts the datasets by ascending order
         datasets = Dataset.objects.order_by("-views")[:5]
@@ -184,10 +164,10 @@ def popular():
         return Response("Couldn't retrieve popular datasets", status=400)
 
 
-# return the users most recent datasets
-@dataset.route("/recent/", methods=["GET"])
-def recent():
-    try:
+# return the users most recent datasets 
+@dataset.route("/recent", methods=["GET"])
+def recent(): 
+    try: 
         ret_list = []
         # use cookies to retrieve user
         user = AuthenticationService.verifySessionAndReturnUser(
@@ -205,10 +185,10 @@ def recent():
     except Exception as e:
         return Response("Couldn't retrieve recent datasets", status=400)
 
-# returns the newest datasets created by the user
-@dataset.route("/new/", methods=["GET"])
-def new():
-    try:
+# returns the newest datasets created by the user 
+@dataset.route("/new", methods=["GET"])
+def new(): 
+    try: 
         ret_list = []
         user = AuthenticationService.verifySessionAndReturnUser(
             request.cookies["SID"])
@@ -222,3 +202,44 @@ def new():
     except Exception as e:
         print(e)
         return Response("Couldn't retrieve recent datasets", status=400)
+
+"""
+Fetch the first 1000 or less objects for a dataset. Create entry in cache if dataset > 1000 objects.
+"""
+@dataset.route("/objects/primary/<id>", methods=["GET"])
+def getDatasetObjectsPrimary(id):
+    filename = id + ".csv"
+    fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
+    dataset = pd.read_csv(fileFromS3["Body"], dtype=str)
+    if (len(dataset) <= 1000):
+        return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset)})
+    else:
+        cacheId = str(uuid4())
+        DatasetCache[cacheId] = dataset[1000:]
+        return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset[:1000]), "cacheId": cacheId})
+
+"""
+Fetch the remaining dataset objects, 1000 or less objects at a time.
+Evict cache if all dataset objects have been fetched for this session (cacheId)
+"""
+@dataset.route("/objects/subsequent/<cacheId>", methods=["GET"])
+def getDatasetObjectsSubsequent(cacheId):
+    dataset = DatasetCache[cacheId]
+    if (len(dataset) <= 1000):
+        del DatasetCache[cacheId]
+        return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset)})
+    else:
+        DatasetCache[cacheId] = dataset[1000:]
+        return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset[:1000]), "cacheId": cacheId})
+
+"""
+Evict dataset from cache if user exits dataset without fully reading the dataset 
+(e.g remainder of dataset for that session still exists in cache)
+"""
+@dataset.route("/objects/evict/<cacheId>", methods=["GET"])
+def evictDatasetFromCache(cacheId):
+    if (cacheId in DatasetCache):
+        del DatasetCache[cacheId]
+        return Response(status=200)
+    else:
+        return Response(status=404)

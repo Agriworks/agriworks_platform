@@ -27,3 +27,9 @@ class DatasetService():
             datasetInfoObject["headers"] = headers
 
         return datasetInfoObject
+    
+    def buildDatasetObjectsList(self, dataset):
+        datasetObjects = []
+        for i in range(len(dataset)):
+            datasetObjects.append(dict(dataset.iloc[i]))
+        return datasetObjects

@@ -64,7 +64,6 @@ class UploadService():
 
             #Read the data in 
             data = pd.read_csv(uploadedFile)
-
             keys = list(data.columns)
             legend = {} #contains same column values
             nonRepeatedKeys = []
@@ -158,6 +157,54 @@ class UploadService():
         return tags
             
 
+    def createDataset(self, request):
+        try:
+            user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+
+            if (not user):
+                return {"message": "Invalid session", "status": 400}
+
+            #TODO: verify that these parameters exist
+            uploadedFile = request.files['file']
+            dataSetName = request.form.get("name")
+            dataSetAuthor = user
+            dataSetIsPublic = True if request.form.get("permissions") == "Public" else False
+            dataSetTags = request.form.get("tags").split(',')
+            dataSetType = request.form.get("type")
+            
+            #Remove empty tag
+            if (len(dataSetTags) == 1):
+                if (dataSetTags[0] == ""):
+                    dataSetTags.pop()
+
+            data = pd.read_csv(uploadedFile)
+            keys = list(data.columns)
+
+            #Create dataset object
+            dataset = Dataset(
+                name=dataSetName,
+                author=dataSetAuthor,
+                keys=keys,
+                public=dataSetIsPublic,
+                tags=dataSetTags,
+                datasetType=dataSetType, 
+                views=1
+            )
+
+            dataset.save()
+
+            #Go back to the front of the file
+            uploadedFile.seek(0)
+
+            #Save to S3
+            self.uploadToAWS(dataset.id, uploadedFile)
+
+            return dataset
+            
+        except ValidationError as e:
+            print(e)
+            return None
+    
     def uploadToAWS(self, datasetId, file):
         bucketName = "agriworks-user-datasets"
         bucket = s3.Bucket(bucketName)
