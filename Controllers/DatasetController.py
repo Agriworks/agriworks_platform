@@ -149,7 +149,7 @@ def file(id):
 
 
 # return the most popular datasets
-@dataset.route("/popular", methods=["GET"])
+@dataset.route("/popular/", methods=["GET"])
 def popular(): 
     try: 
         ret_list = []
@@ -165,7 +165,7 @@ def popular():
 
 
 # return the users most recent datasets 
-@dataset.route("/recent", methods=["GET"])
+@dataset.route("/recent/", methods=["GET"])
 def recent(): 
     try: 
         ret_list = []
@@ -186,7 +186,7 @@ def recent():
         return Response("Couldn't retrieve recent datasets", status=400)
 
 # returns the newest datasets created by the user 
-@dataset.route("/new", methods=["GET"])
+@dataset.route("/new/", methods=["GET"])
 def new(): 
     try: 
         ret_list = []

@@ -9,6 +9,7 @@ from mongoengine import ValidationError
 from flask import current_app
 import pandas as pd
 import numpy
+import datetime
 
 
 AuthenticationService = AuthenticationService()
@@ -29,10 +30,12 @@ class UploadService():
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
     #TODO: Verify that the user that is uploading this dataset is logged in. 
-    def createDataset(self, request):
+    def createDataset(self, request, uploadTime):
         try:
+            #keep track of when request was made 
             user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
 
+            
             if (not user):
                 return {"message": "Invalid session", "status": 400}
 
@@ -43,6 +46,7 @@ class UploadService():
             dataSetIsPublic = True if request.form.get("permissions") == "Public" else False
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
+
             
             #Remove empty tag
             if (len(dataSetTags) == 1):
@@ -68,8 +72,10 @@ class UploadService():
 
             #Save to S3
             self.uploadToAWS(dataset.id, uploadedFile)
-
-            MailService.sendMessage(user, "Dataset successfully uploaded", "Your dataset has finished processing. Visit Agriworks to access your dataset.")
+            
+            uploadCompletedDate = str(datetime.datetime.now()).split(".")[0]
+            
+            MailService.sendMessage(user, "Dataset successfully uploaded", "Your <b>{}</b> dataset has finished processing. <br> <br> <b>Upload Submitted</b>: {} <br> <br> <b>Upload Completed</b>: {}<br> <br> <b> Link below to view your dataset: </b> <br> <a href ='agri-works.org/{}'>agri-works.org/{}</a>.".format(dataset.name, uploadTime, uploadCompletedDate, dataset.id, dataset.id))
             return dataset
             
         except ValidationError as e:
