@@ -75,7 +75,7 @@ class UploadService():
             
             uploadCompletedDate = str(datetime.datetime.now()).split(".")[0]
             
-            MailService.sendMessage(user, "Dataset successfully uploaded", "Your <b>{}</b> dataset has finished processing. <br> <br> <b>Upload Submitted</b>: {} <br> <br> <b>Upload Completed</b>: {}<br> <br> <b> Link below to view your dataset: </b> <br> <a href ='agri-works.org/{}'>agri-works.org/{}</a>.".format(dataset.name, uploadTime, uploadCompletedDate, dataset.id, dataset.id))
+            MailService.sendMessage(user, "Dataset successfully uploaded", "Your <b>{}</b> dataset has finished processing. <br> <br> <b>Upload Submitted</b>: {} <br> <br> <b>Upload Completed</b>: {}<br> <br> <b> Link below to view your dataset: </b> <br> <a href ='agri-works.org/dataset/{}'>agri-works.org/dataset/{}</a>.".format(dataset.name, uploadTime, uploadCompletedDate, dataset.id, dataset.id))
             return dataset
             
         except ValidationError as e:
