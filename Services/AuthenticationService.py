@@ -111,6 +111,7 @@ class AuthenticationService():
             email=document["email"],
             password=document["password"],
             organization=document["organization"],
+            locaiton=document["location"],
             userType=document["userType"],
             isAdmin=False, 
             recentDatasets=[]
