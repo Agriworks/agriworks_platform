@@ -19,3 +19,4 @@ class MailService():
     def sendMessage(self, user, subject, message):
         messageContent = self.generateMessagePrefix(user) + self.generateMessageBody(message) + self.generateMessageSuffix()
         mail.send(Message(recipients=[user.email], subject=subject, html=messageContent))
+
