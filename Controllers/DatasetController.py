@@ -58,7 +58,7 @@ def getUsersDataset():
     ret_list = []
     user = AuthenticationService.verifySessionAndReturnUser(
         request.cookies["SID"])
-    datasets = Dataset.objects.filter(author=user)
+    datasets = Dataset.objects.filter(author=user).order_by('-dateCreated')
     for dataset in datasets:
         if dataset == None:
             return Response("No datasets found", status=400)
