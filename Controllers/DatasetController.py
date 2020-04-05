@@ -123,9 +123,6 @@ def search(searchQuery):
             for user in matchedAuthors:
                 try:
                     correspondingDataset = Dataset.objects.get(author=user.id)
-                    #creator = Dataset.object.get(correspondingDataset.author)
-                    #fullName = creator.object.get()
-                    #if (Dataset.object.get(correspondingDataset.public) == True or Dataset.object.get(correspondingDataset.author).getFullName() ):
                     datasets.append(
                         DatasetService.createDatasetInfoObject(correspondingDataset))
                 except:
