@@ -86,7 +86,7 @@ class UploadService():
 
             headline = "Your <b>{}</b> dataset has finished processing. <br> <br> ".format(dataset.name)
             uploadString = "<b>Upload Received</b>: {} <br> <br> <b>Upload Completed</b>: {}<br> <br> ".format(uploadTime, uploadCompletedDate)
-            datasetLink = "<b> Link below to view your dataset: </b> <br> <a href ='agri-works.org/dataset/{}'>agri-works.org/dataset/{}</a>.".format(dataset.id, dataset.id)
+            datasetLink = "<b> Link below to view your dataset: </b> <br> <a href ='http://agri-works.org/dataset/{}'>agri-works.org/dataset/{}</a>.".format(dataset.id, dataset.id)
             formattedMessage = headline + uploadString + datasetLink
             MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
             
