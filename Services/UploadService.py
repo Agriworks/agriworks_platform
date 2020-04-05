@@ -47,13 +47,16 @@ class UploadService():
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
 
-            #Remove empty tag
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
                     dataSetTags.pop()
 
-            keys = list(pd.read_csv(uploadedFile).columns)
+            data = pd.read_csv(uploadedFile)
+            keys = list(data.columns)
 
+            if (data.isnull().values.sum() > 0 ):
+                raise ValueError
+        
             #Add new tags to collection
             for tag in dataSetTags:
                 newTag = Tag(
