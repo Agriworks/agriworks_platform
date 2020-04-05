@@ -111,11 +111,12 @@ class AuthenticationService():
             email=document["email"],
             password=document["password"],
             organization=document["organization"],
+            location=document["location"],
             userType=document["userType"],
             isAdmin=False, 
             recentDatasets=[]
             )
-    
+
         user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
 
         if (self.save(user)):

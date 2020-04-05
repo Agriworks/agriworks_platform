@@ -44,6 +44,7 @@ def signup():
             "email": request.form["email"],
             "password": request.form["password"],
             "organization": request.form["organization"],
+            "location": request.form["location"],
             "userType": request.form["userType"]
             }
 
