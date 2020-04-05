@@ -4,6 +4,7 @@ from flask import current_app as app
 from Services.UploadService import UploadService
 from Services.MailService import MailService 
 from Services.AuthenticationService import AuthenticationService
+import datetime
 
 upload = Blueprint("UploadController", __name__, url_prefix="/api/upload")
 UploadService = UploadService()
@@ -13,6 +14,7 @@ AuthenticationService = AuthenticationService()
 @upload.route('/', methods=["POST"])
 def uploadNewFile():
     try:
+        uploadRequestDate = str(datetime.datetime.now()).split(".")[0]
         if ("SID" not in request.cookies):
             return Response("No session detected", status=400)
         if ('file' not in request.files):
@@ -20,7 +22,7 @@ def uploadNewFile():
         if (not UploadService.allowed_file(request.files["file"].filename)):
             return Response("Prohibited file type", status=400) #TODO: Append to response: Dynamically return the types of allowed files
         
-        dataset = UploadService.createDataset(request)
+        dataset = UploadService.createDataset(request, uploadRequestDate)
         
         return Response(str(dataset.id))
     except ValueError:

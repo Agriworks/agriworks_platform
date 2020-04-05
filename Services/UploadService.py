@@ -9,6 +9,7 @@ from mongoengine import ValidationError
 from flask import current_app
 import pandas as pd
 import numpy
+import datetime
 
 
 AuthenticationService = AuthenticationService()
@@ -28,12 +29,21 @@ class UploadService():
     def allowed_file(self, filename):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+<<<<<<< HEAD
     #TODO: Verify that the user that is uploading this dataset is logged in.
     def createDataset(self, request):
         try:
             user = AuthenticationService.verifySessionAndReturnUser(
                 request.cookies["SID"])
+=======
+    #TODO: Verify that the user that is uploading this dataset is logged in. 
+    def createDataset(self, request, uploadTime):
+        try:
+            #keep track of when request was made 
+            user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+>>>>>>> feature-mailUploadInfo
 
+            
             if (not user):
                 return {"message": "Invalid session", "status": 400}
 
@@ -46,6 +56,10 @@ class UploadService():
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
 
+<<<<<<< HEAD
+=======
+            
+>>>>>>> feature-mailUploadInfo
             #Remove empty tag
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
@@ -80,9 +94,19 @@ class UploadService():
 
             #Save to S3
             self.uploadToAWS(dataset.id, uploadedFile)
+            
+            uploadCompletedDate = str(datetime.datetime.now()).split(".")[0]
 
+<<<<<<< HEAD
             MailService.sendMessage(user, "Dataset successfully uploaded",
                                     "Your dataset has finished processing. Visit Agriworks to access your dataset.")
+=======
+            headline = "Your <b>{}</b> dataset has finished processing. <br> <br> ".format(dataset.name)
+            uploadString = "<b>Upload Received</b>: {} <br> <br> <b>Upload Completed</b>: {}<br> <br> ".format(uploadTime, uploadCompletedDate)
+            datasetLink = "<b> Link below to view your dataset: </b> <br> <a href ='agri-works.org/dataset/{}'>agri-works.org/dataset/{}</a>.".format(dataset.id, dataset.id)
+            formattedMessage = headline + uploadString + datasetLink
+            MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
+>>>>>>> feature-mailUploadInfo
             return dataset
 
         except ValidationError as e:
