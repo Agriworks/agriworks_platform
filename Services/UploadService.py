@@ -23,15 +23,16 @@ class UploadService():
     def __init__(self):
         self.largeFileThreshold = 1500
         return
-    
-    #Function that checks the file type 
+
+    #Function that checks the file type
     def allowed_file(self, filename):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    #TODO: Verify that the user that is uploading this dataset is logged in. 
+    #TODO: Verify that the user that is uploading this dataset is logged in.
     def createDataset(self, request):
         try:
-            user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+            user = AuthenticationService.verifySessionAndReturnUser(
+                request.cookies["SID"])
 
             if (not user):
                 return {"message": "Invalid session", "status": 400}
@@ -40,16 +41,27 @@ class UploadService():
             uploadedFile = request.files['file']
             dataSetName = request.form.get("name")
             dataSetAuthor = user
-            dataSetIsPublic = True if request.form.get("permissions") == "Public" else False
+            dataSetIsPublic = True if request.form.get(
+                "permissions") == "Public" else False
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
-            
+
             #Remove empty tag
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
                     dataSetTags.pop()
 
             keys = list(pd.read_csv(uploadedFile).columns)
+
+            #Add new tags to collection
+            for tag in dataSetTags:
+                newTag = Tag(
+                    name=tag,
+                    datasetType=dataSetType
+                )
+                newTag.validate()
+                if not self.tagExist(newTag):
+                    newTag.save()
 
             #Create and save dataset object
             dataset = Dataset(
@@ -58,7 +70,7 @@ class UploadService():
                 keys=keys,
                 public=dataSetIsPublic,
                 tags=dataSetTags,
-                datasetType=dataSetType, 
+                datasetType=dataSetType,
                 views=1
             )
             dataset.save()
@@ -69,36 +81,34 @@ class UploadService():
             #Save to S3
             self.uploadToAWS(dataset.id, uploadedFile)
 
-            MailService.sendMessage(user, "Dataset successfully uploaded", "Your dataset has finished processing. Visit Agriworks to access your dataset.")
+            MailService.sendMessage(user, "Dataset successfully uploaded",
+                                    "Your dataset has finished processing. Visit Agriworks to access your dataset.")
             return dataset
-            
+
         except ValidationError as e:
             print(e)
             return None
-    
+
     def tagExist(self, tag):
-        try:        
+        try:
             tag = Tag.objects.get(name=tag.name, datasetType=tag.datasetType)
             tag.noOfEntries += 1
             tag.save()
             return True
         except:
             return False
-    
+
     def getTags(self, datasetType):
-        tags = []  
+        tags = []
 
         # get first 10 most used tags for the datasetType
         for tag in Tag.objects(datasetType=datasetType).order_by('noOfEntries')[:10]:
             tags.append(tag.name)
         return tags
-    
+
     def uploadToAWS(self, datasetId, file):
         bucketName = "agriworks-user-datasets"
         bucket = s3.Bucket(bucketName)
-        filename = str(datasetId) + "." + file.filename.split(".")[1] #filename === datasetId for easy lookups
+        # filename === datasetId for easy lookups
+        filename = str(datasetId) + "." + file.filename.split(".")[1]
         bucket.Object(filename).put(Body=file)
-
-
-    
-
