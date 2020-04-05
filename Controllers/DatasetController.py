@@ -28,27 +28,29 @@ DatasetCache = {}
 # TODO: return only public datasets and datasets which the user owns
 @dataset.route("/list/<pageNumber>", methods=["GET"])
 def get(pageNumber):
-    ret_list = []
+    retList = []
     datasets = []
 
     user = AuthenticationService.verifySessionAndReturnUser(
         request.cookies["SID"])
 
+    allDatasets = Dataset.objects.filter( Q(public=True) | Q(author=user)).order_by('-dateCreated')
+
     if pageNumber == "all":
-        datasets = Dataset.objects.filter( Q(public=True) | Q(author=user))
+        datasets = allDatasets
     elif pageNumber == "0":
-        datasets =  Dataset.objects.filter( Q(public=True) | Q(author=user))[:16]
+        datasets =  allDatasets[:16]
     else:
         datasetIndex = 16 + 12 * (int(pageNumber) - 1)
-        datasets =  Dataset.objects.filter( Q(public=True) | Q(author=user)) [datasetIndex: datasetIndex + 12]
+        datasets =  allDatasets[datasetIndex: datasetIndex + 12]
 
     if len(datasets) == 0:
         return Response("No datasets matching the query were found", status=400)
 
     for dataset in datasets:
-        ret_list.append(DatasetService.createDatasetInfoObject(dataset))
+        retList.append(DatasetService.createDatasetInfoObject(dataset))
 
-    return Response(ret_list)
+    return Response(retList)
 
 # returns the users datasets
 @dataset.route("/user/", methods=["GET"])
