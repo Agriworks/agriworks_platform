@@ -28,27 +28,3 @@ class DatasetService():
             datasetInfoObject["headers"] = headers
 
         return datasetInfoObject
-
-    def checkPublicOrUser(self, dataset):
-        
-        user = AuthenticationService.verifySessionAndReturnUser(
-        request.cookies["SID"])
-
-        result = Dataset.objects.filter( Q(id=dataset_id) & (Q(public=True) | Q(author=user)) )
-
-        if (result == None):
-            return None
-
-        return result
-
-    def checkUser(self, dataset):
-
-        user = AuthenticationService.verifySessionAndReturnUser(
-        request.cookies["SID"])
-
-        result = Dataset.objects.filter( Q(id=dataset_id) & Q(author=user) )
-
-        if (result == None):
-            return None
-
-        return result

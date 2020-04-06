@@ -63,7 +63,10 @@ def getUsersDataset():
 @dataset.route("/<dataset_id>", methods=["GET"])
 def getDataset(dataset_id):
 
-    dataset = DatasetService.checkPublicOrUser(dataset_id)
+    user = AuthenticationService.verifySessionAndReturnUser(
+        request.cookies["SID"])
+    
+    dataset = Dataset.objects.filter( Q(id=dataset_id) & (Q(public=True) | Q(author=user)) )
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
@@ -100,7 +103,11 @@ def getDataset(dataset_id):
 @dataset.route("/<dataset_id>", methods=["DELETE"])
 def deleteDataset(dataset_id):
 
-    dataset = DatasetService.checkUser(dataset_id)
+    
+    user = AuthenticationService.verifySessionAndReturnUser(
+        request.cookies["SID"])
+    
+    dataset = Dataset.objects.filter( Q(id=dataset) & Q(author=user) )
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
