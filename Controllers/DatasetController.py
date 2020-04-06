@@ -63,16 +63,17 @@ def getUsersDataset():
 @dataset.route("/<dataset_id>", methods=["GET"])
 def getDataset(dataset_id):
 
+    dataset = DatasetService.checkPublicOrUser(dataset_id)
+
+    if dataset == None:
+        return Response("Unable to retrieve dataset information. Please try again later.", status=400)
+    
     # increase the views counter by 1 because this dataset has been retrieved
     Dataset.objects(id=dataset_id).update_one(inc__views=1)
 
     AuthenticationService.updateRecentDatasets(
         request.cookies["SID"], dataset_id)
 
-    dataset = Dataset.objects.get(id=dataset_id)
-
-    if dataset == None:
-        return Response("Unable to retrieve dataset information. Please try again later.", status=400)
 
     datasetObj = DatasetService.createDatasetInfoObject(
         dataset, withHeaders=True)
@@ -99,7 +100,7 @@ def getDataset(dataset_id):
 @dataset.route("/<dataset_id>", methods=["DELETE"])
 def deleteDataset(dataset_id):
 
-    dataset = Dataset.objects.get(id=dataset_id)
+    dataset = DatasetService.checkUser(dataset_id)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
@@ -115,6 +116,9 @@ def deleteDataset(dataset_id):
 @dataset.route("/search/<searchQuery>", methods=['GET'])
 def search(searchQuery):
     datasets = []
+    searcher = AuthenticationService.verifySessionAndReturnUser(
+        request.cookies["SID"])
+    
     try:
         if searchQuery == "" or searchQuery == " ":
             raise
@@ -122,7 +126,7 @@ def search(searchQuery):
             matchedAuthors = User.objects.search_text(searchQuery)
             for user in matchedAuthors:
                 try:
-                    correspondingDataset = Dataset.objects.get(author=user.id)
+                    correspondingDataset = Dataset.objects.get( Q(author=user.id) & ( Q(public=True) | Q(author=searcher) ) )
                     #creator = Dataset.object.get(correspondingDataset.author)
                     #fullName = creator.object.get()
                     #if (Dataset.object.get(correspondingDataset.public) == True or Dataset.object.get(correspondingDataset.author).getFullName() ):
@@ -134,8 +138,10 @@ def search(searchQuery):
             matchedDatasets = Dataset.objects.search_text(
                 searchQuery).order_by('$text_score')
             for dataset in matchedDatasets:
+                conditionPassingDataset = Dataset.objects.get( Q(id=dataset.id) & ( Q(public=True) | Q(author=searcher) ) )
+
                 datasets.append(
-                    DatasetService.createDatasetInfoObject(dataset))
+                    DatasetService.createDatasetInfoObject(conditionPassingDataset))
 
             return Response(datasets)
     except:
