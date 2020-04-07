@@ -126,6 +126,13 @@ class AuthenticationService():
 
     def emailIsAlreadyInUse(self, email):
         return User.objects(email=email)
+
+    def resetPasswordSame(self, user, password): 
+        resetPassword = self.saltPassword(password)
+        if (user.password == resetPassword): 
+            return True
+        return False 
+
         
     def changeEmail(self, oldEmail, newEmail):
         User.objects.get(email=oldEmail).update(email=newEmail)

@@ -88,8 +88,11 @@ def resetPassword(idString):
             user = AuthenticationService.getUser(id=userID)
             if user != False:
                 newPassword = request.form["password"]
-                AuthenticationService.changePassword(user.email, newPassword)
-                return Response("Password sucessfully updated", status=200)
+                if (not AuthenticationService.resetPasswordSame(user, newPassword)): 
+                    AuthenticationService.changePassword(user.email, newPassword)
+                    return Response("Password sucessfully updated", status=200)
+                else: 
+                    return Response("Please choose a password that you haven't used before", status=403)
             else:
                 return Response("Your password reset link is either invalid or is expired. Please request a new one.", status=403)
         except:
