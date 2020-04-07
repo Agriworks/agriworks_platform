@@ -61,9 +61,10 @@ def signup():
 def forgotPassword():
     try:
         user = AuthenticationService.getUser(email=request.form["email"])
+        generateID = uuid4()
         try:
             subject = "[Agriworks] Reset password"
-            html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}\">http://localhost:8080/reset-password/{0}</a><br/>".format(user.id)
+            html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}:{1}\">http://localhost:8080/reset-password/{0}:{1}</a><br/>".format(user.id, generateID)
             MailService.sendMessage(user, subject, html)
             return Response("An email with instructions to reset your password has been sent to the provided email.", status=200)
         except:
@@ -74,8 +75,7 @@ def forgotPassword():
 
 @auth.route("/reset-password/<idString>", methods=["POST"])
 def resetPassword(idString):
-    idArray = idString.split(":")
-    userID = idArray[0]
+    userID = idString.split(":")[0]
     try:
         if request.form["initial"]:
             user = AuthenticationService.getUser(id=userID)
