@@ -3,11 +3,14 @@ from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 from Models.Session import Session
+from Services.MailService import MailService
 from flask import current_app as app
-from flask_mail import Mail, Message
 from mongoengine import DoesNotExist
+from uuid import uuid4
 
-mail = Mail(app)
+import uuid
+
+MailService = MailService()
 AuthenticationService = AuthenticationService()
 
 auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
@@ -57,16 +60,15 @@ def signup():
 @auth.route("/forgot-password", methods=["POST"])
 def forgotPassword():
     try:
-        userObject = User.objects.get(email=request.form["email"])
-        session = Session(user=userObject)
+        user = AuthenticationService.getUser(email=request.form["email"])
+        sessionId = uuid4()
+        session = Session(user=user, sessionId=sessionId)
         session.save()
         try:
             subject = "[Agriworks] Reset password"
-            html = "<p>Hi there,</p><p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}\">http://localhost:8080/reset-password/{0}</a><br/><p>Thanks,</p><p>Agriworks Team</p>".format(
-                session.sessionId)
-            msg = Message(recipients=[userObject.email],
-                          subject=subject, html=html)
-            mail.send(msg)
+            html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}\">http://localhost:8080/reset-password/{0}</a><br/>".format(
+                sessionId)
+            MailService.sendMessage(user, subject, html)
             return Response("An email with instructions to reset your password has been sent to the provided email.", status=200)
         except:
             return Response("Unable to send password reset email. Please try again later.", status=400)
