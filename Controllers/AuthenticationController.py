@@ -61,13 +61,9 @@ def signup():
 def forgotPassword():
     try:
         user = AuthenticationService.getUser(email=request.form["email"])
-        sessionId = uuid4()
-        session = Session(user=user, sessionId=sessionId)
-        session.save()
         try:
             subject = "[Agriworks] Reset password"
-            html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}\">http://localhost:8080/reset-password/{0}</a><br/>".format(
-                sessionId)
+            html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}\">http://localhost:8080/reset-password/{0}</a><br/>".format(user.id)
             MailService.sendMessage(user, subject, html)
             return Response("An email with instructions to reset your password has been sent to the provided email.", status=200)
         except:
@@ -76,18 +72,20 @@ def forgotPassword():
         return Response("No account with given email found. Please try creating a new account.", status=403)
 
 
-@auth.route("/reset-password/<sessionId>", methods=["POST"])
-def resetPassword(sessionId):
+@auth.route("/reset-password/<idString>", methods=["POST"])
+def resetPassword(idString):
+    idArray = idString.split(":")
+    userID = idArray[0]
     try:
         if request.form["initial"]:
-            user = AuthenticationService.verifySessionAndReturnUser(sessionId)
+            user = AuthenticationService.getUser(id=userID)
             if user != False:
                 return Response(status=200)
             else:
                 return Response(status=403)
     except:
         try:
-            user = AuthenticationService.verifySessionAndReturnUser(sessionId)
+            user = AuthenticationService.getUser(id=userID)
             if user != False:
                 newPassword = request.form["password"]
                 AuthenticationService.changePassword(user.email, newPassword)
