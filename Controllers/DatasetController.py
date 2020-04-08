@@ -66,37 +66,39 @@ def getUsersDataset():
     return jsonify(ret_list)
 
 # TODO: ensure that only authorized users can access a dataset
-@dataset.route("/metadata/<dataset_id>", methods=["GET"])
-def getDataset(dataset_id):
+@dataset.route("/metadata/<datasetId>", methods=["GET"])
+def getDataset(datasetId):
 
     user = AuthenticationService.verifySessionAndReturnUser(
         request.cookies["SID"])
 
-    dataset = Dataset.objects.get(Q(id=dataset_id) & (Q(public=True) | Q(author=user) ) )
+    dataset = Dataset.objects.get(id=datasetId)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-
-    Dataset.objects(id=dataset_id).update_one(inc__views=1)
-    AuthenticationService.updateRecentDatasets(request.cookies["SID"],dataset_id)
+    if (dataset.public == False and dataset.author != user):
+        return Response("You do not have permission to access that dataset.", status=403)
+    
+    Dataset.objects(id=datasetId).update_one(inc__views=1)
+    AuthenticationService.updateRecentDatasets(request.cookies["SID"],datasetId)
     return Response(DatasetService.createDatasetInfoObject(dataset, withHeaders=True))
 
 # Delete a specific dataset
-@dataset.route("/<dataset_id>", methods=["DELETE"])
-def deleteDataset(dataset_id):
+@dataset.route("/<datasetId>", methods=["DELETE"])
+def deleteDataset(datasetId):
 
     user = AuthenticationService.verifySessionAndReturnUser(
         request.cookies["SID"])
 
-    dataset = Dataset.objects.get(Q(id=dataset_id) & Q(author=user))
+    dataset = Dataset.objects.get(id=datasetId)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-    else:
-        dataset.delete()
+    if (dataset.public == False and dataset.author != user):
+        return Response("You do not have permission to delete that dataset.", status=403)
 
-    # Get all data_objects that belong to dataset
-    data_objects = DataObject.objects(dataSetId=dataset_id).delete()
+    dataset.delete()
+    #TODO: Delete dataset from S3
     return Response("Succesfully deleted your dataset", status=200)
 
 
@@ -232,7 +234,7 @@ def getDatasetObjectsPrimary(dataset_id):
         fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
         dataset = pd.read_csv(fileFromS3["Body"], dtype=str)
     else:
-        return Response("Does not have access to file.", status=403)
+        return Response("You do not have access to that dataset.", status=403)
 
     if (len(dataset) <= 1000):
         return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset)})
