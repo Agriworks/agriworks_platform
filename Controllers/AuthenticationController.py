@@ -61,11 +61,11 @@ def signup():
 def forgotPassword():
     try:
         user = AuthenticationService.getUser(email=request.form["email"])
-        generateID = uuid4()
-        AuthenticationService.setUserResetID(user, generateID)
+        passwordResetId = uuid4()
+        AuthenticationService.setUserResetID(user, passwordResetId)
         try:
             subject = "[Agriworks] Reset password"
-            html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://agri-works.org/reset-password/{0}:{1}\">http://agri-works.org/reset-password/{0}:{1}</a><br/>".format(user.id, generateID)
+            html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://agri-works.org/reset-password/{0}\">http://agri-works.org/reset-password/{0}</a><br/>".format(passwordResetId)
             MailService.sendMessage(user, subject, html)
             return Response("An email with instructions to reset your password has been sent to the provided email.", status=200)
         except:
@@ -74,40 +74,24 @@ def forgotPassword():
         return Response("No account with given email found. Please try creating a new account.", status=403)
 
 
-@auth.route("/reset-password/<idString>", methods=["POST"])
-def resetPassword(idString):
+@auth.route("/reset-password/<passwordResetId>", methods=["POST"])
+def resetPassword(passwordResetId):
+    try:
+       user = AuthenticationService.checkUserResetID(passwordResetId)
 
-    try:  
-        idArray = idString.split(":")
-        userID = idArray[0]
-        generateID = idArray[1]
-        if (not AuthenticationService.checkUserResetID(userID, generateID)): 
-            return Response("Your password reset link is either invalid or is expired. Please request a new one.", status=403)
-        try:
-            if request.form["initial"]:
-                user = AuthenticationService.getUser(id=userID)
-                if user != False:
-                    return Response(status=200)
-                else:
-                    return Response(status=403)
-        except:
-            try:
-                user = AuthenticationService.getUser(id=userID)
-                if user != False:
-                    newPassword = request.form["password"]
-                    if (not AuthenticationService.resetPasswordSame(user, newPassword)): 
-                        # set id to empty again so user can't use the same link 
-                        AuthenticationService.setUserResetID(user, "")
-                        AuthenticationService.changePassword(user.email, newPassword)
-                        return Response("Password sucessfully updated", status=200)
-                    else: 
-                        return Response("Please choose a password that you haven't used before", status=403)
-                else:
-                    return Response("Your password reset link is either invalid or is expired. Please request a new one.", status=403)
-            except:
-                return Response("The server could not understand your request. Please reload and try again later.", status=400)
-    except: 
-        return Response("The server could not understand your request. Please reload and try again later.", status=400)
+       if ("password" not in request.form):
+           return Response("Please provide a new password.", status=400)
+       
+       newPassword = request.form["password"]
+       
+       if (AuthenticationService.resetPasswordSame(user, newPassword)): 
+           return Response("Please choose a password that you haven't used before", status=403)
+       
+       AuthenticationService.setUserResetID(user, "")
+       AuthenticationService.changePassword(user.email, newPassword)
+       return Response("Password sucessfully updated", status=200)
+    except:
+        return Response("Your password reset link is either invalid or expired. Please request a new one.", status=403)
 
 @auth.route("/verifySession", methods=["POST"])
 def verifySession():

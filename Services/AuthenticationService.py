@@ -134,13 +134,13 @@ class AuthenticationService():
             return True
         return False 
 
-    def setUserResetID(self, user, linkId):
-        User.objects.get(email=user.email).update(resetId=str(linkId))
+    def setUserResetID(self, user, resetPasswordId):
+        User.objects.get(email=user.email).update(resetId=str(resetPasswordId))
 
-    def checkUserResetID(self, userID, resetID):
-        userID = User.objects.get(id=userID).resetId
-        if (userID == resetID): 
-            return True
+    def checkUserResetID(self, resetPasswordId):
+        user = User.objects.get(resetId=resetPasswordId)
+        if (user): 
+            return user
         else: 
             return False 
 
