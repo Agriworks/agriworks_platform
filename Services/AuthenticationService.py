@@ -114,7 +114,8 @@ class AuthenticationService():
             location=document["location"],
             userType=document["userType"],
             isAdmin=False, 
-            recentDatasets=[]
+            recentDatasets=[], 
+            resetId=""
             )
 
         user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
@@ -126,7 +127,23 @@ class AuthenticationService():
 
     def emailIsAlreadyInUse(self, email):
         return User.objects(email=email)
-        
+
+    def resetPasswordSame(self, user, password): 
+        resetPassword = self.saltPassword(password)
+        if (user.password == resetPassword): 
+            return True
+        return False 
+
+    def setUserResetID(self, user, resetPasswordId):
+        User.objects.get(email=user.email).update(resetId=str(resetPasswordId))
+
+    def checkUserResetID(self, resetPasswordId):
+        user = User.objects.get(resetId=resetPasswordId)
+        if (user): 
+            return user
+        else: 
+            return False 
+
     def changeEmail(self, oldEmail, newEmail):
         User.objects.get(email=oldEmail).update(email=newEmail)
 

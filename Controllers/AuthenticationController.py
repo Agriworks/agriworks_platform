@@ -3,11 +3,14 @@ from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 from Models.Session import Session
+from Services.MailService import MailService
 from flask import current_app as app
-from flask_mail import Mail, Message
 from mongoengine import DoesNotExist
+from uuid import uuid4
 
-mail = Mail(app)
+import uuid
+
+MailService = MailService()
 AuthenticationService = AuthenticationService()
 
 auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
@@ -57,16 +60,13 @@ def signup():
 @auth.route("/forgot-password", methods=["POST"])
 def forgotPassword():
     try:
-        userObject = User.objects.get(email=request.form["email"])
-        session = Session(user=userObject)
-        session.save()
+        user = AuthenticationService.getUser(email=request.form["email"])
+        passwordResetId = uuid4()
+        AuthenticationService.setUserResetID(user, passwordResetId)
         try:
             subject = "[Agriworks] Reset password"
-            html = "<p>Hi there,</p><p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://localhost:8080/reset-password/{0}\">http://localhost:8080/reset-password/{0}</a><br/><p>Thanks,</p><p>Agriworks Team</p>".format(
-                session.sessionId)
-            msg = Message(recipients=[userObject.email],
-                          subject=subject, html=html)
-            mail.send(msg)
+            html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://agri-works.org/reset-password/{0}\">http://agri-works.org/reset-password/{0}</a><br/>".format(passwordResetId)
+            MailService.sendMessage(user, subject, html)
             return Response("An email with instructions to reset your password has been sent to the provided email.", status=200)
         except:
             return Response("Unable to send password reset email. Please try again later.", status=400)
@@ -74,26 +74,27 @@ def forgotPassword():
         return Response("No account with given email found. Please try creating a new account.", status=403)
 
 
-@auth.route("/reset-password/<sessionId>", methods=["POST"])
-def resetPassword(sessionId):
+@auth.route("/reset-password/<passwordResetId>", methods=["POST"])
+def resetPassword(passwordResetId):
     try:
-        if request.form["initial"]:
-            user = AuthenticationService.verifySessionAndReturnUser(sessionId)
-            if user != False:
-                return Response(status=200)
-            else:
-                return Response(status=403)
+       user = AuthenticationService.checkUserResetID(passwordResetId)
+       if ("password" not in request.form):
+           return Response("Please provide a new password.", status=400)
+       
+       newPassword = request.form["password"]
+       confirmPassword = request.form["confirmPassword"]
+
+       if (newPassword != confirmPassword): 
+           return Response("Password and Confirm Password fields must be the same", status=403)
+       
+       if (AuthenticationService.resetPasswordSame(user, newPassword)): 
+           return Response("Please choose a password that you haven't used before", status=403)
+       
+       AuthenticationService.setUserResetID(user, "")
+       AuthenticationService.changePassword(user.email, newPassword)
+       return Response("Password sucessfully updated", status=200)
     except:
-        try:
-            user = AuthenticationService.verifySessionAndReturnUser(sessionId)
-            if user != False:
-                newPassword = request.form["password"]
-                AuthenticationService.changePassword(user.email, newPassword)
-                return Response("Password sucessfully updated", status=200)
-            else:
-                return Response("Your password reset link is either invalid or is expired. Please request a new one.", status=403)
-        except:
-            return Response("The server could not understand your request. Please reload and try again later.", status=400)
+        return Response("Your password reset link is either invalid or expired. Please request a new one.", status=403)
 
 @auth.route("/verifySession", methods=["POST"])
 def verifySession():
