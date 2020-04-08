@@ -9,7 +9,8 @@ class User(DynamicDocument):
     organization = StringField(required=False)
     location = StringField(required=False)
     isAdmin = BooleanField(default=False)
-    recentDatasets = ListField(default=[])
+    recentDatasets = ListField(default=[]), 
+    resetId = StringField(default="")
 
     def getFullname(self):
         return self.firstName + " " + self.lastName

@@ -114,7 +114,8 @@ class AuthenticationService():
             location=document["location"],
             userType=document["userType"],
             isAdmin=False, 
-            recentDatasets=[]
+            recentDatasets=[], 
+            resetId=""
             )
 
         user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
@@ -133,7 +134,16 @@ class AuthenticationService():
             return True
         return False 
 
-        
+    def setUserResetID(self, user, linkId):
+        User.objects.get(email=user.email).update(resetId=str(linkId))
+
+    def checkUserResetID(self, userID, resetID):
+        userID = User.objects.get(id=userID).resetId
+        if (userID == resetID): 
+            return True
+        else: 
+            return False 
+
     def changeEmail(self, oldEmail, newEmail):
         User.objects.get(email=oldEmail).update(email=newEmail)
 
