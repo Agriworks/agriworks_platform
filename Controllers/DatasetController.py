@@ -4,7 +4,6 @@ from gridfs import GridFS
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from mongoengine.queryset.visitor import Q
-from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
 from Services.AuthenticationService import AuthenticationService
@@ -66,30 +65,39 @@ def getUsersDataset():
     return jsonify(ret_list)
 
 # TODO: ensure that only authorized users can access a dataset
-@dataset.route("/metadata/<dataset_id>", methods=["GET"])
-def getDataset(dataset_id):
-    dataset = Dataset.objects.get(id=dataset_id)
+@dataset.route("/metadata/<datasetId>", methods=["GET"])
+def getDataset(datasetId):
+
+    user = AuthenticationService.verifySessionAndReturnUser(
+        request.cookies["SID"])
+
+    dataset = Dataset.objects.get(id=datasetId)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-
-    Dataset.objects(id=dataset_id).update_one(inc__views=1)
-    AuthenticationService.updateRecentDatasets(request.cookies["SID"],dataset_id)
+    if (dataset.public == False and dataset.author != user):
+        return Response("You do not have permission to access that dataset.", status=403)
+    
+    Dataset.objects(id=datasetId).update_one(inc__views=1)
+    AuthenticationService.updateRecentDatasets(request.cookies["SID"],datasetId)
     return Response(DatasetService.createDatasetInfoObject(dataset, withHeaders=True))
 
 # Delete a specific dataset
-@dataset.route("/<dataset_id>", methods=["DELETE"])
-def deleteDataset(dataset_id):
+@dataset.route("/<datasetId>", methods=["DELETE"])
+def deleteDataset(datasetId):
 
-    dataset = Dataset.objects.get(id=dataset_id)
+    user = AuthenticationService.verifySessionAndReturnUser(
+        request.cookies["SID"])
+
+    dataset = Dataset.objects.get(id=datasetId)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-    else:
-        dataset.delete()
+    if (dataset.public == False and dataset.author != user):
+        return Response("You do not have permission to delete that dataset.", status=403)
 
-    # Get all data_objects that belong to dataset
-    data_objects = DataObject.objects(dataSetId=dataset_id).delete()
+    dataset.delete()
+    #TODO: Delete dataset from S3
     return Response("Succesfully deleted your dataset", status=200)
 
 
@@ -104,21 +112,23 @@ def search(searchQuery):
     matchedDatasets = []
     typeUser = None
 
+    user = AuthenticationService.verifySessionAndReturnUser(
+                    request.cookies["SID"])
+
     try:
         if searchQuery == "" or searchQuery == " ":
             raise
         else:
             #Perform search only on user datasets
             if referrerURL == manageURL:
-                user = AuthenticationService.verifySessionAndReturnUser(
-                    request.cookies["SID"])
                 userDatasets = Dataset.objects.filter(author=user)
                 matchedDatasets = userDatasets.search_text(
                     searchQuery).order_by('$text_score')
                 typeUser = True
             #Perform search on all datasets
             elif referrerURL == browseURL:
-                matchedDatasets = Dataset.objects.search_text(
+                visibleDatasetsToUser = Dataset.objects.filter(Q(author=user) | Q(public=True))
+                matchedDatasets = visibleDatasetsToUser.search_text(
                     searchQuery).order_by('$text_score')
                 typeUser = False
             else:
@@ -212,11 +222,19 @@ def new():
 """
 Fetch the first 1000 or less objects for a dataset. Create entry in cache if dataset > 1000 objects.
 """
-@dataset.route("/objects/primary/<id>", methods=["GET"])
-def getDatasetObjectsPrimary(id):
-    filename = id + ".csv"
-    fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
-    dataset = pd.read_csv(fileFromS3["Body"], dtype=str)
+@dataset.route("/objects/primary/<dataset_id>", methods=["GET"])
+def getDatasetObjectsPrimary(dataset_id):
+    
+    user = AuthenticationService.verifySessionAndReturnUser(
+        request.cookies["SID"])
+
+    if (Dataset.objects.get(Q(id=dataset_id) & (Q(public=True) | Q(author=user) ) ) != None):
+        filename = dataset_id + ".csv"
+        fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
+        dataset = pd.read_csv(fileFromS3["Body"], dtype=str)
+    else:
+        return Response("You do not have access to that dataset.", status=403)
+
     if (len(dataset) <= 1000):
         return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset)})
     else:
