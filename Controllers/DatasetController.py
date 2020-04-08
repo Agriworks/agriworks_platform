@@ -4,7 +4,6 @@ from gridfs import GridFS
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from mongoengine.queryset.visitor import Q
-from Models.DataObject import DataObject
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
 from Services.AuthenticationService import AuthenticationService

@@ -1,7 +1,6 @@
 from werkzeug.datastructures import ImmutableMultiDict
 from werkzeug.utils import secure_filename
 from Models.Dataset import Dataset
-from Models.DataObject import DataObject
 from Models.Tag import Tag
 from Services.AuthenticationService import AuthenticationService
 from Services.MailService import MailService
