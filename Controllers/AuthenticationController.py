@@ -78,11 +78,14 @@ def forgotPassword():
 def resetPassword(passwordResetId):
     try:
        user = AuthenticationService.checkUserResetID(passwordResetId)
-
        if ("password" not in request.form):
            return Response("Please provide a new password.", status=400)
        
        newPassword = request.form["password"]
+       confirmPassword = request.form["confirmPassword"]
+
+       if (newPassword != confirmPassword): 
+           return Response("Password and Confirm Password fields must be the same", status=403)
        
        if (AuthenticationService.resetPasswordSame(user, newPassword)): 
            return Response("Please choose a password that you haven't used before", status=403)
