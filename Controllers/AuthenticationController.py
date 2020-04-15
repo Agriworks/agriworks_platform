@@ -73,7 +73,6 @@ def signup():
 
 @auth.route("/confirm-user/<userConfirmationId>", methods=["POST"])
 def confirmUser(userConfirmationId):
-    print("CONFIRMED USER NOW")
     try:
         user = User.objects.get(confirmationId=userConfirmationId)
         AuthenticationService.setUserAsConfirmed(user)
