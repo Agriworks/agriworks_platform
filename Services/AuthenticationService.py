@@ -115,7 +115,9 @@ class AuthenticationService():
             userType=document["userType"],
             isAdmin=False, 
             recentDatasets=[], 
-            resetId=""
+            resetId="",
+            confirmationId="",
+            isConfirmed=False
             )
 
         user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
@@ -129,7 +131,7 @@ class AuthenticationService():
         return User.objects(email=email)
 
     def setUserConfirmationId(self, user, userConfirmationId):
-        User.objects.get(email=user.email).update(confirmationId=str(userConfirmationId))
+        user.update(confirmationId=str(userConfirmationId))
 
     def checkUserConfirmationId(self, userConfirmationId):
         user = User.objects.get(confirmationId=userConfirmationId)
@@ -142,6 +144,7 @@ class AuthenticationService():
         User.objects.get(email=user.email).update(isConfirmed=True)
 
     def isUserConfirmed(self, user):
+        print('user confirmed is =',user.isConfirmed)
         if user.isConfirmed:
             return True
         return False
