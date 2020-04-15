@@ -80,6 +80,10 @@ def deleteDataset(dataset_id):
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
     else:
+        fileName = dataset_id + ".csv"
+        s3.delete_object(
+            Bucket="agriworks-user-datasets", Key=fileName
+        )
         dataset.delete()
 
     # Get all data_objects that belong to dataset
