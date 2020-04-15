@@ -21,7 +21,9 @@ def login():
         request.form["email"], request.form["password"])
     if not session:
         return Response("Incorrect username or password. Please check your credentials and try again.", status=403)
-    else:
+    
+    user = AuthenticationService.getUser(email=request.form["email"])
+    if AuthenticationService.isUserConfirmed(user):
         ret = make_response("Success")
         ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
         return ret
