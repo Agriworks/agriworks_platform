@@ -22,7 +22,7 @@ def login():
     if not session:
         return Response("Incorrect username or password. Please check your credentials and try again.", status=403)
     
-    user = AuthenticationService.getUser(email=request.form["email"])
+    user = User.objects.get(email=request.form["email"])
     if AuthenticationService.isUserConfirmed(user):
         ret = make_response("Success")
         ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
@@ -59,17 +59,18 @@ def signup():
         return Response("There's already an account with the provided email.", status=400)
 
     userConfirmationId = uuid4()
-    AuthenticationService.setUserConfirmationId(user, userConfirmationId)
-    emailConfirmationMessage = "<p>Thanks for signing up for an account at Agriworks. Please click the link below to confirm your account.</p><br><br><a href=\"http://agri-works.org/confirm-account/{0}\">http://agri-works.org/confirm-account/{0}</a><br/>".format(userConfirmationId)
-    MailService.sendMessage(user, "[Agriworks] Confirm Account", emailConfirmationMessage)
+    AuthenticationService.setUserConfirmationId(User.objects.get(email=user["email"]), userConfirmationId)
+    emailConfirmationMessage = "<p>Thanks for signing up for an account at Agriworks. Please click the link below to confirm your account.</p><br><a href=\"http://localhost:8080/confirm-user/{0}\">http://localhost:8080/confirm-user/{0}</a><br/>".format(userConfirmationId)
+    MailService.sendMessage(User.objects.get(email=request.form["email"]), "[Agriworks] Confirm Account", emailConfirmationMessage)
     return Response("Signup successful", status=200)
 
 @auth.route("/confirm-user/<userConfirmationId>", methods=["POST"])
 def confirmUser(userConfirmationId):
+    print("CONFIRMED USER NOW")
     try:
-        user = AuthenticationService.checkUserConfirmationId(userConfirmationId)
-        
+        user = User.objects.get(confirmationId=userConfirmationId)
         AuthenticationService.setUserAsConfirmed(user)
+
         return Response("Congratulations! Your account is now confirmed. Please log in to access your account.")
     except:
         return Response("No such account found. Please try again.", status=200)
