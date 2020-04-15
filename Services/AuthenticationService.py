@@ -137,8 +137,7 @@ class AuthenticationService():
         user = User.objects.get(confirmationId=userConfirmationId)
         if (user):
             return user
-        else:
-            return False
+        return False
     
     def setUserAsConfirmed(self, user):
         User.objects.get(email=user.email).update(isConfirmed=True)
