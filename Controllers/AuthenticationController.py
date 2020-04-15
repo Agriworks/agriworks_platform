@@ -84,7 +84,7 @@ def forgotPassword():
         passwordResetId = uuid4()
         AuthenticationService.setUserResetID(user, passwordResetId)
         try:
-            subject = "[Agriworks] Reset password"
+            subject = "[Agriworks] Reset Password"
             html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://agri-works.org/reset-password/{0}\">http://agri-works.org/reset-password/{0}</a><br/>".format(passwordResetId)
             MailService.sendMessage(user, subject, html)
             return Response("An email with instructions to reset your password has been sent to the provided email.", status=200)
