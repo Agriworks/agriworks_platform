@@ -59,6 +59,7 @@ def signup():
         return Response("There's already an account with the provided email.", status=400)
 
     userConfirmationId = uuid4()
+    user = User.objects.get(email=user["email"])
     AuthenticationService.setUserConfirmationId(User.objects.get(email=user["email"]), userConfirmationId)
     emailConfirmationMessage = "<p>Congratulations, you just got registered on Agriworks. Please click the link below to confirm your account.</p><p><a href=\"http://agri-works.org/confirm-user/{0}\">http://agri-works.org/confirm-user/{0}</a></p><br/>".format(userConfirmationId)
     MailService.sendMessage(User.objects.get(email=request.form["email"]), "[Agriworks] Confirm Account", emailConfirmationMessage)
