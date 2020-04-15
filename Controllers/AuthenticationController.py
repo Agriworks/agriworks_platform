@@ -62,7 +62,7 @@ def signup():
     user = User.objects.get(email=user["email"])
     AuthenticationService.setUserConfirmationId(user, userConfirmationId)
     emailConfirmationMessage = "<p>Congratulations, you just got registered on Agriworks. Please click the link below to confirm your account.</p><p><a href=\"http://agri-works.org/confirm-user/{0}\">http://agri-works.org/confirm-user/{0}</a></p><br/>".format(userConfirmationId)
-    MailService.sendMessage(User.objects.get(email=request.form["email"]), "[Agriworks] Confirm Account", emailConfirmationMessage)
+    MailService.sendMessage(user, "[Agriworks] Confirm Account", emailConfirmationMessage)
     return Response("Signup successful", status=200)
 
 @auth.route("/confirm-user/<userConfirmationId>", methods=["POST"])
