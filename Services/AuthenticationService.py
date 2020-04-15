@@ -137,6 +137,9 @@ class AuthenticationService():
             return user
         else:
             return False
+    
+    def setUserAsConfirmed(self, user):
+        User.objects.get(email=user.email).update(isConfirmed=True)
 
     def resetPasswordSame(self, user, password): 
         resetPassword = self.saltPassword(password)
