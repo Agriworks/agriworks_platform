@@ -128,6 +128,16 @@ class AuthenticationService():
     def emailIsAlreadyInUse(self, email):
         return User.objects(email=email)
 
+    def setUserConfirmationId(self, user, userConfirmationId):
+        User.objects.get(email=user.email).update(confirmationId=str(userConfirmationId))
+
+    def checkUserConfirmationId(self, userConfirmationId):
+        user = User.objects.get(confirmationId=userConfirmationId)
+        if (user):
+            return user
+        else:
+            return False
+
     def resetPasswordSame(self, user, password): 
         resetPassword = self.saltPassword(password)
         if (user.password == resetPassword): 
