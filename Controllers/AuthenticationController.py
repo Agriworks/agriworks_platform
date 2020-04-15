@@ -60,10 +60,11 @@ def signup():
 def confirmUser(userConfirmationId):
     try:
         user = AuthenticationService.checkUserConfirmationId(userConfirmationId)
-        if not user:
-            return Response("No such account found. Please try again.", status=200)
         
-
+        AuthenticationService.setUserAsConfirmed(user)
+        return Response("Congratulations! Your account is now confirmed. Please log in to access your account.")
+    except:
+        return Response("No such account found. Please try again.", status=200)
 
 @auth.route("/forgot-password", methods=["POST"])
 def forgotPassword():
