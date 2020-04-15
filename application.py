@@ -1,8 +1,12 @@
-import yaml
-from flask import Flask, send_file
+from flask import Flask, send_file, send_from_directory
 from mongoengine import connect
 import yaml
 import boto3
+from Response import Response
+
+STATIC_DIRECTORIES = ["js", "css", "img"]
+STATIC_DIRECTORY_ROOT = "./dist/"
+STATIC_ASSETS_DIRECTORY_ROOT = "./dist/static/"
 
 # Instantiate connection to database
 creds = yaml.safe_load(open("creds.yaml", "r"))
@@ -19,13 +23,27 @@ awsSession = boto3.Session(
 # Instantiate application 
 application = Flask(__name__)
 
-# Default route to test if backend is online
-@application.route("/")
-def index():
-    #return "Agriworks is online"
-    return send_file("index.html")
+if (application.config["ENV"] == "production"):
+    # Route handlers for FE
+    @application.route("/static/<string:requestedStaticDirectory>/<path:path>")
+    def sendStaticComponent(requestedStaticDirectory, path):
+        if requestedStaticDirectory not in STATIC_DIRECTORIES:
+            return Response("Not a valid static asset directory", status=400)
 
+        return send_from_directory(STATIC_ASSETS_DIRECTORY_ROOT + requestedStaticDirectory, path)
 
+    @application.route("/")
+    def index():
+        return send_file(STATIC_DIRECTORY_ROOT + "index.html")
+
+    @application.errorhandler(404)
+    def rerouteToIndex(e):
+        return send_file(STATIC_DIRECTORY_ROOT + "index.html")
+    
+@application.errorhandler(500)
+def handleServerError(e):
+    return Response("Internal server error", status=500)
+    
 # Link aws session to application object
 application.awsSession = awsSession
 
