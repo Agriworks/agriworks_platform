@@ -58,13 +58,16 @@ def signup():
     if (not AuthenticationService.signup(user)):
         return Response("There's already an account with the provided email.", status=400)
 
-    userConfirmationId = uuid4()
-    user = User.objects.get(email=user["email"])
-    AuthenticationService.setUserConfirmationId(user, userConfirmationId)
-    sub = "[Agriworks] Confirm Account"
-    msg = "<p>Congratulations, you just got registered on Agriworks. Please click the link below to confirm your account.</p><p><a href=\"http://agri-works.org/confirm-user/{0}\">http://agri-works.org/confirm-user/{0}</a></p><br/>".format(userConfirmationId)
-    MailService.sendMessage(user, sub, msg)
-    return Response("Signup successful", status=200)
+    try:
+        userConfirmationId = uuid4()
+        user = User.objects.get(email=user["email"])
+        AuthenticationService.setUserConfirmationId(user, userConfirmationId)
+        sub = "[Agriworks] Confirm Account"
+        msg = "<p>Congratulations, you just got registered on Agriworks. Please click the link below to confirm your account.</p><p><a href=\"http://agri-works.org/confirm-user/{0}\">http://agri-works.org/confirm-user/{0}</a></p><br/>".format(userConfirmationId)
+        MailService.sendMessage(user, sub, msg)
+        return Response("Signup successful", status=200)
+    except:
+        return Response("Signup unsuccessful. Please try again.", status=403)
 
 @auth.route("/confirm-user/<userConfirmationId>", methods=["POST"])
 def confirmUser(userConfirmationId):
