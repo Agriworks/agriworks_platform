@@ -11,6 +11,7 @@ class User(DynamicDocument):
     isAdmin = BooleanField(default=False)
     recentDatasets = ListField(default=[]), 
     resetId = StringField(default="")
+    confirmationId = StringField(default="")
 
     def getFullname(self):
         return self.firstName + " " + self.lastName
