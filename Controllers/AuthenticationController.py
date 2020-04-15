@@ -28,7 +28,7 @@ def login():
         ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
         return ret
     
-    return Response("You must confirm your account to log in.")
+    return Response("You must confirm your account to log in.", status=403)
 
 @auth.route("/logout", methods=["POST"])
 def logout():
