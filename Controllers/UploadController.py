@@ -1,6 +1,5 @@
-from flask import Blueprint, flash, request, redirect
+from flask import Blueprint, request
 from Response import Response
-from flask import current_app as app
 from Services.UploadService import UploadService
 from Services.MailService import MailService 
 from Services.AuthenticationService import AuthenticationService

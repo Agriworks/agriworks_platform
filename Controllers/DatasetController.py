@@ -203,6 +203,7 @@ def getUsersDatasets():
 def popular(): 
     try: 
         retList = []
+        user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
         # sorts the datasets by ascending order
         datasets = Dataset.objects.filter(Q(author=user) | Q(public=True)).order_by("-views")[:5]
         for dataset in datasets:
