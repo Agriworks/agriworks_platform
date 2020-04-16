@@ -85,21 +85,21 @@ def getDataset(datasetId):
 # Delete a specific dataset
 @dataset.route("/<datasetId>", methods=["DELETE"])
 def deleteDataset(datasetId):
-
     user = AuthenticationService.verifySessionAndReturnUser(
         request.cookies["SID"])
-
     dataset = Dataset.objects.get(id=datasetId)
 
     if dataset == None:
         return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-    if (dataset.public == False and dataset.author != user):
+    if (dataset.author != user):
         return Response("You do not have permission to delete that dataset.", status=403)
 
-    dataset.delete()
-    #TODO: Delete dataset from S3
-    return Response("Succesfully deleted your dataset", status=200)
-
+    try: 
+        s3.delete_object(Bucket="agriworks-user-datasets", Key=dataset_id + ".csv")
+        dataset.delete()
+        return Response("Succesfully deleted dataset.", status=200)
+    except:
+        return Response("Unable to delete dataset.", status=500)
 
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
