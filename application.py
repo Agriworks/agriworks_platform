@@ -4,9 +4,9 @@ import yaml
 import boto3
 from Response import Response
 
-STATIC_DIRECTORIES = ["js", "css", "img"]
+STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
-STATIC_ASSETS_DIRECTORY_ROOT = "./dist/static/"
+STATIC_ASSETS_DIRECTORY_ROOT = "./dist/assets/"
 
 # Instantiate connection to database
 creds = yaml.safe_load(open("creds.yaml", "r"))
@@ -25,11 +25,10 @@ application = Flask(__name__)
 
 if (application.config["ENV"] == "production"):
     # Route handlers for FE
-    @application.route("/static/<string:requestedStaticDirectory>/<path:path>")
+    @application.route("/assets/<string:requestedStaticDirectory>/<path:path>")
     def sendStaticComponent(requestedStaticDirectory, path):
         if requestedStaticDirectory not in STATIC_DIRECTORIES:
             return Response("Not a valid static asset directory", status=400)
-
         return send_from_directory(STATIC_ASSETS_DIRECTORY_ROOT + requestedStaticDirectory, path)
 
     @application.route("/")
@@ -39,11 +38,11 @@ if (application.config["ENV"] == "production"):
     @application.errorhandler(404)
     def rerouteToIndex(e):
         return send_file(STATIC_DIRECTORY_ROOT + "index.html")
-    
-@application.errorhandler(500)
-def handleServerError(e):
-    return Response("Internal server error", status=500)
-    
+        
+    @application.errorhandler(500)
+    def handleServerError(e):
+        return Response("Internal server error", status=500)
+
 # Link aws session to application object
 application.awsSession = awsSession
 
