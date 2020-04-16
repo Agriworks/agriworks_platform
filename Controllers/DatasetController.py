@@ -74,22 +74,17 @@ def getDataset(dataset_id):
 # Delete a specific dataset
 @dataset.route("/<dataset_id>", methods=["DELETE"])
 def deleteDataset(dataset_id):
-
     dataset = Dataset.objects.get(id=dataset_id)
 
     if dataset == None:
-        return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-    else:
-        fileName = dataset_id + ".csv"
-        s3.delete_object(
-            Bucket="agriworks-user-datasets", Key=fileName
-        )
+        return Response("Dataset does not exist.", status=400)
+
+    try: 
+        s3.delete_object(Bucket="agriworks-user-datasets", Key=dataset_id + ".csv")
         dataset.delete()
-
-    # Get all data_objects that belong to dataset
-    data_objects = DataObject.objects(dataSetId=dataset_id).delete()
-    return Response("Succesfully deleted your dataset", status=200)
-
+        return Response("Succesfully deleted dataset.", status=200)
+    except:
+        return Response("Could not delete dataset.", status=500)
 
 # TODO: only return public datasets and the datasets that belong to the user
 @dataset.route("/search/<searchQuery>", methods=['GET'])
