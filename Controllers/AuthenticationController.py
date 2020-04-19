@@ -17,15 +17,17 @@ auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
 
 @auth.route("/login", methods=["POST"])
 def login():
-    session = AuthenticationService.authenticate(
-        request.form["email"], request.form["password"])
+    session = AuthenticationService.authenticate(request.form["email"], request.form["password"])
     if not session:
         return Response("Incorrect username or password. Please check your credentials and try again.", status=403)
-    else:
-        ret = make_response("Success")
-        ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
-        return ret
-
+    
+    user = User.objects.get(email=request.form["email"])
+    if not AuthenticationService.isUserConfirmed(user):
+        return Response("You must confirm your account to log in.", status=403)
+    
+    ret = make_response("Success")
+    ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
+    return ret
 @auth.route("/logout", methods=["POST"])
 def logout():
     try:
@@ -51,11 +53,31 @@ def signup():
             "userType": request.form["userType"]
             }
 
-    if (not AuthenticationService.signup(user)):
+    try:
+        User.objects.get(email=user["email"])
         return Response("There's already an account with the provided email.", status=400)
+    except:
+        try:
+            AuthenticationService.signup(user)
+            userConfirmationId = uuid4()
+            user = User.objects.get(email=user["email"])
+            AuthenticationService.setUserConfirmationId(user, userConfirmationId)
+            sub = "[Agriworks] Confirm Account"
+            msg = "<p>Congratulations, you've registered for Agriworks. Please click the link below to confirm your account.</p><p><a href=\"http://agri-works.org/confirm-user/{0}\">http://agri-works.org/confirm-user/{0}</a></p>".format(userConfirmationId)
+            MailService.sendMessage(user, sub, msg)
+            return Response("Signup successful", status=200)
+        except:
+            return Response("Signup unsuccessful. Please try again.", status=403)
 
-    return Response("Signup successful", status=200)
+@auth.route("/confirm-user/<userConfirmationId>", methods=["POST"])
+def confirmUser(userConfirmationId):
+    try:
+        user = User.objects.get(confirmationId=userConfirmationId)
+        AuthenticationService.setUserAsConfirmed(user)
 
+        return Response("Congratulations! Your account is now confirmed. Please log in to access your account.")
+    except:
+        return Response("No such account found. Please try again.", status=200)
 
 @auth.route("/forgot-password", methods=["POST"])
 def forgotPassword():
@@ -64,7 +86,7 @@ def forgotPassword():
         passwordResetId = uuid4()
         AuthenticationService.setUserResetID(user, passwordResetId)
         try:
-            subject = "[Agriworks] Reset password"
+            subject = "[Agriworks] Reset Password"
             html = "<p>We heard you lost your password. No worries, just click the link below to reset your password.</p><p>You can safely ignore this email if you did not request a password reset</p><br/><a href=\"http://agri-works.org/reset-password/{0}\">http://agri-works.org/reset-password/{0}</a><br/>".format(passwordResetId)
             MailService.sendMessage(user, subject, html)
             return Response("An email with instructions to reset your password has been sent to the provided email.", status=200)

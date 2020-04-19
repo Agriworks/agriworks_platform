@@ -4,3 +4,4 @@
 cd ../agriworks_portal && yarn build
 cd ../agriworks_platform && eb deploy
 rm -rf dist/
+
