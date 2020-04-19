@@ -22,8 +22,9 @@ awsSession = boto3.Session(
 
 # Instantiate application 
 application = Flask(__name__)
+application.env = application.config["ENV"]
 
-if (application.config["ENV"] == "production"):
+if (application.env == "production"):
     # Route handlers for FE
     @application.route("/assets/<string:requestedStaticDirectory>/<path:path>")
     def sendStaticComponent(requestedStaticDirectory, path):
@@ -38,10 +39,6 @@ if (application.config["ENV"] == "production"):
     @application.errorhandler(404)
     def rerouteToIndex(e):
         return send_file(STATIC_DIRECTORY_ROOT + "index.html")
-        
-    @application.errorhandler(500)
-    def handleServerError(e):
-        return Response("Internal server error", status=500)
 
 # Link aws session to application object
 application.awsSession = awsSession
@@ -57,6 +54,14 @@ application.config.update(dict(
     MAIL_DEFAULT_SENDER="noreply.agriworks@gmail.com"
 ))
 
+#Define root of site 
+if (application.env == "production"):
+    application.rootUrl = "https://agri-works.org"
+else:
+    application.rootUrl = "http://localhost:8080"
+
+print(application.rootUrl)
+
 # Import application controllers. Cannot import from default context due to mutual imports issue
 def importControllers():
     with application.app_context():
@@ -71,6 +76,11 @@ def importControllers():
         application.register_blueprint(dataset.dataset)
 
 importControllers()
+
+#Default error handler
+@application.errorhandler(500)
+def handleServerError(e):
+    return Response("Internal server error", status=500)
 
 if __name__ == "__main__":
     application.run(port=4000, debug=True)

@@ -5,18 +5,17 @@ from Models.Tag import Tag
 from Services.AuthenticationService import AuthenticationService
 from Services.MailService import MailService
 from mongoengine import ValidationError
-from flask import current_app
+from flask import current_app as app
 import pandas as pd
 import numpy
 import datetime
-
 
 AuthenticationService = AuthenticationService()
 MailService = MailService()
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
-s3 = current_app.awsSession.resource('s3')
+s3 = app.awsSession.resource('s3')
 
 class UploadService():
 
@@ -86,9 +85,9 @@ class UploadService():
             
             uploadCompletedDate = str(datetime.datetime.now()).split(".")[0]
 
-            headline = "Your <b>{}</b> dataset has finished processing. <br> <br> ".format(dataset.name)
-            uploadString = "<b>Upload Received</b>: {} <br> <br> <b>Upload Completed</b>: {}<br> <br> ".format(uploadTime, uploadCompletedDate)
-            datasetLink = "<b> Link below to view your dataset: </b> <br> <a href ='http://agri-works.org/dataset/{}'>agri-works.org/dataset/{}</a>.".format(dataset.id, dataset.id)
+            headline = f"Your <b>{dataset.name}</b> dataset has finished processing. <br> <br> "
+            uploadString = f"<b>Upload Received</b>: {uploadTime} <br> <br> <b>Upload Completed</b>: {uploadCompletedDate}<br> <br>"
+            datasetLink = f"<b> Link below to view your dataset: </b> <br> <a href ='{app.rootUrl}/dataset/{dataset.id}'>{app.rootUrl}/dataset/{dataset.id}</a>."
             formattedMessage = headline + uploadString + datasetLink
             MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
             

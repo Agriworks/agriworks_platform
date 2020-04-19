@@ -6,6 +6,9 @@ class MailService():
 
     def __init__(self):
         return
+
+    def generateSubject(self, subject):
+        return "[Agriworks] " + subject
     
     def generateMessagePrefix(self, user):
         return "<p>Hi " + user.firstName + ", </p>"
@@ -18,5 +21,5 @@ class MailService():
     
     def sendMessage(self, user, subject, message):
         messageContent = self.generateMessagePrefix(user) + self.generateMessageBody(message) + self.generateMessageSuffix()
-        mail.send(Message(recipients=[user.email], subject=subject, html=messageContent))
+        mail.send(Message(recipients=[user.email], subject=self.generateSubject(subject), html=messageContent))
 
