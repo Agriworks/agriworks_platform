@@ -8,8 +8,6 @@ from flask import current_app as app
 from mongoengine import DoesNotExist
 from uuid import uuid4
 
-import uuid
-
 MailService = MailService()
 AuthenticationService = AuthenticationService()
 
@@ -74,10 +72,9 @@ def confirmUser(userConfirmationId):
     try:
         user = User.objects.get(confirmationId=userConfirmationId)
         AuthenticationService.setUserAsConfirmed(user)
-
-        return Response("Congratulations! Your account is now confirmed. Please log in to access your account.")
+        return Response("Account confirmed successfully. You may now login.")
     except:
-        return Response("No such account found. Please try again.", status=200)
+        return Response("No account was found using the provided confirmation code.", status=404)
 
 @auth.route("/forgot-password", methods=["POST"])
 def forgotPassword():
