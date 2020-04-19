@@ -1,5 +1,3 @@
-from werkzeug.datastructures import ImmutableMultiDict
-from werkzeug.utils import secure_filename
 from Models.Dataset import Dataset
 from Models.Tag import Tag
 from Services.AuthenticationService import AuthenticationService
@@ -7,7 +5,6 @@ from Services.MailService import MailService
 from mongoengine import ValidationError
 from flask import current_app as app
 import pandas as pd
-import numpy
 import datetime
 
 AuthenticationService = AuthenticationService()
