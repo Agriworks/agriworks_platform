@@ -17,19 +17,17 @@ auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
 
 @auth.route("/login", methods=["POST"])
 def login():
-    session = AuthenticationService.authenticate(
-        request.form["email"], request.form["password"])
+    session = AuthenticationService.authenticate(request.form["email"], request.form["password"])
     if not session:
         return Response("Incorrect username or password. Please check your credentials and try again.", status=403)
     
     user = User.objects.get(email=request.form["email"])
-    if AuthenticationService.isUserConfirmed(user):
-        ret = make_response("Success")
-        ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
-        return ret
+    if not AuthenticationService.isUserConfirmed(user):
+        return Response("You must confirm your account to log in.", status=403)
     
-    return Response("You must confirm your account to log in.", status=403)
-
+    ret = make_response("Success")
+    ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
+    return ret
 @auth.route("/logout", methods=["POST"])
 def logout():
     try:
@@ -65,7 +63,7 @@ def signup():
             user = User.objects.get(email=user["email"])
             AuthenticationService.setUserConfirmationId(user, userConfirmationId)
             sub = "[Agriworks] Confirm Account"
-            msg = "<p>Congratulations, we have registered you on Agriworks. Please click the link below to confirm your account.</p><p><a href=\"http://agri-works.org/confirm-user/{0}\">http://agri-works.org/confirm-user/{0}</a></p>".format(userConfirmationId)
+            msg = "<p>Congratulations, you've registered for Agriworks. Please click the link below to confirm your account.</p><p><a href=\"http://agri-works.org/confirm-user/{0}\">http://agri-works.org/confirm-user/{0}</a></p>".format(userConfirmationId)
             MailService.sendMessage(user, sub, msg)
             return Response("Signup successful", status=200)
         except:
