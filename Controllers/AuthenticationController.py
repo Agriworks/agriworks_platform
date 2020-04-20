@@ -126,3 +126,6 @@ def verifySession():
             return Response(status=200)
     except DoesNotExist as e:
         return Response("Your session was not found. Please login again.",status=401)
+    except ValueError as e:
+        return Response("Invalid session. Please login again.", status=400)
+    
