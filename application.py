@@ -60,8 +60,6 @@ if (application.env == "production"):
 else:
     application.rootUrl = "http://localhost:8080"
 
-print(application.rootUrl)
-
 # Import application controllers. Cannot import from default context due to mutual imports issue
 def importControllers():
     with application.app_context():

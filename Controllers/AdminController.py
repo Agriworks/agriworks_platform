@@ -17,18 +17,13 @@ def account():
 
     form = request.form #the form submitted
 
-    return Response("Wrong password", status=400)
-
-
     #This is the stuff from the cookie, getting the email and password of the person who is logged in
     SID = form["sessionID"] #gets SID from cookie
     session = Authentication.getSession(SID) #uses SID to get session from db
     user = session["user"] #gets user from session
     sessionEmail = user["email"] #email from person logged in
     sessionPassword = user["password"] #password from person logged in
-
     
-
     if form["submit"] == "email":  #might not actually be the way to do it, need to differeiante the forms
 
         formPassword = form["inputCurrentPassword"] #password from form
