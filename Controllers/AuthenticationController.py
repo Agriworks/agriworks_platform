@@ -68,17 +68,18 @@ def signup():
         except:
             return Response("Signup unsuccessful. Please try again.", status=403)
 
-@auth.route("/signup/resend-confirmation-email", methods=["POST"])
+@auth.route("/resend-confirmation-email/<email>", methods=["POST"])
 def resendConfirmationEmail():
     try:
-        email = request.form["email"]
-        userConfirmationId = uuid4()
         user = User.objects.get(email=email)
+        if user.isUserConfirmed(user):
+            return Response("User already confirmed.")
+        userConfirmationId = uuid4()
         AuthenticationService.setUserConfirmationId(user, userConfirmationId)
         sub = "Confirm Account"
         msg = f"<p>Congratulations, you've registered for Agriworks. Please click the link below to confirm your account.</p><p><a href=\"{app.rootUrl}/confirm-user/{userConfirmationId}\"> Confirm account </a></p>"
         MailService.sendMessage(user, sub, msg)
-        return Response("Signup successful", status=200)
+        return Response("Confirmation email sent", status=200)
     except:
         return Response("Resend confirmation email unsuccessful.", status=403)
 
