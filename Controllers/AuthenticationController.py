@@ -73,7 +73,7 @@ def resendConfirmationEmail(email):
     try:
         user = User.objects.get(email=email)
         if user.isConfirmed:
-            return Response("User already confirmed.",status=400)
+            return Response("User already confirmed.",status=403)
         userConfirmationId2 = uuid4()
         AuthenticationService.setUserConfirmationId(user, userConfirmationId2)
         sub = "Confirm Account"
