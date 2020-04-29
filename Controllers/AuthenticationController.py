@@ -74,10 +74,10 @@ def resendConfirmationEmail(email):
         user = User.objects.get(email=email)
         if user.isConfirmed:
             return Response("User already confirmed.",status=403)
-        userConfirmationId2 = uuid4()
-        AuthenticationService.setUserConfirmationId(user, userConfirmationId2)
+        newUserConfirmationId = uuid4()
+        AuthenticationService.setUserConfirmationId(user, newUserConfirmationId)
         sub = "Confirm Account"
-        msg = f"<p>Congratulations, you've registered for Agriworks. Please click the link below to confirm your account.</p><p><a href=\"{app.rootUrl}/confirm-user/{userConfirmationId2}\"> Confirm account </a></p>"
+        msg = f"<p>Congratulations, you've registered for Agriworks. Please click the link below to confirm your account.</p><p><a href=\"{app.rootUrl}/confirm-user/{newUserConfirmationId}\"> Confirm account </a></p>"
         MailService.sendMessage(user, sub, msg)
         return Response("New confirmation email sent.", status=200)
     except:
