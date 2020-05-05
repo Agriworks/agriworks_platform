@@ -46,11 +46,14 @@ class AuthenticationService():
         if not user: 
             return False 
         
-        # first get the array of datasets and 
         recentDatasets = user.recentDatasets
-        recentDatasets.insert(0, datasetId)
-        if len(recentDatasets) > 5: 
-            recentDatasets = recentDatasets[:5]
+        try: 
+            recentDatasets.insert(0, datasetId)
+            if len(recentDatasets) > 5: 
+                recentDatasets = recentDatasets[:5]
+        except: 
+            # exception means that the list dataset is empty 
+            recentDatasets = [datasetId]
         user.update(recentDatasets=recentDatasets)
         return True
 
