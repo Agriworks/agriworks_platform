@@ -3,6 +3,7 @@ from mongoengine import connect
 import yaml
 import boto3
 from Response import Response
+from Services.endpointProtection import authRequired
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
@@ -57,6 +58,7 @@ application.config.update(dict(
     MAIL_DEFAULT_SENDER="noreply.agriworks@gmail.com"
 ))
 
+
 # Import application controllers. Cannot import from default context due to mutual imports issue
 def importControllers():
     with application.app_context():
@@ -71,6 +73,13 @@ def importControllers():
         application.register_blueprint(dataset.dataset)
 
 importControllers()
+
+#protect all endpoints
+viewFunctions = application.view_functions
+for key in viewFunctions.keys():
+    application.view_functions[key] = authRequired(viewFunctions[key])
+    
+
 
 if __name__ == "__main__":
     application.run(port=4000, debug=True)

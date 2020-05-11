@@ -9,7 +9,7 @@ import boto3
 import botocore
 import pandas as pd
 from uuid import uuid4
-from Services.endpointProtection import authRequired
+
 
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
@@ -19,7 +19,7 @@ s3 = current_app.awsSession.client('s3')
 DatasetCache = {}
 
 @dataset.route("/list/<pageNumber>", methods=["GET"])
-# @authRequired
+
 def get(pageNumber):
     retList = []
     datasets = []
