@@ -19,7 +19,6 @@ s3 = current_app.awsSession.client('s3')
 DatasetCache = {}
 
 @dataset.route("/list/<pageNumber>", methods=["GET"])
-
 def get(pageNumber):
     retList = []
     datasets = []

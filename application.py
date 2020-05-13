@@ -3,7 +3,7 @@ from mongoengine import connect
 import yaml
 import boto3
 from Response import Response
-from Services.endpointProtection import authRequired
+from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
@@ -74,12 +74,11 @@ def importControllers():
 
 importControllers()
 
-#protect all endpoints
+#Protect all endpoints by wrapping relevant view function with authentication required function.
 viewFunctions = application.view_functions
 for key in viewFunctions.keys():
-    application.view_functions[key] = authRequired(viewFunctions[key])
-    
-
+    if (key not in NON_PROTECTED_ENDPOINTS):    
+        viewFunctions[key] = authRequired(viewFunctions[key])
 
 if __name__ == "__main__":
     application.run(port=4000, debug=True)

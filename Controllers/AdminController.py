@@ -12,7 +12,6 @@ def index():
     return {"status": "Congratulations, Agriworks is now running on your machine."}
 
 @admin.route("/account", methods=["POST"])
-@Authentication.login_required
 def account():
 
     form = request.form #the form submitted

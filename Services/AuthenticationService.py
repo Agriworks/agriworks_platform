@@ -14,17 +14,6 @@ class AuthenticationService():
     
     def __init__(self):
         return
-    
-    #TODO: 
-    def login_required(self,f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            authenticated = True
-            if(not authenticated):
-                return "Please login first"
-            else:
-                return f(*args, **kwargs) #PASSING TO NEXT 
-        return decorated_function
 
     """ 
     Return the user
