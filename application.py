@@ -3,6 +3,7 @@ from mongoengine import connect
 import yaml
 import boto3
 from Response import Response
+from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
@@ -54,7 +55,7 @@ application.config.update(dict(
     MAIL_DEFAULT_SENDER="noreply.agriworks@gmail.com"
 ))
 
-#Define root of site 
+#Define root url of site 
 if (application.env == "production"):
     application.rootUrl = "https://agri-works.org"
 else:
@@ -79,6 +80,12 @@ importControllers()
 @application.errorhandler(500)
 def handleServerError(e):
     return Response("Internal server error", status=500)
+
+#Protect all endpoints by wrapping relevant view function with authentication required function.
+viewFunctions = application.view_functions
+for key in viewFunctions.keys():
+    if (key not in NON_PROTECTED_ENDPOINTS):    
+        viewFunctions[key] = authRequired(viewFunctions[key])
 
 if __name__ == "__main__":
     application.run(port=4000, debug=True)
