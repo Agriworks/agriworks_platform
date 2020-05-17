@@ -144,3 +144,11 @@ def verifySession():
     except ValueError as e:
         return Response("Invalid session. Please login again.", status=400)
     
+@auth.route("/delete-account/<email>", methods=["POST"])
+def deleteAccount(email):
+    try:
+        user = User.objects.get(email=email)
+        
+        return Response("Account deleted.", status=200)
+    except:
+        return Response("User not found.", status=403)
