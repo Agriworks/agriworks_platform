@@ -149,18 +149,14 @@ def verifySession():
 def deleteAccount(email):
     try:
         user = AuthenticationService.getUser(email=email)
-        # found user, do stuff to remove datasets from db
-        datasets = Dataset.objects
-        for i in datasets:
-            if i.author == user:
-                print("found")
+        # found user, remove their datasets
+        Dataset.objects(author=user).delete()
         # once datasets have been removed, remove user from users
         try:
             # log out before deletion
             sessionId = request.form["sessionId"]
             AuthenticationService.logout(sessionId)
             # remove user with query by email
-            print(email)
             user.delete()
         except:
             return Response("Error deleting user.", status=403)
