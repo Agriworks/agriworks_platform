@@ -145,12 +145,19 @@ def verifySession():
     except ValueError as e:
         return Response("Invalid session. Please login again.", status=400)
     
-@auth.route("/delete-account/<email>", methods=["POST"])
-def deleteAccount(email):
+@auth.route("/delete-account", methods=["POST"])
+def deleteAccount():
     try:
-        user = AuthenticationService.getUser(email=email)
+        form = request.form #the form submitted
+        SID = form["sessionId"] #gets SID from cookie
+        session = AuthenticationService.getSession(SID) #uses SID to get session from db
+        user = session["user"] #gets user from session
+
         # found user, remove their datasets
-        Dataset.objects(author=user).delete()
+        try:
+            Dataset.objects(author=user).delete()
+        except:
+            return Response("Error deleting datasets.",status=403)
         # once datasets have been removed, remove user from users
         try:
             # log out before deletion
@@ -162,4 +169,4 @@ def deleteAccount(email):
             return Response("Error deleting user.", status=403)
         return Response("Account deleted.", status=200)
     except:
-        return Response("User not found.", status=403)
+        return Response("Error getting user from session.", status=403)
