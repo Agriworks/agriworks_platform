@@ -2,6 +2,7 @@ from flask import Blueprint, request, make_response
 from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
+from Models.Dataset import Dataset
 from Models.Session import Session
 from Services.MailService import MailService
 from flask import current_app as app
@@ -147,8 +148,22 @@ def verifySession():
 @auth.route("/delete-account/<email>", methods=["POST"])
 def deleteAccount(email):
     try:
-        user = User.objects.get(email=email)
-        
+        user = AuthenticationService.getUser(email=email)
+        # found user, do stuff to remove datasets from db
+        datasets = Dataset.objects
+        for i in datasets:
+            if i.author == user:
+                print("found")
+        # once datasets have been removed, remove user from users
+        try:
+            # log out before deletion
+            sessionId = request.form["sessionId"]
+            AuthenticationService.logout(sessionId)
+            # remove user with query by email
+            print(email)
+            user.delete()
+        except:
+            return Response("Error deleting user.", status=403)
         return Response("Account deleted.", status=200)
     except:
         return Response("User not found.", status=403)
