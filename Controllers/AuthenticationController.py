@@ -2,6 +2,7 @@ from flask import Blueprint, request, make_response
 from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
+from Models.Dataset import Dataset
 from Models.Session import Session
 from Services.MailService import MailService
 from flask import current_app as app
@@ -144,3 +145,28 @@ def verifySession():
     except ValueError as e:
         return Response("Invalid session. Please login again.", status=400)
     
+@auth.route("/delete-account", methods=["POST"])
+def deleteAccount():
+    try:
+        form = request.form #the form submitted
+        SID = form["sessionId"] #gets SID from cookie
+        session = AuthenticationService.getSession(SID) #uses SID to get session from db
+        user = session["user"] #gets user from session
+
+        # found user, remove their datasets
+        try:
+            Dataset.objects(author=user).delete()
+        except:
+            return Response("Error deleting datasets.",status=403)
+        # once datasets have been removed, remove user from users
+        try:
+            # log out before deletion
+            sessionId = request.form["sessionId"]
+            AuthenticationService.logout(sessionId)
+            # remove user with query by email
+            user.delete()
+        except:
+            return Response("Error deleting user.", status=403)
+        return Response("Account deleted.", status=200)
+    except:
+        return Response("Error getting user from session.", status=403)
