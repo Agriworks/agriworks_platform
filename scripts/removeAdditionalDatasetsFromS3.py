@@ -9,23 +9,17 @@ import yaml
 
 creds = yaml.safe_load(open("../creds.yaml", "r"))
 dbHostUri = "mongodb+srv://" + creds["DB_USER"] + ":" + creds["DB_PASSWORD"] + "@cluster0-ollas.mongodb.net/test?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
-client = MongoClient(dbHostUri)
-db = client.test
+db = MongoClient(dbHostUri).test
 
 serverStatusResult=db.command("serverStatus")
 # pprint(serverStatusResult)
 
-# dataset = db.dataset.find_one({'_id': ObjectId('5e44a4987e5f826b51cc9684')})
-# print(dataset)
-
 s3 = boto3.resource('s3')
-
 bucketName = "agriworks-user-datasets"
 bucket = s3.Bucket(bucketName)
 
 s3Length = sum(1 for i in bucket.objects.all())
 print('s3 Size =',s3Length)
-
 
 for key in bucket.objects.all():
     if not db.dataset.find_one({'_id': ObjectId(key.key.split('.')[0])}):
