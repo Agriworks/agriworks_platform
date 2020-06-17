@@ -18,7 +18,7 @@ auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
 def login():
     session = AuthenticationService.authenticate(request.form["email"], request.form["password"])
     if not session:
-        return Response("Incorrect username or password. Please check your credentials and try again.", status=403)
+        return Response("Incorrect username or password. Please check your credentials and try again.", status=401)
     
     user = User.objects.get(email=request.form["email"])
     if not AuthenticationService.isUserConfirmed(user):
