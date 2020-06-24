@@ -45,9 +45,9 @@ class TemplateService():
             headers=document["headers"]
             )
 
-        user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
+        template.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered
 
-        if (self.save(user)):
+        if (self.save(template)):
             return True
         else:
             return False
