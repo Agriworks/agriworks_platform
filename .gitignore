@@ -10,7 +10,9 @@ manuja_temp_files/
 .DS_Store
 connectToDb.sh
 connectToAws.sh
-
+scripts/
+Lib/
+pyvenv.cfg
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
