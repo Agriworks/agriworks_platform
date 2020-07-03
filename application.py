@@ -2,8 +2,10 @@ from flask import Flask, send_file, send_from_directory
 from mongoengine import connect
 import yaml
 import boto3
+from uuid import uuid4
 from Response import Response
 from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
+import google_auth_oauthlib.flow
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
@@ -21,9 +23,21 @@ awsSession = boto3.Session(
     aws_secret_access_key=creds["AWS_SECRET_KEY"]
 )
 
+
+flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+    'client_secrets.json',
+    scopes=['https://www.googleapis.com/auth/drive.metadata.readonly',
+            'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'openid'])
+
+
 # Instantiate application 
 application = Flask(__name__)
 application.env = application.config["ENV"]
+application.flow = flow
+application.secret_key = str(uuid4())
+
 
 if (application.env == "production"):
     # Route handlers for FE

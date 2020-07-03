@@ -5,6 +5,7 @@ __pycache__/*
 .vscode/
 config
 creds.yaml
+client_secrets.json
 manuja_temp_files/
 *.pem
 .DS_Store

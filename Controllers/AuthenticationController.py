@@ -1,18 +1,58 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, url_for, session, redirect
+from flask import current_app as app
 from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 from Models.Dataset import Dataset
 from Models.Session import Session
 from Services.MailService import MailService
-from flask import current_app as app
 from mongoengine import DoesNotExist
 from uuid import uuid4
+import google.oauth2.credentials
+
 
 MailService = MailService()
 AuthenticationService = AuthenticationService()
 
 auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
+
+@auth.route("/authorize", methods=["GET"])
+def authorize():
+    flow = app.flow
+    flow.redirect_uri = url_for('AuthenticationController.callback', _external=True)
+
+    authorization_url, state = flow.authorization_url(
+      access_type='offline',
+      include_granted_scopes='true')
+
+    session['state'] = state
+
+    return Response({"authorization_url":authorization_url})
+
+
+@auth.route("/callback", methods=["GET"])
+def callback():
+    state = session['state']
+    
+    flow = app.flow
+    flow.redirect_uri = url_for('AuthenticationController.callback', _external=True)
+    
+    authorization_response = request.url
+    flow.fetch_token(authorization_response=authorization_response)
+    credentials = flow.credentials
+    session['credentials'] = credentials_to_dict(credentials)
+    return redirect("http://localhost:8080"+ "/login")
+
+
+def credentials_to_dict(credentials):
+  return {'token': credentials.token,
+          'refresh_token': credentials.refresh_token,
+          'token_uri': credentials.token_uri,
+          'client_id': credentials.client_id,
+          'client_secret': credentials.client_secret,
+          'scopes': credentials.scopes}
+
+
 
 @auth.route("/login", methods=["POST"])
 def login():
