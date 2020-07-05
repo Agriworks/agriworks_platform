@@ -1,6 +1,7 @@
 from flask import current_app as app
-from flask_mail import Mail, Message
-mail = Mail(app)
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+mail = SendGridAPIClient(app.config["SENDGRID_KEY"])
 
 class MailService():
 
@@ -21,5 +22,5 @@ class MailService():
     
     def sendMessage(self, user, subject, message):
         messageContent = self.generateMessagePrefix(user) + self.generateMessageBody(message) + self.generateMessageSuffix()
-        mail.send(Message(recipients=[user.email], subject=self.generateSubject(subject), html=messageContent))
+        mail.send(Mail(from_email=app.config["MAIL_USERNAME"], to_emails=user.email, subject=self.generateSubject(subject), html_content=messageContent))
 
