@@ -46,13 +46,8 @@ application.awsSession = awsSession
 
 # Setup mail 
 application.config.update(dict(
-    MAIL_SERVER='smtp.gmail.com',
-    MAIL_PORT=587,
-    MAIL_USE_TLS=True,
-    MAIL_USE_SSL=False,
     MAIL_USERNAME=creds["MAIL_USER"],
-    MAIL_PASSWORD=creds["MAIL_PASSWORD"],
-    MAIL_DEFAULT_SENDER="noreply.agriworks@gmail.com"
+    SENDGRID_KEY=creds["SENDGRID_API_KEY"]
 ))
 
 #Define root url of site 
