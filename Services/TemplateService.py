@@ -6,7 +6,8 @@ from uuid import uuid4
 from Models.User import User
 from Models.Session import Session 
 from datetime import datetime
-
+from Models.Template import Template
+import json 
 
 class TemplateService():
     
@@ -40,9 +41,9 @@ class TemplateService():
     """
     def createTemplate(self, document):
         template = Template(
-            templateName=document["templateName"],
+            templateName=document["name"],
             author=document["author"],
-            headers=document["headers"]
+            headers=json.loads(document["headers"])
             )
 
         template.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered

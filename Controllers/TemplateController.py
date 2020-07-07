@@ -6,11 +6,10 @@ from Services.TemplateService import TemplateService
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 
-
 TemplateService = TemplateService()
 AuthenticationService = AuthenticationService()
 
-template = Blueprint("TemplateEndpoints", __name__, url_prefix="/api/template")
+template = Blueprint("TemplateController", __name__, url_prefix="/api/templates")
 
 #Used to delete a template
 @template.route("/delete/<templateName>", methods=["DELETE"])
@@ -42,12 +41,6 @@ def getTemplate(templateName):
         return Response(TemplateService.getTemplate(template))
 
 #Used to store a template
-@template.route("/store", method=["POST"])
-def storeTemplate(templateDocument)
-
-    storageWorked = TemplateService.createTemplate(templateDocument)
-
-    if (storageWorked)
-        return Response("New template successfully stored")
-    else:
-        return Response("Unable to create new template")
+@template.route("/create", methods=["POST"])
+def create():
+    return Response("New template successfully stored") if TemplateService.createTemplate(request.form) else Response("Unable to create new template")
