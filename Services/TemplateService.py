@@ -7,7 +7,10 @@ from Models.User import User
 from Models.Session import Session 
 from datetime import datetime
 from Models.Template import Template
+from Services.AuthenticationService import AuthenticationService
 import json 
+
+AuthenticationService = AuthenticationService()
 
 class TemplateService():
     
@@ -39,11 +42,11 @@ class TemplateService():
     """
     Currently, all users will not be administrators.
     """
-    def createTemplate(self, document):
+    def createTemplate(self, request):
         template = Template(
-            templateName=document["name"],
-            author=document["author"],
-            headers=json.loads(document["headers"])
+            templateName=request.form["name"],
+            author=AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"]),
+            headers=json.loads(request.form["headers"])
             )
 
         template.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered

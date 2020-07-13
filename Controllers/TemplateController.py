@@ -43,4 +43,4 @@ def getTemplate(templateName):
 #Used to store a template
 @template.route("/create", methods=["POST"])
 def create():
-    return Response("New template successfully stored") if TemplateService.createTemplate(request.form) else Response("Unable to create new template")
+    return Response("New template successfully stored") if TemplateService.createTemplate(request) else Response("Unable to create new template")
