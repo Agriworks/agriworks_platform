@@ -13,7 +13,8 @@ NON_PROTECTED_ENDPOINTS = [
     "AuthenticationController.forgotPassword", 
     "AuthenticationController.resetPassword", 
     "AuthenticationController.verifySession",
-    "TemplateController.create"
+    "TemplateController.create",
+    "TemplateController.getAllTemplates"
     ]
 
 def authRequired(f):  

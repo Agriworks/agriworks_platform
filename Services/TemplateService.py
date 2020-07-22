@@ -56,6 +56,12 @@ class TemplateService():
         else:
             return False
 
+    def createTemplateObject(self, template):
+        templateAuthor = AuthenticationService.getUser(id=template.author.id)
+        templateObject = {"name":template.templateName, "author": templateAuthor.getFullname(), "id":str(template.id), "headers": template.headers}
+        
+        return templateObject
+
     def templateNameIsAlreadyInUse(self, templateName):
         return Template.objects(templateName=templateName)
     

@@ -5,11 +5,24 @@ from Models.Template import Template
 from Services.TemplateService import TemplateService
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
+import json
 
 TemplateService = TemplateService()
 AuthenticationService = AuthenticationService()
 
 template = Blueprint("TemplateController", __name__, url_prefix="/api/templates")
+
+#Used to retrieve all templates
+@template.route("/", methods=["GET"])
+def getAllTemplates():
+    retList = []
+    allTemplates = Template.objects.all()
+    
+    for template in allTemplates:
+        templateObject = TemplateService.createTemplateObject(template)
+        retList.append(templateObject)
+
+    return Response(retList)
 
 #Used to delete a template
 @template.route("/delete/<templateName>", methods=["DELETE"])
