@@ -4,18 +4,31 @@ orbs:
   python: circleci/python@0.2.1
 
 jobs:
-  build-and-test:
-    executor: python/default
+  deploy:
+    working_directory: ~/app
+    docker:
+      - image: circleci/ruby:2.4.3
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
+
       - run:
-          command: ./manage.py test
-          name: Test
+          name: Deploying
+          working_directory: /
+          command: |
+            ./deploy.sh
+
+      # - run:
+      #     name: Deploying
+      #     command: eb deploy $CIRCLE_BRANCH-my-application
 
 workflows:
-  main:
+  version: 2.1
+  build:
     jobs:
-      - build-and-test
+      - deploy:
+          filters:
+            branches:
+              only:
+                - staging
+                - master
+                - circleci-project-setup
