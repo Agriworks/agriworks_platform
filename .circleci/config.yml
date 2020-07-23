@@ -18,7 +18,8 @@ jobs:
             cd /home/circleci/
             git clone https://github.com/Hack4Impact-Boston-University/agriworks_portal
             cd agriworks_platform
-            which pip
+            which pip3
+            npm install vue
             ./deploy.sh
 
 
