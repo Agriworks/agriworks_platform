@@ -22,7 +22,7 @@ jobs:
             pip3 install --upgrade --user awsebcli
             echo $CREDS > creds.yaml
             ls
-            cat creds.yaml | grep MAIL_USER
+            cat creds.yaml
             cd ../agriworks_portal && yarn install && cd ../agriworks_platform
             ./deploy.sh
 
