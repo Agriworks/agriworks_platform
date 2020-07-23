@@ -18,7 +18,7 @@ jobs:
             cd /home/circleci/
             git clone https://github.com/Hack4Impact-Boston-University/agriworks_portal
             cd agriworks_platform
-            pip3 install -r --user requirements.txt
+            pip3 install --user -r requirements.txt
             pip3 install --upgrade --user awsebcli
             cd ../agriworks_portal && yarn install && cd ../agriworks_platform
             ./deploy.sh
