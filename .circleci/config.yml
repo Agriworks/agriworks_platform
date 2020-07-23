@@ -5,7 +5,7 @@ orbs:
 
 jobs:
   deploy:
-    working_directory: ~/app
+    working_directory: /home/circleci/agriworks_platform
     docker:
       - image: circleci/ruby:2.4.3
     steps:
@@ -15,8 +15,7 @@ jobs:
           name: Deploying
           working_directory: /
           command: |
-            cd /home/circleci/app
-            ./deploy.sh
+            ls /home/circleci/
 
       # - run:
       #     name: Deploying
