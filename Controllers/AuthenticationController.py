@@ -1,4 +1,4 @@
-from flask import Blueprint, request, make_response, url_for, session, redirect
+from flask import Blueprint, request, make_response, url_for, redirect
 from flask import current_app as app
 from Response import Response
 from Services.AuthenticationService import AuthenticationService
@@ -16,32 +16,16 @@ AuthenticationService = AuthenticationService()
 
 auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
 
-@auth.route("/authorize", methods=["GET"])
+@auth.route("/authorize", methods=["POST"])
 def authorize():
     flow = app.flow
-    flow.redirect_uri = url_for('AuthenticationController.callback', _external=True)
+    flow.redirect_uri = request.form["redirect_uri"]
+    authCode = request.form["code"]
+    flow.fetch_token(code=authCode)
 
-    authorization_url, state = flow.authorization_url(
-      access_type='offline',
-      include_granted_scopes='true')
-
-    session['state'] = state
-
-    return Response({"authorization_url":authorization_url})
-
-
-@auth.route("/callback", methods=["GET"])
-def callback():
-    state = session['state']
-    
-    flow = app.flow
-    flow.redirect_uri = url_for('AuthenticationController.callback', _external=True)
-    
-    authorization_response = request.url
-    flow.fetch_token(authorization_response=authorization_response)
     credentials = flow.credentials
-    session['credentials'] = credentials_to_dict(credentials)
-    return redirect("http://localhost:8080"+ "/login")
+
+    return Response(credentials_to_dict(credentials))
 
 
 def credentials_to_dict(credentials):
