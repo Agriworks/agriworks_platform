@@ -7,6 +7,7 @@ from pprint import pprint
 from bson.objectid import ObjectId
 import yaml
 
+## NOTE: CREDS FILE NOT AVAILABLE ON PROD
 creds = yaml.safe_load(open("../creds.yaml", "r"))
 dbHostUri = "mongodb+srv://" + creds["DB_USER"] + ":" + creds["DB_PASSWORD"] + "@cluster0-ollas.mongodb.net/test?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
 db = MongoClient(dbHostUri).test
