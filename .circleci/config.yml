@@ -15,7 +15,8 @@ jobs:
           name: Deploying
           working_directory: /
           command: |
-            ls /home/circleci/app
+            cd /home/circleci/app
+            ./deploy.sh
 
       # - run:
       #     name: Deploying
