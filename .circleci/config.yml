@@ -16,6 +16,7 @@ jobs:
           working_directory: ~/app
           command: |
             ./deploy.sh
+            ls
 
       # - run:
       #     name: Deploying
