@@ -11,7 +11,3 @@ manuja_temp_files/
 connectToDb.sh
 connectToAws.sh
 
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
