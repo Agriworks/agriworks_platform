@@ -15,7 +15,7 @@ jobs:
           name: Deploying
           working_directory: /
           command: |
-            ./deploy.sh
+            ls
 
       # - run:
       #     name: Deploying
