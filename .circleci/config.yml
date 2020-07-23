@@ -7,7 +7,7 @@ jobs:
   deploy:
     working_directory: /home/circleci/agriworks_platform
     docker:
-      - image: circleci/python:3-node
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
 
