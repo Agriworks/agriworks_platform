@@ -15,7 +15,10 @@ jobs:
           name: Deploying
           working_directory: /
           command: |
-            ls /home/circleci/
+            cd /home/circleci/
+            git clone https://github.com/Hack4Impact-Boston-University/agriworks_portal
+            cd agriworks_platform
+            ./deploy.sh
 
 
       # - run:
