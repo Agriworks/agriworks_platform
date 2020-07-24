@@ -29,15 +29,15 @@ jobs:
           name: Deploying
           working_directory: /
           command: |
-            echo ${CREDS}
+            # echo ${CREDS}
             cd /home/circleci/
             git clone https://github.com/Hack4Impact-Boston-University/agriworks_portal
             cd agriworks_platform
             # pip3 install --user -r requirements.txt
             pip3 install --upgrade --user awsebcli
-            echo $CREDS > creds.yaml
-            ls -al
-            cat creds.yaml
+            # echo $CREDS > creds.yaml
+            # ls -al
+            # cat creds.yaml
             cd ../agriworks_portal && yarn install && cd ../agriworks_platform
             ./deploy.sh
 
