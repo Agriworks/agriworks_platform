@@ -28,10 +28,6 @@ jobs:
             ./deploy.sh
 
 
-      # - run:
-      #     name: Deploying
-      #     command: eb deploy $CIRCLE_BRANCH-my-application
-
 workflows:
   version: 2.1
   build:
