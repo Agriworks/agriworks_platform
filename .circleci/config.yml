@@ -5,9 +5,9 @@ orbs:
 
 workflows:
   version: 2.1
-  my-workflow:
+  set-context:
      jobs:
-       - run-tests:
+       - deploy:
            context: agriworks 
   build:
     jobs:
