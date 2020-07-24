@@ -3,6 +3,23 @@ version: 2.1
 orbs:
   python: circleci/python@0.2.1
 
+workflows:
+  version: 2.1
+  my-workflow:
+     jobs:
+       - run-tests:
+           context: agriworks 
+  build:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - staging
+                - master
+                - circleci-project-setup
+
+
 jobs:
   deploy:
     working_directory: /home/circleci/agriworks_platform
@@ -28,16 +45,4 @@ jobs:
             ./deploy.sh
 
 
-workflows:
-  version: 2.1
-  build:
-    jobs:
-      - build:
-          context: agriworks
-      - deploy:
-          filters:
-            branches:
-              only:
-                - staging
-                - master
-                - circleci-project-setup
+
