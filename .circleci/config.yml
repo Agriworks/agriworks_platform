@@ -30,6 +30,7 @@ jobs:
           working_directory: /
           command: |
             # echo ${CREDS}
+            printenv
             cd /home/circleci/
             git clone https://github.com/Hack4Impact-Boston-University/agriworks_portal
             cd agriworks_platform
