@@ -23,6 +23,7 @@ jobs:
             pip3 install --upgrade --user awsebcli
             echo $CREDS > creds.yaml
             ls -al
+            cat creds.yaml
             cd ../agriworks_portal && yarn install && cd ../agriworks_platform
             ./deploy.sh
 
@@ -35,6 +36,8 @@ workflows:
   version: 2.1
   build:
     jobs:
+      - context:
+          context: agriworks
       - deploy:
           filters:
             branches:
