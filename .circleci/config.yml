@@ -5,13 +5,10 @@ orbs:
 
 workflows:
   version: 2.1
-  set-context:
-     jobs:
-       - deploy:
-           context: agriworks 
   build:
     jobs:
       - deploy:
+          context: agriworks
           filters:
             branches:
               only:
