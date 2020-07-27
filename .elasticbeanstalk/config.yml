@@ -1,6 +1,4 @@
 branch-defaults:
-  circleci-project-setup:
-    environment: test
   master:
     environment: test
 environment-defaults:
