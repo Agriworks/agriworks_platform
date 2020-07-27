@@ -9,6 +9,8 @@ from Services.MailService import MailService
 from mongoengine import DoesNotExist
 from uuid import uuid4
 import google.oauth2.credentials
+import requests
+
 
 
 MailService = MailService()
@@ -24,18 +26,15 @@ def authorize():
     flow.fetch_token(code=authCode)
 
     credentials = flow.credentials
+    req_url = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + credentials.token
+    user_info = requests.get(req_url).json()
 
-    return Response(credentials_to_dict(credentials))
-
-
-def credentials_to_dict(credentials):
-  return {'token': credentials.token,
-          'refresh_token': credentials.refresh_token,
-          'token_uri': credentials.token_uri,
-          'client_id': credentials.client_id,
-          'client_secret': credentials.client_secret,
-          'scopes': credentials.scopes}
-
+    user_existed = AuthenticationService.getUser(email=user_info['email'])
+    
+    if user_existed:
+        return Response("Email already existed", status=200)
+    else:
+        return Response("Redirect to sign up", status=200)
 
 
 @auth.route("/login", methods=["POST"])

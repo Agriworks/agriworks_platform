@@ -26,7 +26,9 @@ awsSession = boto3.Session(
 
 flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
     'client_secrets.json',
-    scopes=[])
+    scopes=["https://www.googleapis.com/auth/userinfo.profile", 
+            "https://www.googleapis.com/auth/userinfo.email",
+            "openid"])
 
 
 # Instantiate application 
