@@ -77,10 +77,10 @@ def handleServerError(e):
     return Response("Internal server error", status=500)
 
 #Protect all endpoints by wrapping relevant view function with authentication required function.
-viewFunctions = application.view_functions
-for key in viewFunctions.keys():
-    if (key not in NON_PROTECTED_ENDPOINTS):    
-        viewFunctions[key] = authRequired(viewFunctions[key])
+# viewFunctions = application.view_functions
+# for key in viewFunctions.keys():
+#     if (key not in NON_PROTECTED_ENDPOINTS):    
+#         viewFunctions[key] = authRequired(viewFunctions[key])
 
 if __name__ == "__main__":
     application.run(port=4000, debug=True)
