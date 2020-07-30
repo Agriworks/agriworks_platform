@@ -27,6 +27,8 @@ RUN chmod u+x start.sh
 # EXPOSE 8080
 # CMD ["yarn", "run", "serve"]
 
+RUN echo ' --host 0.0.0.0' >> start.sh
+
 CMD sh ./start.sh
 # CMD ["./start.sh"]
 # ["chmod", "+x", "start.sh", "&&", "./start.sh"]
