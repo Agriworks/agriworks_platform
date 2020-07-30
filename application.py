@@ -95,4 +95,4 @@ for key in viewFunctions.keys():
         viewFunctions[key] = authRequired(viewFunctions[key])
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port=4000, debug=True)
+    application.run(port=4000, debug=True)
