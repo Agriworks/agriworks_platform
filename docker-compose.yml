@@ -9,7 +9,7 @@ services:
     ports:
       - '4000:4000'
     networks:
-      - bench
+      - agri
   frontend:
     image: vue
     container_name: agriworks_portal
@@ -19,7 +19,7 @@ services:
     ports:
       - '8080:8080'
     networks:
-      - bench
+      - agri
 
 networks:
-  bench: {}
+  agri: {}
