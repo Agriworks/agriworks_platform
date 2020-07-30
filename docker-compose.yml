@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  backend:
+    image: flask
+    container_name: agriworks_platform
+    restart: always
+    build: .
+    command: sh ./start.sh
+    ports:
+      - '4000:4000'
+    networks:
+      - agri
+  frontend:
+    image: vue
+    container_name: agriworks_portal
+    restart: always
+    build: ../agriworks_portal
+    command: yarn run serve
+    ports:
+      - '8080:8080'
+    networks:
+      - agri
+
+networks:
+  agri: {}
