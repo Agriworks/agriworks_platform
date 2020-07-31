@@ -6,13 +6,28 @@ from uuid import uuid4
 from Response import Response
 from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
 import google_auth_oauthlib.flow
+import os
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
 STATIC_ASSETS_DIRECTORY_ROOT = "./dist/assets/"
 
+# Instantiate application 
+application = Flask(__name__)
+application.env = application.config["ENV"]
+
 # Instantiate connection to database
-creds = yaml.safe_load(open("creds.yaml", "r"))
+if (application.env == "production"):
+    creds = {}
+    creds["DB_USER"] = os.getenv("DB_USER")
+    creds["DB_PASSWORD"] = os.getenv("DB_PASSWORD")
+    creds["AWS_ACCESS_KEY"] = os.getenv("AWS_ACCESS_KEY")
+    creds["AWS_SECRET_KEY"] = os.getenv("AWS_SECRET_KEY")
+    creds["MAIL_USER"] = os.getenv("MAIL_USER")
+    creds["SENDGRID_API_KEY"] = os.getenv("SENDGRID_API_KEY")
+else:
+    creds = yaml.safe_load(open("creds.yaml", "r"))
+
 dbHostUri = "mongodb+srv://" + creds["DB_USER"] + ":" + creds["DB_PASSWORD"] + \
     "@cluster0-ollas.mongodb.net/test?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
 db = connect(host=dbHostUri)
