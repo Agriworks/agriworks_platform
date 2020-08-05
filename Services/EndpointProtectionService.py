@@ -5,7 +5,7 @@ from Services.AuthenticationService import AuthenticationService
 AuthenticationService = AuthenticationService()
 
 
-NON_PROTECTED_ENDPOINTS = ["index", 'AdminController.specs', 'AdminController.admin_index', 'AdminController.admin_account', 'AdminController.doc', "AuthenticationController.login", "AuthenticationController.signup", "AuthenticationController.confirmUser", "AuthenticationController.forgotPassword", "AuthenticationController.resetPassword", "AuthenticationController.verifySession"]
+NON_PROTECTED_ENDPOINTS = ["index", 'UploadController.doc', 'UploadController.specs', 'DatasetEndpoints.doc', 'DatasetEndpoints.specs', 'AdminController.specs', 'AdminController.index', 'AdminController.account', 'AdminController.doc', 'AuthenticationController.doc', 'AuthenticationController.specs', "AuthenticationController.login", "AuthenticationController.signup", "AuthenticationController.confirmUser", "AuthenticationController.forgotPassword", "AuthenticationController.resetPassword", "AuthenticationController.verifySession"]
 
 def authRequired(f):  
     @wraps(f)  
