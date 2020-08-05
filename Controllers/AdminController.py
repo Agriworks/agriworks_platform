@@ -8,15 +8,9 @@ from flask_restplus import Api, Resource
 Authentication = AuthenticationService()
 
 admin = Blueprint("AdminController", __name__, url_prefix="/api/admin")
+restPlus = Api(admin, doc = "/swagger/")
 
-# @admin.route("/", methods=["GET"])
-# def index():
-#     return {"status": "Congratulations, Agriworks is now running on your machine."}
-
-restPlus = Api(admin)
-name_space = restPlus.namespace('api/admin', description='Admin APIs')
-
-@name_space.route("/")
+@restPlus.route("/")
 class Index(Resource):
 	def get(self):
 		return {
@@ -24,8 +18,26 @@ class Index(Resource):
 		}
 
 
-@name_space.route("/account")
+@restPlus.route("/account")
 class Account(Resource):
+    @restPlus.doc(
+        responses={
+            200: "Email Updated",
+            200: "Updated Password", 
+            400: "Email is already in use", 
+            400: "Wrong password",
+            400: "Password does not match confirm password",
+            400: "No form submitted",
+        },
+        params={
+            'sessionId': {'in': 'formData', 'required': True},
+            'submit': {'in': 'formData', 'description': 'either email or password to differentiate the forms','required': True},
+            'inputCurrentPassword': {'in': 'formData'},
+            'inputEmail': {'in': 'formData'},
+            'inputPassword': {'in': 'formData'},
+            'inputConfirmPassword': {'in': 'formData'},
+        }
+    )
     def post(self):
 
         form = request.form #the form submitted

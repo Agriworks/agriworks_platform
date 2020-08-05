@@ -5,6 +5,7 @@ import boto3
 from Response import Response
 from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
 import os
+    
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
@@ -88,8 +89,9 @@ importControllers()
 def handleServerError(e):
     return Response("Internal server error", status=500)
 
-#Protect all endpoints by wrapping relevant view function with authentication required function.
+# Protect all endpoints by wrapping relevant view function with authentication required function.
 # viewFunctions = application.view_functions
+# print(viewFunctions.keys())
 # for key in viewFunctions.keys():
 #     if (key not in NON_PROTECTED_ENDPOINTS):    
 #         viewFunctions[key] = authRequired(viewFunctions[key])
