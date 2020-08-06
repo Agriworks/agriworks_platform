@@ -3,12 +3,6 @@ version: '3'
 services:
   platform:
     build: .
-    command: flask run
-    environment:
-      FLASK_ENV: development
-      FLASK_APP: application.py
-      FLASK_RUN_HOST: 0.0.0.0
-      FLASK_RUN_PORT: 4000
     ports:
       - '4000:4000'
     volumes:
@@ -17,7 +11,8 @@ services:
       - agri
   portal:
     build: ../agriworks_portal
-    command: yarn serve
+    environment:
+      AGRIWORKS_API_HOST: "platform"
     ports:
       - '8080:8080'
     volumes:
