@@ -1,6 +1,6 @@
 # Agriworks Backend
 
-## Build & Develop
+## Run & Develop
 0. Install Docker https://www.docker.com/products/docker-desktop
 1. Clone this repo and the portal (frontend) repo   https://github.com/Hack4Impact-Boston-University/agriworks_portal
 2. Run the command `docker-compose up` in either repo. 
