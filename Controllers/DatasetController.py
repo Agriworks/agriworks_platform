@@ -90,7 +90,8 @@ class GetDatasetObjectsPrimary(Resource):
             'SID': {'in': 'cookies', 'required': True},
         }
     )  
-    def get(self, datasetId): 
+    def get(self, datasetId):
+        """ Fetch the first 1000 or less objects for a dataset and create entry in cache if dataset > 1000 objects. """ 
         user = AuthenticationService.verifySessionAndReturnUser(
             request.cookies["SID"])
 
@@ -108,13 +109,13 @@ class GetDatasetObjectsPrimary(Resource):
             DatasetCache[cacheId] = dataset[1000:]
             return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset[:1000]), "cacheId": cacheId})
 
-"""
-Fetch the remaining dataset objects, 1000 or less objects at a time.
-Evict cache if all dataset objects have been fetched for this session (cacheId)
-"""
+
 @restPlus.route("/objects/subsequent/<cacheId>")
 class GetDatasetObjectsSubsequent(Resource):
-    def get(self, cacheId): 
+    def get(self, cacheId):
+        """
+        Fetch the remaining dataset objects, 1000 or less objects at a time, evict cache if all dataset objects have been fetched for this session (cacheId)
+        """  
         dataset = DatasetCache[cacheId]
         if (len(dataset) <= 1000):
             del DatasetCache[cacheId]
