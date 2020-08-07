@@ -2,6 +2,7 @@ version: '3'
 
 services:
   platform:
+    container_name: platform
     build: .
     ports:
       - '4000:4000'
@@ -10,6 +11,7 @@ services:
     networks:
       - agri
   portal:
+    container_name: portal
     build: ../agriworks_portal
     environment:
       AGRIWORKS_API_HOST: "platform"
@@ -17,6 +19,7 @@ services:
       - '8080:8080'
     volumes:
       - ../agriworks_portal:/portal
+      - /portal/node_modules
     networks:
       - agri
 
