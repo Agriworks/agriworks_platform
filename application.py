@@ -47,8 +47,6 @@ flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
 
 
 # Instantiate application 
-application = Flask(__name__)
-application.env = application.config["ENV"]
 application.flow = flow
 application.secret_key = str(uuid4())
 
