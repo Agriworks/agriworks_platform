@@ -1,9 +1,10 @@
 FROM python:3.7-slim-buster
-WORKDIR /code/agriworks_platform
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+WORKDIR /platform
+ENV FLASK_ENV development
+ENV FLASK_APP application.py
+ENV FLASK_RUN_HOST 0.0.0.0
+ENV FLASK_RUN_PORT 4000
 COPY . .
+RUN pip install -r requirements.txt
 EXPOSE 4000
-RUN chmod u+x start.sh
-RUN echo ' --host 0.0.0.0' >> start.sh
-CMD sh ./start.sh
+CMD flask run
