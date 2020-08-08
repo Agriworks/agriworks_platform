@@ -15,5 +15,4 @@ DatasetCache = {}
 @mapview.route("/", methods=["GET"])
 def getShapefile():
     # Returns a GeoDataFrame object
-    GeoDataFrame = gpd.read_file("IndiaGADM/IND_adm0.shp")
-    return Response(str(GeoDataFrame.shape),status=200)
+    return Response("hello world")
