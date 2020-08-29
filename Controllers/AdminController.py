@@ -3,14 +3,14 @@ from flask import current_app as app
 from Services.AuthenticationService import AuthenticationService
 from Response import Response
 from flask_restplus import Api, Resource
-
+from application import api, admin_ns
 
 Authentication = AuthenticationService()
 
-admin = Blueprint("AdminController", __name__, url_prefix="/api/admin")
-restPlus = Api(admin, doc = "/swagger/")
+# admin = Blueprint("AdminController", __name__, url_prefix="/api/admin")
+# restPlus = Api(admin, doc = "/swagger/")
 
-@restPlus.route("/")
+@admin_ns.route("/")
 class Index(Resource):
 	def get(self):
 		return {
@@ -18,9 +18,9 @@ class Index(Resource):
 		}
 
 
-@restPlus.route("/account")
+@admin_ns.route("/account")
 class Account(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Email Updated",
             200: "Updated Password", 

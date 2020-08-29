@@ -10,19 +10,20 @@ import botocore
 import pandas as pd
 from uuid import uuid4
 from flask_restplus import Api, Resource
+from application import api, dataset_ns
 
 
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
 
-dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
+# dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
 s3 = current_app.awsSession.client('s3')
 DatasetCache = {}
-restPlus = Api(dataset, doc = "/swagger/")
+# restPlus = Api(dataset, doc = "/swagger/")
 
-@restPlus.route("/list/<pageNumber>")
+@dataset_ns.route("/list/<pageNumber>")
 class Get(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             400: "No datasets matching the query were found"
         },
@@ -55,9 +56,9 @@ class Get(Resource):
 
         return Response(retList)
 
-@restPlus.route("/metadata/<datasetId>")
+@dataset_ns.route("/metadata/<datasetId>")
 class GetDataset(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             400: "Unable to retrieve dataset information. Please try again later.", 
             403: "You do not have permission to access that dataset."
@@ -80,9 +81,9 @@ class GetDataset(Resource):
         AuthenticationService.updateRecentDatasets(request.cookies["SID"],datasetId)
         return Response(DatasetService.createDatasetInfoObject(dataset, withHeaders=True))
 
-@restPlus.route("/objects/primary/<dataset_id>")
+@dataset_ns.route("/objects/primary/<dataset_id>")
 class GetDatasetObjectsPrimary(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             403: "You do not have access to that dataset."
         },
@@ -90,7 +91,7 @@ class GetDatasetObjectsPrimary(Resource):
             'SID': {'in': 'cookies', 'required': True},
         }
     )  
-    def get(self, datasetId):
+    def get(self, dataset_id):
         """ Fetch the first 1000 or less objects for a dataset and create entry in cache if dataset > 1000 objects. """ 
         user = AuthenticationService.verifySessionAndReturnUser(
             request.cookies["SID"])
@@ -110,7 +111,7 @@ class GetDatasetObjectsPrimary(Resource):
             return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset[:1000]), "cacheId": cacheId})
 
 
-@restPlus.route("/objects/subsequent/<cacheId>")
+@dataset_ns.route("/objects/subsequent/<cacheId>")
 class GetDatasetObjectsSubsequent(Resource):
     def get(self, cacheId):
         """
@@ -129,7 +130,7 @@ class GetDatasetObjectsSubsequent(Resource):
 Evict dataset from cache if user exits dataset without fully reading the dataset 
 (e.g remainder of dataset for that session still exists in cache)
 """
-@restPlus.route("/objects/evict/<cacheId>")
+@dataset_ns.route("/objects/evict/<cacheId>")
 class EvictDatasetFromCache(Resource): 
     def get(self, cacheId): 
         if (cacheId in DatasetCache):
@@ -141,7 +142,7 @@ class EvictDatasetFromCache(Resource):
 
 
 # TODO: Get any type of file, not just csv. May just need to encode the files without filename. But then need to determine what content_type the file is
-@restPlus.route('/download/<id>')
+@dataset_ns.route('/download/<id>')
 class File(Resource): 
     def get(self, id): 
         try:
@@ -158,9 +159,9 @@ class File(Resource):
             else:
                 raise
 
-@restPlus.route("/<datasetId>")
+@dataset_ns.route("/<datasetId>")
 class DeleteDataset(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Succesfully deleted dataset.", 
             400: "Unable to retrieve dataset information. Please try again later.", 
@@ -189,9 +190,9 @@ class DeleteDataset(Resource):
             return Response("Unable to delete dataset.", status=500)
 
 
-@restPlus.route("/search/<searchQuery>")
+@dataset_ns.route("/search/<searchQuery>")
 class Search(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             400: "Error processing request. Please try again later.", 
             400: "Unable to retrieve datasets with the given search parameter.", 
@@ -242,9 +243,9 @@ class Search(Resource):
         except:
             return Response("Unable to retrieve datasets with the given search parameter.", status=400)
 
-@restPlus.route("/user/")
+@dataset_ns.route("/user/")
 class GetUsersDatasets(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             400: "No datasets found", 
         },
@@ -263,9 +264,9 @@ class GetUsersDatasets(Resource):
             retList.append(DatasetService.createDatasetInfoObject(dataset))
         return Response(retList)
 
-@restPlus.route("/popular/")
+@dataset_ns.route("/popular/")
 class Popular(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             400: "No datasets found",
             400: "Couldn't retrieve popular datasets" 
@@ -288,9 +289,9 @@ class Popular(Resource):
         except:
             return Response("Couldn't retrieve popular datasets", status=400)
 
-@restPlus.route("/recent/")
+@dataset_ns.route("/recent/")
 class Recent(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             400: "Couldn't retrieve recent datasets"        
         },
@@ -317,9 +318,9 @@ class Recent(Resource):
         except Exception as e:
             return Response("Couldn't retrieve recent datasets", status=400)
 
-@restPlus.route("/new/")
+@dataset_ns.route("/new/")
 class New(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             400: "Couldn't retrieve recent datasets", 
             404: "No datasets found"       

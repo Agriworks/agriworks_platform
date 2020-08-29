@@ -5,17 +5,18 @@ from Services.MailService import MailService
 from Services.AuthenticationService import AuthenticationService
 import datetime
 from flask_restplus import Api, Resource
+from application import api, upload_ns
 
 
-upload = Blueprint("UploadController", __name__, url_prefix="/api/upload")
-restPlus = Api(upload, doc = "/swagger/")
+# upload = Blueprint("UploadController", __name__, url_prefix="/api/upload")
+# restPlus = Api(upload, doc = "/swagger/")
 UploadService = UploadService()
 MailService = MailService()
 AuthenticationService = AuthenticationService()
 
-@restPlus.route('/') 
+@upload_ns.route('/') 
 class UploadNewFile(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             400: "No session detected", 
             400: "Prohibited file type",
@@ -42,7 +43,7 @@ class UploadNewFile(Resource):
             return Response("Empty fields detected. Please remove empty values from your dataset and try again.", status=400) 
 
 
-@restPlus.route("/getTags/<datasetType>") 
+@upload_ns.route("/getTags/<datasetType>") 
 class GetTags(Resource): 
     def get(self, datasetType):
         try:

@@ -9,18 +9,19 @@ from flask import current_app as app
 from mongoengine import DoesNotExist
 from uuid import uuid4
 from flask_restplus import Api, Resource, fields
+from application import api, auth_ns
 
 MailService = MailService()
 AuthenticationService = AuthenticationService()
 
-auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
-restPlus = Api(auth, doc = "/swagger/")
+# auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
+# restPlus = Api(auth, doc = "/swagger/")
 # name_space = restPlus.namespace('auth', description='Auth APIs')
 
 
-@restPlus.route("/login")
+@auth_ns.route("/login")
 class Login(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Success", 
             401: "Incorrect username or password. Please check your credentials and try again.", 
@@ -44,9 +45,9 @@ class Login(Resource):
         ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
         return ret
 
-@restPlus.route("/logout")
+@auth_ns.route("/logout")
 class Logout(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Successfully logged out.", 
             400: "Unable to process request. Please reload and try again later."            
@@ -63,9 +64,9 @@ class Logout(Resource):
         except:
             return Response("Unable to process request. Please reload and try again later.", status=400)
 
-@restPlus.route("/signup")
+@auth_ns.route("/signup")
 class Signup(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Signup successful", 
             400: "There's already an account with the provided email.",
@@ -107,9 +108,9 @@ class Signup(Resource):
             except:
                 return Response("Signup unsuccessful. Please try again.", status=403)
 
-@restPlus.route("/resend-confirmation-email/<email>")
+@auth_ns.route("/resend-confirmation-email/<email>")
 class ResendConfirmationEmail(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "New confirmation email sent.",
             400: "There's already an account with the provided email.",
@@ -130,9 +131,9 @@ class ResendConfirmationEmail(Resource):
         except:
             return Response("Resend confirmation email unsuccessful.", status=403)
 
-@restPlus.route("/confirm-user/<userConfirmationId>")
+@auth_ns.route("/confirm-user/<userConfirmationId>")
 class ConfirmUser(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Account confirmed successfully. You may now login.",
             404: "No account was found using the provided confirmation code."
@@ -146,9 +147,9 @@ class ConfirmUser(Resource):
         except:
             return Response("No account was found using the provided confirmation code.", status=404)
 
-@restPlus.route("/forgot-password")
+@auth_ns.route("/forgot-password")
 class ForgotPassword(Resource): 
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "An email with instructions to reset your password has been sent to the provided email.",
             400: "Unable to send password reset email. Please try again later.",
@@ -173,9 +174,9 @@ class ForgotPassword(Resource):
         except:
             return Response("No account with given email found. Please try creating a new account.", status=403)
 
-@restPlus.route("/reset-password/<passwordResetId>")
+@auth_ns.route("/reset-password/<passwordResetId>")
 class ResetPassword(Resource): 
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Password sucessfully updated",
             400: "Please provide a new password.",
@@ -209,9 +210,9 @@ class ResetPassword(Resource):
         except:
                 return Response("Your password reset link is either invalid or expired. Please request a new one.", status=403)
 
-@restPlus.route("/verifySession")
+@auth_ns.route("/verifySession")
 class VerifySession(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Password sucessfully updated",
             400: "Invalid session. Please login again.",
@@ -235,9 +236,9 @@ class VerifySession(Resource):
         except ValueError as e:
             return Response("Invalid session. Please login again.", status=400)  
 
-@restPlus.route("/delete-account")
+@auth_ns.route("/delete-account")
 class DeleteAccount(Resource):
-    @restPlus.doc(
+    @api.doc(
         responses={
             200: "Account deleted.",
             403: "Error getting user from session.",
