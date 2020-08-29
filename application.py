@@ -102,7 +102,6 @@ def handleServerError(e):
 
 # Protect all endpoints by wrapping relevant view function with authentication required function.
 viewFunctions = application.view_functions
-print(viewFunctions.keys())
 for key in viewFunctions.keys():
     if (key not in NON_PROTECTED_ENDPOINTS):    
         viewFunctions[key] = authRequired(viewFunctions[key])
