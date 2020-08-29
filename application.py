@@ -85,10 +85,6 @@ def importControllers():
         import Controllers.UploadController as upload
         import Controllers.DatasetController as dataset
 
-        # application.register_blueprint(admin.admin)
-        # application.register_blueprint(auth.auth)
-        # application.register_blueprint(upload.upload)
-        # application.register_blueprint(dataset.dataset)
 
         application.register_blueprint(apiBlueprint)
 

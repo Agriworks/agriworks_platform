@@ -7,8 +7,6 @@ from application import api, admin_ns
 
 Authentication = AuthenticationService()
 
-# admin = Blueprint("AdminController", __name__, url_prefix="/api/admin")
-# restPlus = Api(admin, doc = "/swagger/")
 
 @admin_ns.route("/")
 class Index(Resource):

@@ -8,8 +8,6 @@ from flask_restplus import Api, Resource
 from application import api, upload_ns
 
 
-# upload = Blueprint("UploadController", __name__, url_prefix="/api/upload")
-# restPlus = Api(upload, doc = "/swagger/")
 UploadService = UploadService()
 MailService = MailService()
 AuthenticationService = AuthenticationService()

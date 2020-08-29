@@ -16,10 +16,8 @@ from application import api, dataset_ns
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
 
-# dataset = Blueprint("DatasetEndpoints", __name__, url_prefix="/api/dataset")
 s3 = current_app.awsSession.client('s3')
 DatasetCache = {}
-# restPlus = Api(dataset, doc = "/swagger/")
 
 @dataset_ns.route("/list/<pageNumber>")
 class Get(Resource):

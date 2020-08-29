@@ -14,9 +14,6 @@ from application import api, auth_ns
 MailService = MailService()
 AuthenticationService = AuthenticationService()
 
-# auth = Blueprint("AuthenticationController", __name__, url_prefix="/api/auth")
-# restPlus = Api(auth, doc = "/swagger/")
-# name_space = restPlus.namespace('auth', description='Auth APIs')
 
 
 @auth_ns.route("/login")
