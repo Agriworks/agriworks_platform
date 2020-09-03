@@ -75,7 +75,8 @@ class AuthenticationService():
         if self.getUser(email=user.email): 
             return False
         else:
-            user.password = self.saltPassword(user.password)
+            if user.password:
+                user.password = self.saltPassword(user.password)
             user.save()
             return True
           
@@ -97,19 +98,35 @@ class AuthenticationService():
     Currently, all users will not be administrators.
     """
     def signup(self, document):
-        user = User(
-            firstName=document["firstName"], 
-            lastName=document["lastName"], 
-            email=document["email"],
-            password=document["password"],
-            organization=document["organization"],
-            location=document["location"],
-            userType=document["userType"],
-            isAdmin=False, 
-            recentDatasets=[], 
-            resetId="",
-            confirmationId="",
-            isConfirmed=False
+        user = None
+        if not document["password"]:
+            user = User(
+                firstName=document["firstName"], 
+                lastName=document["lastName"], 
+                email=document["email"],
+                organization=document["organization"],
+                location=document["location"],
+                userType=document["userType"],
+                isAdmin=False, 
+                recentDatasets=[], 
+                resetId="",
+                confirmationId="",
+                isConfirmed=True
+                )
+        else:
+            user = User(
+                firstName=document["firstName"],
+                lastName=document["lastName"],
+                email=document["email"],
+                password=document["password"],
+                organization=document["organization"],
+                location=document["location"],
+                userType=document["userType"],
+                isAdmin=False,
+                recentDatasets=[],
+                resetId="",
+                confirmationId="",
+                isConfirmed=False
             )
 
         user.validate()  # TODO: enclose this in a try/catch block /check if its an error with the type entered

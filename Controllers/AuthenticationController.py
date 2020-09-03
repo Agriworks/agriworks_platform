@@ -29,12 +29,23 @@ def authorize():
     req_url = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + credentials.token
     user_info = requests.get(req_url).json()
 
-    user_existed = AuthenticationService.getUser(email=user_info['email'])
+    user = AuthenticationService.getUser(email=user_info['email'])
+
     
-    if user_existed:
-        return Response("Email already existed", status=200)
+    if user:
+        if not user.password:
+            sessionId = uuid4()
+            session = Session(user=user, sessionId=sessionId)
+            session.save()
+            ret = make_response(user_info)
+            ret.set_cookie("SID", str(session.sessionId), expires=session.dateExpires)
+            return ret
+        return Response("Email already registered with our service", status=403)
     else:
-        return Response("Redirect to sign up", status=200)
+        ret = {}
+        ret['message'] = "Redirect to complete sign up"
+        ret['user'] = user_info
+        return Response(ret, status=200)
 
 
 @auth.route("/login", methods=["POST"])
@@ -75,7 +86,6 @@ def signup():
             "location": request.form["location"],
             "userType": request.form["userType"]
             }
-
     try:
         User.objects.get(email=user["email"])
         return Response("There's already an account with the provided email.", status=400)
@@ -84,6 +94,14 @@ def signup():
             AuthenticationService.signup(user)
             userConfirmationId = uuid4()
             user = User.objects.get(email=user["email"])
+            if AuthenticationService.isUserConfirmed(user):
+                sessionId = uuid4()
+                session = Session(user=user, sessionId=sessionId)
+                session.save()
+                data = {"message": "Google authorized successful!", "user": user.email}
+                ret = make_response(data)
+                ret.set_cookie("SID", str(session.sessionId),expires=session.dateExpires)
+                return ret
             AuthenticationService.setUserConfirmationId(user, userConfirmationId)
             sub = "Confirm Account"
             msg = f"<p>Congratulations, you've registered for Agriworks. Please click the link below to confirm your account.</p><p><a href=\"{app.rootUrl}/confirm-user/{userConfirmationId}\"> Confirm account </a></p>"
