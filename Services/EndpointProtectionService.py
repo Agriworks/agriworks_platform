@@ -5,7 +5,7 @@ from Services.AuthenticationService import AuthenticationService
 AuthenticationService = AuthenticationService()
 
 
-NON_PROTECTED_ENDPOINTS = ["index", "sendStaticComponent", "AdminController.index", "AuthenticationController.login", "AuthenticationController.signup", "AuthenticationController.confirmUser", "AuthenticationController.forgotPassword", "AuthenticationController.resetPassword", "AuthenticationController.verifySession"]
+NON_PROTECTED_ENDPOINTS = ["index", "sendStaticComponent", "AdminController.index", "AuthenticationController.login", "AuthenticationController.signup", "AuthenticationController.confirmUser", "AuthenticationController.forgotPassword", "AuthenticationController.resetPassword", "AuthenticationController.verifySession", "MapviewEndpoints.getGeometry"]
 
 def authRequired(f):  
     @wraps(f)  

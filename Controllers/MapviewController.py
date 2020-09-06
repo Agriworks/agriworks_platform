@@ -3,6 +3,7 @@ from Response import Response
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
 import geopandas as gpd
+import json
 
 DatasetService = DatasetService()
 
@@ -10,9 +11,13 @@ mapview = Blueprint("MapviewEndpoints", __name__, url_prefix="/api/mapview")
 s3 = current_app.awsSession.client('s3')
 DatasetCache = {}
 
-# Mapview routes that the front end can call to get the data to show different types of maps
+# Mapview routes that the front end can call to show different types of maps
+@mapview.route("/getGeometry", methods=["GET"])
+def getGeometry():
+    # Returns a JSON object
+    print("attept to open file")
+    with open("/Users/cody/Hack4Impact/agriworks_platform/IND_adm1.json") as file:
+        data = json.load(file)
 
-@mapview.route("/", methods=["GET"])
-def getShapefile():
-    # Returns a GeoDataFrame object
-    return Response("hello world")
+    print("loaded geometry")
+    return Response(data)
