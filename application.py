@@ -1,10 +1,11 @@
-from flask import Flask, send_file, send_from_directory
+from flask import Flask, send_file, send_from_directory, Blueprint
 from mongoengine import connect
 import yaml
 import boto3
 from Response import Response
 from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
 import os
+from flask_restplus import Api
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
@@ -68,6 +69,14 @@ if (application.env == "production"):
 else:
     application.rootUrl = "http://localhost:8080"
 
+apiBlueprint = Blueprint('api', __name__, url_prefix='/api')
+api = Api(apiBlueprint, version='1.0', title='Agriworks API',
+        description='All of the Controllers and their routes within Agriworks', doc = '/swagger/')
+admin_ns = api.namespace('admin', 'Admin methods')
+auth_ns = api.namespace('auth', 'Auth methods')
+dataset_ns = api.namespace('dataset', 'upload methods')
+upload_ns = api.namespace('upload', 'dataset methods')
+
 # Import application controllers. Cannot import from default context due to mutual imports issue
 def importControllers():
     with application.app_context():
@@ -76,10 +85,9 @@ def importControllers():
         import Controllers.UploadController as upload
         import Controllers.DatasetController as dataset
 
-        application.register_blueprint(admin.admin)
-        application.register_blueprint(auth.auth)
-        application.register_blueprint(upload.upload)
-        application.register_blueprint(dataset.dataset)
+
+        application.register_blueprint(apiBlueprint)
+
 
 importControllers()
 
@@ -88,7 +96,7 @@ importControllers()
 def handleServerError(e):
     return Response("Internal server error", status=500)
 
-#Protect all endpoints by wrapping relevant view function with authentication required function.
+# Protect all endpoints by wrapping relevant view function with authentication required function.
 viewFunctions = application.view_functions
 for key in viewFunctions.keys():
     if (key not in NON_PROTECTED_ENDPOINTS):    
