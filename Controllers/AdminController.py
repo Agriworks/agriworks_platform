@@ -2,11 +2,10 @@ from flask import Blueprint, request
 from flask import current_app as app
 from Services.AuthenticationService import AuthenticationService
 from Response import Response
-from flask_restplus import Api, Resource
-from application import api
+from flask_restplus import Api, Resource, Namespace
 
 Authentication = AuthenticationService()
-admin_ns = api.namespace('admin', 'Admin methods')
+admin_ns = Namespace('admin', 'Admin methods')
 
 @admin_ns.route("/")
 class Index(Resource):
@@ -18,7 +17,7 @@ class Index(Resource):
 
 @admin_ns.route("/account")
 class Account(Resource):
-    @api.doc(
+    @admin_ns.doc(
         responses={
             200: "Email Updated",
             200: "Updated Password", 

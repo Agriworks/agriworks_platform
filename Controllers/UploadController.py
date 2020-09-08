@@ -4,18 +4,18 @@ from Services.UploadService import UploadService
 from Services.MailService import MailService 
 from Services.AuthenticationService import AuthenticationService
 import datetime
-from flask_restplus import Api, Resource
+from flask_restplus import Api, Resource, Namespace
 from application import api
 
 
 UploadService = UploadService()
 MailService = MailService()
 AuthenticationService = AuthenticationService()
-upload_ns = api.namespace('upload', 'dataset methods')
+upload_ns = Namespace('upload', 'dataset methods')
 
 @upload_ns.route('/') 
 class UploadNewFile(Resource):
-    @api.doc(
+    @upload_ns.doc(
         responses={
             400: "No session detected", 
             400: "Prohibited file type",
