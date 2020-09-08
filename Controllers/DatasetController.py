@@ -10,11 +10,12 @@ import botocore
 import pandas as pd
 from uuid import uuid4
 from flask_restplus import Api, Resource
-from application import api, dataset_ns
+from application import api
 
 
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
+dataset_ns = api.namespace('dataset', 'upload methods')
 
 s3 = current_app.awsSession.client('s3')
 DatasetCache = {}

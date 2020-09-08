@@ -3,10 +3,10 @@ from flask import current_app as app
 from Services.AuthenticationService import AuthenticationService
 from Response import Response
 from flask_restplus import Api, Resource
-from application import api, admin_ns
+from application import api
 
 Authentication = AuthenticationService()
-
+admin_ns = api.namespace('admin', 'Admin methods')
 
 @admin_ns.route("/")
 class Index(Resource):
