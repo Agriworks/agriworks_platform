@@ -72,19 +72,14 @@ else:
 apiBlueprint = Blueprint('api', __name__, url_prefix='/api')
 api = Api(apiBlueprint, version='1.0', title='Agriworks API',
         description='All of the Controllers and their routes within Agriworks', doc = '/swagger/')
-admin_ns = api.namespace('admin', 'Admin methods')
-auth_ns = api.namespace('auth', 'Auth methods')
-dataset_ns = api.namespace('dataset', 'upload methods')
-upload_ns = api.namespace('upload', 'dataset methods')
 
-# Import application controllers. Cannot import from default context due to mutual imports issue
+# Import application namespaces. Cannot import from default context due to mutual imports issue
 def importControllers():
     with application.app_context():
-        import Controllers.AdminController as admin
-        import Controllers.AuthenticationController as auth
-        import Controllers.UploadController as upload
-        import Controllers.DatasetController as dataset
-
+        from Controllers.AdminController import admin_ns
+        from Controllers.AuthenticationController import auth_ns
+        from Controllers.UploadController import upload_ns
+        from Controllers.DatasetController import dataset_ns
 
         application.register_blueprint(apiBlueprint)
 

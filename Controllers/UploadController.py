@@ -5,12 +5,13 @@ from Services.MailService import MailService
 from Services.AuthenticationService import AuthenticationService
 import datetime
 from flask_restplus import Api, Resource
-from application import api, upload_ns
+from application import api
 
 
 UploadService = UploadService()
 MailService = MailService()
 AuthenticationService = AuthenticationService()
+upload_ns = api.namespace('upload', 'dataset methods')
 
 @upload_ns.route('/') 
 class UploadNewFile(Resource):

@@ -9,10 +9,11 @@ from flask import current_app as app
 from mongoengine import DoesNotExist
 from uuid import uuid4
 from flask_restplus import Api, Resource, fields
-from application import api, auth_ns
+from application import api
 
 MailService = MailService()
 AuthenticationService = AuthenticationService()
+auth_ns = api.namespace('auth', 'Auth methods')
 
 
 
