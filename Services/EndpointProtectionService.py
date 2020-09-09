@@ -5,7 +5,7 @@ from Services.AuthenticationService import AuthenticationService
 AuthenticationService = AuthenticationService()
 
 
-NON_PROTECTED_ENDPOINTS = ['static', 'api.specs', 'api.doc', 'api.root', 'restplus_doc.static', 'api.admin_index', 'api.admin_account', "api.auth_login", "api.auth_signup", "api.auth_confirmUser", "api.auth_forgotPassword", "api.auth_resetPassword", "api.auth_verifySession"]
+NON_PROTECTED_ENDPOINTS = ['index', 'sendStaticComponent', 'static', 'api.specs', 'api.doc', 'api.root', 'restplus_doc.static', 'api.admin_index', 'api.admin_account', "api.auth_login", "api.auth_signup", "api.auth_confirmUser", "api.auth_forgotPassword", "api.auth_resetPassword", "api.auth_verifySession"]
 def authRequired(f):  
     @wraps(f)  
     def decorator(*args, **kwargs):
