@@ -9,20 +9,19 @@ import boto3
 import botocore
 import pandas as pd
 from uuid import uuid4
-from flask_restplus import Api, Resource
-from application import api
+from flask_restplus import Api, Resource, Namespace
 
 
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
-dataset_ns = api.namespace('dataset', 'upload methods')
+dataset_ns = Namespace('dataset', 'upload methods')
 
 s3 = current_app.awsSession.client('s3')
 DatasetCache = {}
 
 @dataset_ns.route("/list/<pageNumber>")
 class Get(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             400: "No datasets matching the query were found"
         },
@@ -57,7 +56,7 @@ class Get(Resource):
 
 @dataset_ns.route("/metadata/<datasetId>")
 class GetDataset(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             400: "Unable to retrieve dataset information. Please try again later.", 
             403: "You do not have permission to access that dataset."
@@ -82,7 +81,7 @@ class GetDataset(Resource):
 
 @dataset_ns.route("/objects/primary/<dataset_id>")
 class GetDatasetObjectsPrimary(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             403: "You do not have access to that dataset."
         },
@@ -160,7 +159,7 @@ class File(Resource):
 
 @dataset_ns.route("/<datasetId>")
 class DeleteDataset(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             200: "Succesfully deleted dataset.", 
             400: "Unable to retrieve dataset information. Please try again later.", 
@@ -191,7 +190,7 @@ class DeleteDataset(Resource):
 
 @dataset_ns.route("/search/<searchQuery>")
 class Search(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             400: "Error processing request. Please try again later.", 
             400: "Unable to retrieve datasets with the given search parameter.", 
@@ -244,7 +243,7 @@ class Search(Resource):
 
 @dataset_ns.route("/user/")
 class GetUsersDatasets(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             400: "No datasets found", 
         },
@@ -265,7 +264,7 @@ class GetUsersDatasets(Resource):
 
 @dataset_ns.route("/popular/")
 class Popular(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             400: "No datasets found",
             400: "Couldn't retrieve popular datasets" 
@@ -290,7 +289,7 @@ class Popular(Resource):
 
 @dataset_ns.route("/recent/")
 class Recent(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             400: "Couldn't retrieve recent datasets"        
         },
@@ -319,7 +318,7 @@ class Recent(Resource):
 
 @dataset_ns.route("/new/")
 class New(Resource):
-    @api.doc(
+    @dataset_ns.doc(
         responses={
             400: "Couldn't retrieve recent datasets", 
             404: "No datasets found"       

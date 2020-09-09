@@ -8,18 +8,17 @@ from Services.MailService import MailService
 from flask import current_app as app
 from mongoengine import DoesNotExist
 from uuid import uuid4
-from flask_restplus import Api, Resource, fields
-from application import api
+from flask_restplus import Api, Resource, fields, Namespace
 
 MailService = MailService()
 AuthenticationService = AuthenticationService()
-auth_ns = api.namespace('auth', 'Auth methods')
+auth_ns = Namespace('auth', 'Auth methods')
 
 
 
 @auth_ns.route("/login")
 class Login(Resource):
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "Success", 
             401: "Incorrect username or password. Please check your credentials and try again.", 
@@ -45,7 +44,7 @@ class Login(Resource):
 
 @auth_ns.route("/logout")
 class Logout(Resource):
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "Successfully logged out.", 
             400: "Unable to process request. Please reload and try again later."            
@@ -64,7 +63,7 @@ class Logout(Resource):
 
 @auth_ns.route("/signup")
 class Signup(Resource):
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "Signup successful", 
             400: "There's already an account with the provided email.",
@@ -108,7 +107,7 @@ class Signup(Resource):
 
 @auth_ns.route("/resend-confirmation-email/<email>")
 class ResendConfirmationEmail(Resource):
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "New confirmation email sent.",
             400: "There's already an account with the provided email.",
@@ -131,7 +130,7 @@ class ResendConfirmationEmail(Resource):
 
 @auth_ns.route("/confirm-user/<userConfirmationId>")
 class ConfirmUser(Resource):
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "Account confirmed successfully. You may now login.",
             404: "No account was found using the provided confirmation code."
@@ -147,7 +146,7 @@ class ConfirmUser(Resource):
 
 @auth_ns.route("/forgot-password")
 class ForgotPassword(Resource): 
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "An email with instructions to reset your password has been sent to the provided email.",
             400: "Unable to send password reset email. Please try again later.",
@@ -174,7 +173,7 @@ class ForgotPassword(Resource):
 
 @auth_ns.route("/reset-password/<passwordResetId>")
 class ResetPassword(Resource): 
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "Password sucessfully updated",
             400: "Please provide a new password.",
@@ -210,7 +209,7 @@ class ResetPassword(Resource):
 
 @auth_ns.route("/verifySession")
 class VerifySession(Resource):
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "Password sucessfully updated",
             400: "Invalid session. Please login again.",
@@ -236,7 +235,7 @@ class VerifySession(Resource):
 
 @auth_ns.route("/delete-account")
 class DeleteAccount(Resource):
-    @api.doc(
+    @auth_ns.doc(
         responses={
             200: "Account deleted.",
             403: "Error getting user from session.",
