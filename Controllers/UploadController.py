@@ -5,7 +5,6 @@ from Services.MailService import MailService
 from Services.AuthenticationService import AuthenticationService
 import datetime
 from flask_restplus import Api, Resource, Namespace
-from application import api
 
 
 UploadService = UploadService()
