@@ -141,6 +141,16 @@ class Signup(Resource):
                 AuthenticationService.signup(user)
                 userConfirmationId = uuid4()
                 user = User.objects.get(email=user["email"])
+                if AuthenticationService.isUserConfirmed(user):
+                    sessionId = uuid4()
+                    session = Session(user=user, sessionId=sessionId)
+                    session.save()
+                    data = {"message": "Google authorized successful!",
+                            "user": user.email}
+                    ret = make_response(data)
+                    ret.set_cookie("SID", str(session.sessionId),
+                                expires=session.dateExpires)
+                    return ret
                 AuthenticationService.setUserConfirmationId(user, userConfirmationId)
                 sub = "Confirm Account"
                 msg = f"<p>Congratulations, you've registered for Agriworks. Please click the link below to confirm your account.</p><p><a href=\"{app.rootUrl}/confirm-user/{userConfirmationId}\"> Confirm account </a></p>"
