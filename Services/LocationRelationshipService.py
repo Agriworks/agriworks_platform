@@ -7,7 +7,7 @@ class LocationRelationshipService():
         # Load location relationships onto memory upon initization
         villageToDistrictDic = {}
         districtToStateDic = {}
-        with open("../LocationRelationships.csv") as csvfile:
+        with open("LocationRelationship.csv", 'r') as csvfile:
             csvreader = csv.reader(csvfile, delimiter=",")
             csvreader.next()
             for row in csvreader:
@@ -26,4 +26,3 @@ class LocationRelationshipService():
     def getVersion(self):
         return self.version
 
-    
