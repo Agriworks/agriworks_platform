@@ -1,4 +1,4 @@
-from flask import Flask, send_file, send_from_directory
+from flask import Flask, send_file, send_from_directory, Blueprint
 from mongoengine import connect
 import yaml
 import boto3
@@ -7,6 +7,7 @@ from Response import Response
 from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
 import google_auth_oauthlib.flow
 import os
+from flask_restplus import Api
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
@@ -82,18 +83,25 @@ if (application.env == "production"):
 else:
     application.rootUrl = "http://localhost:8080"
 
-# Import application controllers. Cannot import from default context due to mutual imports issue
+apiBlueprint = Blueprint('api', __name__, url_prefix='/api')
+api = Api(apiBlueprint, version='1.0', title='Agriworks API',
+        description='All of the Controllers and their routes within Agriworks', doc = '/swagger/')
+
+# Import application namespaces. Cannot import from default context due to mutual imports issue
 def importControllers():
     with application.app_context():
-        import Controllers.AdminController as admin
-        import Controllers.AuthenticationController as auth
-        import Controllers.UploadController as upload
-        import Controllers.DatasetController as dataset
+        from Controllers.AdminController import admin_ns
+        from Controllers.AuthenticationController import auth_ns
+        from Controllers.UploadController import upload_ns
+        from Controllers.DatasetController import dataset_ns
 
-        application.register_blueprint(admin.admin)
-        application.register_blueprint(auth.auth)
-        application.register_blueprint(upload.upload)
-        application.register_blueprint(dataset.dataset)
+        api.add_namespace(admin_ns)
+        api.add_namespace(auth_ns)
+        api.add_namespace(upload_ns)
+        api.add_namespace(dataset_ns)
+
+        application.register_blueprint(apiBlueprint)
+
 
 importControllers()
 
@@ -102,7 +110,7 @@ importControllers()
 def handleServerError(e):
     return Response("Internal server error", status=500)
 
-#Protect all endpoints by wrapping relevant view function with authentication required function.
+# Protect all endpoints by wrapping relevant view function with authentication required function.
 viewFunctions = application.view_functions
 for key in viewFunctions.keys():
     if (key not in NON_PROTECTED_ENDPOINTS):    
