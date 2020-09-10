@@ -1,19 +1,63 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, url_for, redirect
+from flask import current_app as app
 from Response import Response
 from Services.AuthenticationService import AuthenticationService
 from Models.User import User
 from Models.Dataset import Dataset
 from Models.Session import Session
 from Services.MailService import MailService
-from flask import current_app as app
 from mongoengine import DoesNotExist
 from uuid import uuid4
+import google.oauth2.credentials
+import requests
+
+
 from flask_restplus import Api, Resource, fields, Namespace
 
 MailService = MailService()
 AuthenticationService = AuthenticationService()
 auth_ns = Namespace('auth', 'Auth methods')
 
+
+@auth_ns.route("/authorize")
+class Authorize(Resource):
+    @auth_ns.doc(
+        responses={
+            200: "Success",
+            403: "Email already registered with our service"
+        },
+        params={
+            'redirect_uri': {'in': 'formData', 'required': True},
+            'authCode': {'in': 'formData', 'required': True}
+        }
+    )
+    def post(self):
+        flow = app.flow
+        flow.redirect_uri = request.form["redirect_uri"]
+        authCode = request.form["code"]
+        flow.fetch_token(code=authCode)
+
+        credentials = flow.credentials
+        req_url = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + credentials.token
+        user_info = requests.get(req_url).json()
+
+        user = AuthenticationService.getUser(email=user_info['email'])
+
+        if user:
+            if not user.password:
+                sessionId = uuid4()
+                session = Session(user=user, sessionId=sessionId)
+                session.save()
+                ret = make_response(user_info)
+                ret.set_cookie("SID", str(session.sessionId),
+                            expires=session.dateExpires)
+                return ret
+            return Response("Email already registered with our service", status=403)
+        else:
+            ret = {}
+            ret['message'] = "Redirect to complete sign up"
+            ret['user'] = user_info
+            return Response(ret, status=200)
 
 
 @auth_ns.route("/login")
@@ -97,6 +141,16 @@ class Signup(Resource):
                 AuthenticationService.signup(user)
                 userConfirmationId = uuid4()
                 user = User.objects.get(email=user["email"])
+                if AuthenticationService.isUserConfirmed(user):
+                    sessionId = uuid4()
+                    session = Session(user=user, sessionId=sessionId)
+                    session.save()
+                    data = {"message": "Google authorized successful!",
+                            "user": user.email}
+                    ret = make_response(data)
+                    ret.set_cookie("SID", str(session.sessionId),
+                                expires=session.dateExpires)
+                    return ret
                 AuthenticationService.setUserConfirmationId(user, userConfirmationId)
                 sub = "Confirm Account"
                 msg = f"<p>Congratulations, you've registered for Agriworks. Please click the link below to confirm your account.</p><p><a href=\"{app.rootUrl}/confirm-user/{userConfirmationId}\"> Confirm account </a></p>"

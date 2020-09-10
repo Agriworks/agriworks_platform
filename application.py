@@ -2,8 +2,10 @@ from flask import Flask, send_file, send_from_directory, Blueprint
 from mongoengine import connect
 import yaml
 import boto3
+from uuid import uuid4
 from Response import Response
 from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
+import google_auth_oauthlib.flow
 import os
 from flask_restplus import Api
 
@@ -36,6 +38,18 @@ awsSession = boto3.Session(
     aws_access_key_id=creds["AWS_ACCESS_KEY"],
     aws_secret_access_key=creds["AWS_SECRET_KEY"]
 )
+
+
+flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+    'client_secrets.json',
+    scopes=["https://www.googleapis.com/auth/userinfo.profile", 
+            "https://www.googleapis.com/auth/userinfo.email",
+            "openid"])
+
+
+# Instantiate application 
+application.flow = flow
+application.secret_key = str(uuid4())
 
 
 if (application.env == "production"):
