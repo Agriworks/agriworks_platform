@@ -1,3 +1,4 @@
+from flask import current_app
 import csv
 
 class LocationRelationshipService():
@@ -7,10 +8,11 @@ class LocationRelationshipService():
         # Load location relationships onto memory upon initization
         villageToDistrictDic = {}
         districtToStateDic = {}
-        with open("LocationRelationship.csv", 'r') as csvfile:
+        with current_app.open_resource("LocationRelationship.csv") as csvfile:
             csvreader = csv.reader(csvfile, delimiter=",")
             csvreader.next()
             for row in csvreader:
+                print(row)
                 villageToDistrictDic[row[2]] = row[1]
                 districtToStateDic[row[1]] = row[0]
         self.villageToDistrictDic = villageToDistrictDic
@@ -25,4 +27,3 @@ class LocationRelationshipService():
 
     def getVersion(self):
         return self.version
-
