@@ -14,7 +14,6 @@ def authRequired(f):
             return Response(status=403)
 
         cookie = request.cookies["SID"]
-        
         try:
             user = AuthenticationService.verifySessionAndReturnUser(cookie)
             return f(*args, **kwargs)
