@@ -22,11 +22,21 @@ class GetMap(Resource):
         }
     )
     def get(self):
-        with open("Controllers\states.json", "r") as read_file:
+        print("In the get method")
+        with open("Services/US_States.json", "r") as read_file:
             data = json.load(read_file)
         return Response({"data": data}, status=200)
     def post(self):
-        return Response({"data": "hello"}, status= 200)
+        print("Got the method called")
+        dataset = json.loads(request.form['dataset'])
+        
+        try:
+            print("Here")
+            heatMap = VisualizeService.getMap(dataset)
+        except:
+            return Response("Failed to generate map", status=400)
+
+        return Response({"data": heatMap}, status= 200)
 
 
 @visualize_ns.route("/getFormattedData")

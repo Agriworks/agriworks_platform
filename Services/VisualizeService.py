@@ -1,4 +1,5 @@
 import secrets
+import json
 
 class VisualizeService():
     def __init__(self):
@@ -47,3 +48,40 @@ class VisualizeService():
 
 
         return datacollection
+
+
+    def getMap(self, dataset):
+
+        name_col = 'States'
+        data_col = 'Density'
+        
+        print("In the getMap function   ")
+        #the geojson file with the borders, the shape file
+        with open("Services/US_States.json", "r") as read_file:
+            area = json.load(read_file)    
+
+        #assign the color fill to each line
+        colors =[(237,248,233), (186,228,179), (116,196,118), (49,163,84), (0,109,44)]
+        numColors = 5
+        low = int(dataset[0][data_col])
+        high = int(dataset[0][data_col])
+
+        for line in dataset:
+            x = int(line[data_col])
+            high = max(x, high)
+            low = min(x,low)
+
+
+        bucketSize = (high - low)/numColors
+
+        for line in area["features"]:
+            name = line["properties"]["NAME"]
+            for dataset_line in dataset:
+                if name == dataset_line[name_col]:
+                    num = int(dataset_line[data_col])
+                    line["properties"]["data"] = num
+                    bucketNum = int((num - low)//bucketSize)
+                    line["properties"]["color"] = colors[bucketNum]
+                    break
+        
+        return area
