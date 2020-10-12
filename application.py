@@ -94,11 +94,13 @@ def importControllers():
         from Controllers.AuthenticationController import auth_ns
         from Controllers.UploadController import upload_ns
         from Controllers.DatasetController import dataset_ns
+        from Controllers.MapDataController import map_data_ns
 
         api.add_namespace(admin_ns)
         api.add_namespace(auth_ns)
         api.add_namespace(upload_ns)
         api.add_namespace(dataset_ns)
+        api.add_namespace(map_data_ns)
 
         application.register_blueprint(apiBlueprint)
 
