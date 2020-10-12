@@ -29,10 +29,11 @@ class GetMap(Resource):
     def post(self):
         print("Got the method called")
         dataset = json.loads(request.form['dataset'])
-        
+        locationCol = request.form['locationCol']
+        dataCol = request.form['dataCol']
         try:
             print("Here")
-            heatMap, colors, bucketGrades = VisualizeService.getMap(dataset)
+            heatMap, colors, bucketGrades = VisualizeService.getMap(dataset, locationCol, dataCol)
         except:
             return Response("Failed to generate map", status=400)
 
