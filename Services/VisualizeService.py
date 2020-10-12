@@ -50,8 +50,8 @@ class VisualizeService():
         return datacollection
 
 
-    def getMap(self, dataset, location_col, data_col):
-        
+    def getMap(self, dataset, name_col, data_col):
+
         #the geojson file with the borders, the shape file
         with open("Services/US_States.json", "r") as read_file:
             area = json.load(read_file)    
