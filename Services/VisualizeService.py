@@ -62,7 +62,7 @@ class VisualizeService():
 
         #assign the color fill to each line
         colors =[(237,248,233), (186,228,179), (116,196,118), (49,163,84), (0,109,44)]
-        numColors = 5
+        numColors = len(colors)
         low = int(dataset[0][data_col])
         high = int(dataset[0][data_col])
 
@@ -84,4 +84,8 @@ class VisualizeService():
                     line["properties"]["color"] = colors[bucketNum]
                     break
         
-        return area
+        bucketGrades = []
+        for i in range(numColors):
+            bucketGrades.append(int(low + i * bucketSize))
+
+        return area, colors, bucketGrades

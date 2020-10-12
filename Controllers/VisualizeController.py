@@ -32,11 +32,11 @@ class GetMap(Resource):
         
         try:
             print("Here")
-            heatMap = VisualizeService.getMap(dataset)
+            heatMap, colors, bucketGrades = VisualizeService.getMap(dataset)
         except:
             return Response("Failed to generate map", status=400)
 
-        return Response({"data": heatMap}, status= 200)
+        return Response({"data": heatMap, "colors": colors, "bucketGrades": bucketGrades}, status= 200)
 
 
 @visualize_ns.route("/getFormattedData")
