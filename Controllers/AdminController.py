@@ -10,6 +10,7 @@ admin_ns = Namespace('admin', 'Admin methods')
 @admin_ns.route("/")
 class Index(Resource):
 	def get(self):
+		division = 1/0
 		return {
 			"status": "Congratulations, Agriworks is now running on your machine."
 		}
