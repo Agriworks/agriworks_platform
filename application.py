@@ -9,7 +9,6 @@ import google_auth_oauthlib.flow
 import os
 from flask_restplus import Api
 import sentry_sdk
-from flask import Flask
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
