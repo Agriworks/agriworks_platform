@@ -8,10 +8,19 @@ from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPO
 import google_auth_oauthlib.flow
 import os
 from flask_restplus import Api
+import boto3
+import botocore
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
 STATIC_ASSETS_DIRECTORY_ROOT = "./dist/assets/"
+
+# Download all secret files from S3 bucket
+s3 = boto3.resource('s3')
+myBucket = s3.Bucket('agriworks-secret-files')
+for s3_object in myBucket.objects.all():
+    fileName = s3_object.key
+    myBucket.download_file(s3_object.key, fileName)
 
 # Instantiate application 
 application = Flask(__name__)
@@ -118,3 +127,4 @@ for key in viewFunctions.keys():
 
 if __name__ == "__main__":
     application.run(port=4000, debug=True)
+    
