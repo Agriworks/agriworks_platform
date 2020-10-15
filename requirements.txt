@@ -38,4 +38,5 @@ urllib3==1.25.7
 Werkzeug==0.16.0
 wrapt==1.11.2
 zipp==0.6.0
-sendgrid==6.4.1
+sentry-sdk[flask]
+google_auth_oauthlib
