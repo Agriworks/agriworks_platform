@@ -23,7 +23,7 @@ class GetMap(Resource):
     )
     def get(self):
         print("In the get method")
-        with open("Services/US_States.json", "r") as read_file:
+        with open("Controllers\IND_adm0.geojson", "r") as read_file:
             data = json.load(read_file)
         return Response({"data": data}, status=200)
     def post(self):
