@@ -22,17 +22,16 @@ class GetMap(Resource):
         }
     )
     def get(self):
+        #only for debugging purposes 
         print("In the get method")
         with open("Controllers\IND_adm0.geojson", "r") as read_file:
             data = json.load(read_file)
         return Response({"data": data}, status=200)
     def post(self):
-        print("Got the method called")
         dataset = json.loads(request.form['dataset'])
         locationCol = request.form['locationCol']
         dataCol = request.form['dataCol']
         try:
-            print("Here")
             heatMap, colors, bucketGrades = VisualizeService.getMap(dataset, locationCol, dataCol)
         except:
             return Response("Failed to generate map", status=400)
