@@ -127,3 +127,4 @@ for key in viewFunctions.keys():
 
 if __name__ == "__main__":
     application.run(port=4000, debug=True)
+    
