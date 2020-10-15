@@ -41,6 +41,7 @@ class UploadService():
                 "permissions") == "Public" else False
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
+            dataSetColumnData = request.form.get("columnData")
 
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
@@ -70,6 +71,7 @@ class UploadService():
                 public=dataSetIsPublic,
                 tags=dataSetTags,
                 datasetType=dataSetType,
+                columnData=dataSetColumnData,
                 views=1
             )
             dataset.save()
