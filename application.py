@@ -128,7 +128,7 @@ for key in viewFunctions.keys():
         viewFunctions[key] = authRequired(viewFunctions[key])
 
 sentry_sdk.init(
-    dsn="https://aaa1f6d3493e48108e053def58eb0b26@o452234.ingest.sentry.io/5439322",
+    dsn="https://a79f91323d954248a3ef209ca9240af7@o462392.ingest.sentry.io/5465735",
     integrations=[FlaskIntegration()],
     traces_sample_rate=1.0
 )
