@@ -1,4 +1,4 @@
-from flask import Flask, send_file, send_from_directory, Blueprint, current_app
+from flask import Flask, send_file, send_from_directory, Blueprint
 from mongoengine import connect
 import yaml
 import boto3
