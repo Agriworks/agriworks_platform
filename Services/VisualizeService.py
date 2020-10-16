@@ -56,14 +56,16 @@ class VisualizeService():
 
     def getMap(self, dataset, loc_col, data_col):
 
-        checkName = False
+        checkName = True
 
         #the geojson file with the borders, the shape file
-        with open("Services/US_States.json", encoding="utf-8") as read_file:
+        with open("Services/IND_adm1.geojson", encoding="utf-8") as read_file:
             area = json.load(read_file)
-          
+
+        print("opened file")
         #assign the color fill to each line
-        colors =[(237,248,233), (186,228,179), (116,196,118), (49,163,84), (0,109,44)]
+        colors =[(237,248,233), (186,228,179), (116,196,118), (49,163,84), (0,109,44)] #GREEN
+        #colors = [(239,243,255), (189,215,231), (107,174,214), (49,130,189), (8,81,156)] BLUE
         numColors = len(colors)
        
 
@@ -78,18 +80,42 @@ class VisualizeService():
                 high = max(x, high)
                 low = min(x,low)
 
+            print("Got high and low")
+            print(low)
+            print(high)
+
             bucketSize = (high - low)/numColors
 
             for line in area["features"]:
-                name = line["properties"]["NAME"]
+                name = line["properties"]["NAME_1"]
+                found_match = False
+                print("LINEEEEEEEEEEEEEE")
+                print(line["properties"])
                 for dataset_line in dataset:
+                    print("looking")
+                    print(dataset_line)
                     if name == dataset_line[loc_col]:
+                        print("Starting found match")
                         num = int(dataset_line[data_col])
+                        print("Not bad yet")
                         line["properties"]["data"] = num
-                        bucketNum = int((num - low)//bucketSize)
+                        print("Still not bad")
+                        print(low)
+                        print(high)
+                        print(bucketSize)
+                        bucketNum = int((num - low -1)//bucketSize)
+                        print("Still not fucked")
+                        print(bucketNum )
                         line["properties"]["color"] = colors[bucketNum]
+                        print("Not fucked")
+                        found_match = True
+                        print("found match")
                         break
+                if not found_match:
+                    line["properties"]["data"] = 0
+                    line["properties"]["color"] = colors[0]
 
+            print("Went through features")
         else: #using location coordinates
 
             #update low and high as we run through the dataset
