@@ -127,11 +127,12 @@ for key in viewFunctions.keys():
     if (key not in NON_PROTECTED_ENDPOINTS):    
         viewFunctions[key] = authRequired(viewFunctions[key])
 
-sentry_sdk.init(
-    dsn="https://a79f91323d954248a3ef209ca9240af7@o462392.ingest.sentry.io/5465735",
-    integrations=[FlaskIntegration()],
-    traces_sample_rate=1.0
-)
+if (application.env == "production"):
+    sentry_sdk.init(
+        dsn="https://a79f91323d954248a3ef209ca9240af7@o462392.ingest.sentry.io/5465735",
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=1.0
+    )
 
 if __name__ == "__main__":
     application.run(port=4000, debug=True)
