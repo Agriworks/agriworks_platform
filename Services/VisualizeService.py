@@ -4,6 +4,9 @@ import json
 from shapely.geometry import Point, shape
 from shapely.geometry.polygon import Polygon
 
+import boto3
+import botocore
+
 
 class VisualizeService():
     def __init__(self):
@@ -53,6 +56,11 @@ class VisualizeService():
 
         return datacollection
 
+    def getGeojson(self, admin_level):
+        name = "IND_adm" + str(admin_level) + ".geojson"
+        
+
+
 
     def getMap(self, dataset, loc_col, data_col):
 
@@ -89,33 +97,18 @@ class VisualizeService():
             for line in area["features"]:
                 name = line["properties"]["NAME_1"]
                 found_match = False
-                print("LINEEEEEEEEEEEEEE")
-                print(line["properties"])
                 for dataset_line in dataset:
-                    print("looking")
-                    print(dataset_line)
                     if name == dataset_line[loc_col]:
-                        print("Starting found match")
                         num = int(dataset_line[data_col])
-                        print("Not bad yet")
                         line["properties"]["data"] = num
-                        print("Still not bad")
-                        print(low)
-                        print(high)
-                        print(bucketSize)
                         bucketNum = int((num - low -1)//bucketSize)
-                        print("Still not fucked")
-                        print(bucketNum )
                         line["properties"]["color"] = colors[bucketNum]
-                        print("Not fucked")
                         found_match = True
-                        print("found match")
                         break
                 if not found_match:
                     line["properties"]["data"] = 0
                     line["properties"]["color"] = colors[0]
 
-            print("Went through features")
         else: #using location coordinates
 
             #update low and high as we run through the dataset
