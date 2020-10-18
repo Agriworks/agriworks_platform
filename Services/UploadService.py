@@ -6,6 +6,7 @@ from mongoengine import ValidationError
 from flask import current_app as app
 import pandas as pd
 import datetime
+import json
 
 AuthenticationService = AuthenticationService()
 MailService = MailService()
@@ -41,7 +42,7 @@ class UploadService():
                 "permissions") == "Public" else False
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
-            dataSetColumnData = request.form.get("columnData")
+            dataSetColumnData = json.loads(request.form.get("columnData"))
 
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
