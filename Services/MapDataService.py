@@ -26,7 +26,6 @@ class MapDataService():
         data = obj.get()['Body'].read().decode('utf-8')
 
         json_data  = json.loads(data)
-    
         return json_data
 
 
@@ -75,6 +74,7 @@ class MapDataService():
             bucketSize = (high - low)/numColors
 
             for line in area["features"]:
+                line["properties"]["name"] = line["properties"][nameField]
                 name = line["properties"][nameField]
                 found_match = False
                 for dataset_line in dataset:
@@ -125,6 +125,7 @@ class MapDataService():
                 num = line["properties"]["data"]
                 bucketNum = int((num - low)//bucketSize)
                 line["properties"]["color"] = colors[bucketNum]
+                line["properties"]["name"] = line["properties"][nameField]
             
         bucketGrades = []
         for i in range(numColors):
