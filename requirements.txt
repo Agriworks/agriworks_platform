@@ -30,14 +30,11 @@ flask-mongoengine==0.9.5
 Flask-PyMongo==2.3.0
 Flask-RESTful==0.3.8
 flask-restplus==0.13.0
-<<<<<<< HEAD
-=======
 Flask-WTF==0.14.3
 geojson==2.5.0
 google-auth==1.21.3
 google-auth-oauthlib==0.4.1
 idna==2.10
->>>>>>> 14d7ce9... added skeleton code for MapDataController API
 importlib-metadata==0.23
 ipykernel==5.3.4
 ipython==7.18.1
@@ -130,3 +127,4 @@ pytest
 pytest-cov
 setuptools
 wheel
+sentry-sdk[flask]

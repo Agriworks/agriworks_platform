@@ -33,3 +33,6 @@ class DatasetService():
         for i in range(len(dataset)):
             datasetObjects.append(dict(dataset.iloc[i]))
         return datasetObjects
+
+    def getColumnData(self, dataset):
+        return dataset.columnData

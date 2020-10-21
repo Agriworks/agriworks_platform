@@ -1,11 +1,15 @@
 import secrets
 import json
+from flask import current_app
+
 
 from shapely.geometry import Point, shape
 from shapely.geometry.polygon import Polygon
 
 import boto3
 import botocore
+
+s3 = current_app.awsSession.client('s3')
 
 class MapDataService():
     def __init__(self):
@@ -14,6 +18,9 @@ class MapDataService():
     
     def getGeojson(self, admin_level):
         name = "IND_adm" + str(admin_level) + ".geojson"
+        nameField = "NAME" + admin_level
+
+
 
 
     def getMap(self, dataset, loc_col, data_col):
@@ -63,6 +70,7 @@ class MapDataService():
                 if not found_match:
                     line["properties"]["data"] = 0
                     line["properties"]["color"] = colors[0]
+                    low = 0
 
         else: #using location coordinates
 
