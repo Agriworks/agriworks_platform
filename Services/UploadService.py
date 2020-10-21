@@ -43,6 +43,8 @@ class UploadService():
             dataSetTags = request.form.get("tags").split(',')
             dataSetType = request.form.get("type")
             dataSetColumnData = json.loads(request.form.get("columnData"))
+            dataSetTimeGranularity = request.form.get("timeGranularity")
+            dataSetLocationGranularity = request.form.get("locationGranularity")
 
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
@@ -73,6 +75,8 @@ class UploadService():
                 tags=dataSetTags,
                 datasetType=dataSetType,
                 columnData=dataSetColumnData,
+                timeGranularity=dataSetTimeGranularity,
+                locationGranularity=dataSetLocationGranularity,
                 views=1
             )
             dataset.save()
