@@ -44,8 +44,9 @@ class GetMap(Resource):
         dataset = json.loads(request.form['dataset'])
         locationCol = request.form['locationCol']
         dataCol = request.form['dataCol']
+        adminLevel = request.form['adminLevel'] 
         try:
-            heatMap, colors, bucketGrades = MapDataService.getMap(dataset, locationCol, dataCol)
+            heatMap, colors, bucketGrades = MapDataService.getMap(dataset, locationCol, dataCol, adminLevel)
         except:
             return Response("Failed to generate map", status=400)
 

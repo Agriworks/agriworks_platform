@@ -9,34 +9,46 @@ from shapely.geometry.polygon import Polygon
 import boto3
 import botocore
 
-s3 = current_app.awsSession.client('s3')
+s3 = boto3.resource('s3')
 
 class MapDataService():
     def __init__(self):
         return
 
     
-    def getGeojson(self, admin_level):
+    def getGeojson(self, admin_level):\
+
         name = "IND_adm" + str(admin_level) + ".geojson"
-        nameField = "NAME" + admin_level
+       
+        jsonBucket = s3.Bucket('agriworks-map-geometry')
+        obj = jsonBucket.Object(name)
 
+        data = obj.get()['Body'].read().decode('utf-8')
 
-
-
-    def getMap(self, dataset, loc_col, data_col):
+        json_data  = json.loads(data)
     
-        data_col = data_col.strip()
+        return json_data
 
-        checkName = True
+
+
+
+    def getMap(self, dataset, loc_col, data_col, admin_level):
+    
+        data_col = data_col.strip() #remove any spaces
+
+        nameField = "NAME_" + str(admin_level) #the way the json is set up is that the most specific name for a feature is a at Name_ + the admin level
+
+        area = self.getGeojson(admin_level) #get the geojson for the admin level
+
+        checkName = True # if the location column is the name of places, then we will match features to rows by names
 
         if(isinstance(loc_col, list)): # if it is long and lat then it will be a list
             checkName = False 
 
         #the geojson file with the borders, the shape file
         with open("Services/IND_adm1.geojson", encoding="utf-8") as read_file:
-            area = json.load(read_file)
+            area2 = json.load(read_file)
 
-        print("opened file")
         #assign the color fill to each line
         colors =[(237,248,233), (186,228,179), (116,196,118), (49,163,84), (0,109,44)] #GREEN
         #colors = [(239,243,255), (189,215,231), (107,174,214), (49,130,189), (8,81,156)] BLUE
@@ -63,7 +75,7 @@ class MapDataService():
             bucketSize = (high - low)/numColors
 
             for line in area["features"]:
-                name = line["properties"]["NAME_1"]
+                name = line["properties"][nameField]
                 found_match = False
                 for dataset_line in dataset:
                     if name == dataset_line[loc_col]:
