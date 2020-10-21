@@ -24,9 +24,13 @@ class MapDataService():
 
 
     def getMap(self, dataset, loc_col, data_col):
+    
+        data_col = data_col.strip()
 
-        print("Int here")
         checkName = True
+
+        if(isinstance(loc_col, list)): # if it is long and lat then it will be a list
+            checkName = False 
 
         #the geojson file with the borders, the shape file
         with open("Services/IND_adm1.geojson", encoding="utf-8") as read_file:
@@ -41,8 +45,10 @@ class MapDataService():
 
         if checkName:
             #get the high and low so that the right color can be assigned when giving it the data 
-            low = int(dataset[0] [data_col])
+            low = int(dataset[0][data_col])
             high = int(dataset[0][data_col])
+
+            print("This worked")
 
 
             for line in dataset:
