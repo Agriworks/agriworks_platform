@@ -10,10 +10,59 @@ class MapDataService():
     def __init__(self):
         return
 
+    def map(self, dataset, column_labels, loc_col, data_col1, data_col2):
+        print("Right here")
+        if loc_col == '-1' or data_col1 == '-1':
+            location = False
+            data = False
+            print("In first loop")
+            for label in column_labels:
+                print(label)
+                value = column_labels[label]
+                if(not location and (value == 'loc_district' or value == 'loc_state' or value == 'loc_village')):
+                    location = label
+                if(not data and (value == 'data_num')):
+                    data = label
+
+                if(not (not location or not data)):
+                    break
+        else:
+            location = loc_col
+            if data_col2 == '-1':
+                data = data_col1
+            else:
+                data = [data_col1, data_col2]
+
+        return self.getMap(dataset, location, data, column_labels)
+
+    
+    def getAdminLevel(self, column_labels, loc_col):
+        name = column_labels[loc_col]
+        
+        if name == 'loc_country':
+            return 0
+        if name == 'loc_state':
+            return 1
+        if name == 'loc_district':
+            return 2
+        if name == 'loc_village':
+            return 3
+        
+        return -1
+
+        
 
     def getMap(self, dataset, loc_col, data_col, admin_level):
 
         print("Getting map")
+        print(loc_col)
+        print(data_col)
+        print(admin_level)
+        
+        admin_level = self.getAdminLevel(admin_level, loc_col)
+
+        if admin_level == -1:
+            return -1,-1,-1
     
         data_col = data_col.strip() #remove any spaces
 
@@ -128,4 +177,6 @@ class MapDataService():
             bucketGrades.append(int(low + i * bucketSize))
 
 
+
+        print("Made Map")
         return area, colors, bucketGrades

@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from Response import Response
 from flask_restplus import Api, Resource, Namespace
 import json
@@ -42,11 +42,19 @@ class GetMap(Resource):
     def post(self):
         print("In the method")
         dataset = json.loads(request.form['dataset'])
+        columnLabels = request.form['columnLabels']
         locationCol = request.form['locationCol']
-        dataCol = request.form['dataCol']
-        adminLevel = request.form['adminLevel'] 
+        dataCol1 = request.form['dataCol1']
+        dataCol2 = request.form['dataCol2'] 
+        # print("ColumnLabels")
+        # print(columnLabels)
+        # print(type(columnLabels))
+        columnLabels = json.loads(columnLabels)
+        # print("Trying something")
+        # print("Dataset")
+        # print(type(dataset))
         try:
-            heatMap, colors, bucketGrades = MapDataService.getMap(dataset, locationCol, dataCol, adminLevel)
+            heatMap, colors, bucketGrades = MapDataService.map(dataset, columnLabels, locationCol, dataCol1, dataCol2)
         except:
             return Response("Failed to generate map", status=400)
 
