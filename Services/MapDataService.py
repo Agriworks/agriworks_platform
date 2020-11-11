@@ -12,28 +12,35 @@ class MapDataService():
 
     def map(self, dataset, column_labels, loc_col, data_col1, data_col2):
         print("Right here")
+        panelLabel = 'Value'
         if loc_col == '-1' or data_col1 == '-1':
+            #if the call did not specify a location or data col, it finds the first location or data col to use
             location = False
             data = False
             print("In first loop")
             for label in column_labels:
                 print(label)
                 value = column_labels[label]
-                if(not location and (value == 'loc_district' or value == 'loc_state' or value == 'loc_village')):
+                if(not location and (value == 'loc_district' or value == 'loc_state' or value == 'loc_village' or value == 'loc_country')):
                     location = label
                 if(not data and (value == 'data_num')):
-                    data = label
-
+                    data = label    
+                    panelLabel = label
                 if(not (not location or not data)):
                     break
         else:
             location = loc_col
             if data_col2 == '-1':
                 data = data_col1
+                panelLabel = data_col1
             else:
-                data = [data_col1, data_col2]
+                #add a new col to dataset that is the first data_col divided by the second data col
+                for line in dataset:
+                    line["newDataColForChoroMap"] = float(line[data_col1])/float(line[data_col2])
+                data = "newDataColForChoroMap" #made the name extra complicated to make sure that it is not a name that another column would have
+                panelLabel = data_col1 + ' per ' + data_col2
 
-        return self.getMap(dataset, location, data, column_labels)
+        return self.getMap(dataset, location, data, column_labels, panelLabel)
 
     
     def getAdminLevel(self, column_labels, loc_col):
@@ -52,7 +59,7 @@ class MapDataService():
 
         
 
-    def getMap(self, dataset, loc_col, data_col, admin_level):
+    def getMap(self, dataset, loc_col, data_col, admin_level, panelLabel):
 
         print("Getting map")
         print(loc_col)
@@ -79,7 +86,7 @@ class MapDataService():
         with open(fileName, encoding="utf-8") as read_file:
             area = json.load(read_file)
 
-        print("Opened file")
+        # print("Opened file")
 
         #assign the color fill to each line
         colors =[(237,248,233), (186,228,179), (116,196,118), (49,163,84), (0,109,44)] #GREEN
@@ -89,14 +96,14 @@ class MapDataService():
 
         if checkName:
 
-            print("About to get high and low")
-            print(dataset[0])
+            # print("About to get high and low")
+            # print(dataset[0])
 
             #get the high and low so that the right color can be assigned when giving it the data 
             low = int(dataset[0][data_col])
             high = int(dataset[0][data_col])
 
-            print("This worked")
+            # print("This worked")
 
 
             for line in dataset:
@@ -104,20 +111,20 @@ class MapDataService():
                 high = max(x, high)
                 low = min(x,low)
 
-            print("Got high and low")
-            print(low)
-            print(high)
+            # print("Got high and low")
+            # print(low)
+            # print(high)
 
             bucketSize = (high - low)/numColors
 
-            print("Got Bucket Size")
+            # print("Got Bucket Size")
 
             for line in area["features"]:
                 line["properties"]["name"] = line["properties"][nameField]
                 name = line["properties"][nameField]
                 found_match = False
                 for dataset_line in dataset:
-                   
+
                     if name == dataset_line[loc_col]:
                         num = int(dataset_line[data_col])
                         line["properties"]["data"] = num
@@ -130,7 +137,7 @@ class MapDataService():
                     line["properties"]["color"] = colors[0]
                     low = 0
 
-            print("This is done")
+            # print("This is done")
 
         else: #using location coordinates
 
@@ -179,4 +186,4 @@ class MapDataService():
 
 
         print("Made Map")
-        return area, colors, bucketGrades
+        return area, colors, bucketGrades, panelLabel

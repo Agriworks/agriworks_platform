@@ -54,10 +54,10 @@ class GetMap(Resource):
         # print("Dataset")
         # print(type(dataset))
         try:
-            heatMap, colors, bucketGrades = MapDataService.map(dataset, columnLabels, locationCol, dataCol1, dataCol2)
+            heatMap, colors, bucketGrades, panelLabel = MapDataService.map(dataset, columnLabels, locationCol, dataCol1, dataCol2)
         except:
             return Response("Failed to generate map", status=400)
 
-        return Response({"data": heatMap, "colors": colors, "bucketGrades": bucketGrades}, status= 200)
+        return Response({"data": heatMap, "colors": colors, "bucketGrades": bucketGrades, "panelLabel": panelLabel}, status= 200)
 
     
