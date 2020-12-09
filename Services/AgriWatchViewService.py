@@ -23,12 +23,12 @@ class AgriWatchViewService():
             if (not dataset):
                 return {"message": "Invalid dataset ID", "status": 400}
 
-            viewName = request.get("name")
             viewAuthor = user
             viewDataset = dataset
             viewVisualtype = request.get("visualType")
             viewXData = request.get("xData")
             viewYData = request.get("yData")
+            viewName = dataset + "/" + viewVisualtype
 
             # Create and save view object
             view = AgriWatchView(
@@ -46,3 +46,15 @@ class AgriWatchViewService():
         except ValidationError as e:
             print(e)
             return None
+
+    # create object with all view info
+    def makeViewObject(self, view):
+        viewDataset = Dataset.objects.get(id=view.dataset.id)
+        viewObject = {
+            "name": view.name,
+            "dataset": viewDataset,
+            "visualType": view.visualType,
+            "xData": view.xData,
+            "yData": view.yData 
+        }
+        return viewObject

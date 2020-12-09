@@ -10,7 +10,7 @@ class AgriWatchView(DynamicDocument):
     dateCreated = DateTimeField(default=datetime.now())
     dataset = ReferenceField(Dataset, required=True)
     visualType = StringField(required=True)
-    xData = IntField(required=True)
-    yData = IntField(required=True)
+    xData = IntField(required=False)
+    yData = IntField(required=False)
 
     meta = {'indexes': [{'fields': ['$name', "$dataset", "$visualType"]}]}

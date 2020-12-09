@@ -9,7 +9,7 @@ AgriWatchViewService = AgriWatchViewService()
 AuthenticationService = AuthenticationService()
 view_ns = Namespace('view', 'view methods')
 
-@view_ns.route('/')
+@view_ns.route('/create')
 class CreateNewView(Resource):
     @view_ns.doc(
         responses = {
@@ -20,6 +20,7 @@ class CreateNewView(Resource):
         }
     )
     def post(self):
+        print("test")
         if ("SID" not in request.cookies):
             return Response("No session detected", status=400)
         
@@ -46,5 +47,5 @@ class FetchViews(Resource):
         for view in views:
             if view == None:
                 return Response("No views found", status=400)
-            retList.append(AgriWatchViewService.createDatasetInfoObject(dataset))
+            retList.append(AgriWatchViewService.makeViewObject(view))
         return Response(retList)
