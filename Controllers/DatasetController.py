@@ -91,6 +91,8 @@ class GetColumnData(Resource):
         }
     )
     def get(self,datasetId):
+        print("here")
+        print(request.cookies)
         user = AuthenticationService.verifySessionAndReturnUser(
             request.cookies["SID"])
         dataset = Dataset.objects.get(id=datasetId)

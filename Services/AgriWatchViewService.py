@@ -18,24 +18,23 @@ class AgriWatchViewService():
                 return {"message": "Invalid session", "status": 400}
 
             # Get the dataset to link view to dataset
-            datasetId = request.get("dataset")
-            dataset = Dataset.objects.get(id=datasetId)
+            datasetName = request.form.get("dataset")
+            dataset = Dataset.objects.get(name=datasetName)
             if (not dataset):
                 return {"message": "Invalid dataset ID", "status": 400}
 
             viewAuthor = user
             viewDataset = dataset
-            viewVisualtype = request.get("visualType")
-            viewXData = request.get("xData")
-            viewYData = request.get("yData")
-            viewName = dataset + "/" + viewVisualtype
+            viewVisualtype = request.form.get("visualType")
+            viewXData = request.form.get("xData")
+            viewYData = request.form.get("yData")
+            print(viewVisualtype)
 
             # Create and save view object
             view = AgriWatchView(
-                name = viewName,
                 author = viewAuthor,
                 dataset = viewDataset,
-                visualtype = viewVisualtype,
+                visualType = viewVisualtype,
                 xData = viewXData,
                 yData = viewYData
             )
@@ -51,8 +50,7 @@ class AgriWatchViewService():
     def makeViewObject(self, view):
         viewDataset = Dataset.objects.get(id=view.dataset.id)
         viewObject = {
-            "name": view.name,
-            "dataset": viewDataset,
+            "dataset": viewDataset.name,
             "visualType": view.visualType,
             "xData": view.xData,
             "yData": view.yData 

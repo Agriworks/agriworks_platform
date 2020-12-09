@@ -20,13 +20,12 @@ class CreateNewView(Resource):
         }
     )
     def post(self):
-        print("test")
         if ("SID" not in request.cookies):
             return Response("No session detected", status=400)
         
         view = AgriWatchViewService.createView(request)
 
-        return Response(str(view.name))
+        return Response(str(view.dataset)+str(view.visualType))
 
 @view_ns.route('/fetch')
 class FetchViews(Resource):
