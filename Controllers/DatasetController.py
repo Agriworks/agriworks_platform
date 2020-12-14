@@ -78,32 +78,6 @@ class GetDataset(Resource):
         Dataset.objects(id=datasetId).update_one(inc__views=1)
         AuthenticationService.updateRecentDatasets(request.cookies["SID"],datasetId)
         return Response(DatasetService.createDatasetInfoObject(dataset, withHeaders=True))
-
-@dataset_ns.route("/columndata/<datasetId>")
-class GetColumnData(Resource):
-    @dataset_ns.doc(
-        responses={
-            400: "Unable to retrieve dataset information. Please try again later.", 
-            403: "You do not have permission to access that dataset."
-        },
-        params={
-            'SID': {'in': 'cookies', 'required': True},
-        }
-    )
-    def get(self,datasetId):
-        user = AuthenticationService.verifySessionAndReturnUser(
-            request.cookies["SID"])
-        dataset = Dataset.objects.get(id=datasetId)
-
-        if dataset == None:
-            return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-        if (dataset.public == False and dataset.author != user):
-            return Response("You do not have permission to access that dataset.", status=403)
-
-        columnData = DatasetService.getColumnData(dataset)
-        
-        return Response(columnData)
-
         
 
 @dataset_ns.route("/objects/primary/<dataset_id>")

@@ -31,8 +31,10 @@ class UploadService():
             #keep track of when request was made 
             user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
 
+
             if (not user):
                 return {"message": "Invalid session", "status": 400}
+
 
             #TODO: verify that these parameters exist
             uploadedFile = request.files['file']
@@ -41,10 +43,11 @@ class UploadService():
             dataSetIsPublic = True if request.form.get(
                 "permissions") == "Public" else False
             dataSetTags = request.form.get("tags").split(',')
+            print("Loaded up to Data")
+            datasetColumnLabels = json.loads(request.form.get('columnLabels'))
             dataSetType = request.form.get("type")
-            dataSetColumnData = json.loads(request.form.get("columnData"))
-            dataSetTimeGranularity = request.form.get("timeGranularity")
-            dataSetLocationGranularity = request.form.get("locationGranularity")
+
+            print("Loaded Everything")
 
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
@@ -74,12 +77,12 @@ class UploadService():
                 public=dataSetIsPublic,
                 tags=dataSetTags,
                 datasetType=dataSetType,
-                columnData=dataSetColumnData,
-                timeGranularity=dataSetTimeGranularity,
-                locationGranularity=dataSetLocationGranularity,
+                columnLabels=datasetColumnLabels,
                 views=1
             )
             dataset.save()
+
+         
 
             #Go back to the front of the file
             uploadedFile.seek(0)
@@ -95,6 +98,8 @@ class UploadService():
             formattedMessage = headline + uploadString + datasetLink
             MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
             
+            print("We are here")
+
             return dataset
 
         except ValidationError as e:
