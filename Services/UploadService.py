@@ -28,12 +28,12 @@ class UploadService():
     #TODO: Verify that the user that is uploading this dataset is logged in. 
     def createDataset(self, request, uploadTime):
         try:
-            #keep track of when request was made 
+
             user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
-
+            
             if (not user):
-                return {"message": "Invalid session", "status": 400}
-
+                return None, "User"
+            
             #TODO: verify that these parameters exist
             uploadedFile = request.files['file']
             dataSetName = request.form.get("name")
@@ -93,13 +93,21 @@ class UploadService():
             uploadString = f"<b>Upload Received</b>: {uploadTime} <br> <br> <b>Upload Completed</b>: {uploadCompletedDate}<br> <br>"
             datasetLink = f"<b> Link below to view your dataset: </b> <br> <a href ='{app.rootUrl}/dataset/{dataset.id}'>{app.rootUrl}/dataset/{dataset.id}</a>."
             formattedMessage = headline + uploadString + datasetLink
-            MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
-            
-            return dataset
+      
+            try:
+                MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
+            except:
+                return None, "Mail"
+
+
+            return dataset, "Ok"
 
         except ValidationError as e:
             print(e)
-            return None
+            return None, "Validation Error"
+        
+        except:
+            return None, "Error"
 
     def tagExist(self, tag):
         try:

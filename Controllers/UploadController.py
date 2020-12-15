@@ -18,7 +18,9 @@ class UploadNewFile(Resource):
         responses={
             400: "No session detected", 
             400: "Prohibited file type",
-            400: "Empty fields detected. Please remove empty values from your dataset and try again." 
+            400: "Empty fields detected. Please remove empty values from your dataset and try again.", 
+            400: "Error Creating Datset",
+            503: "Error Sending Email",
         },
         params={
             'SID': {'in': 'cookies', 'required': True},
@@ -26,17 +28,28 @@ class UploadNewFile(Resource):
     )   
     def post(self):
         try:
+
             uploadRequestDate = str(datetime.datetime.now()).split(".")[0]
             if ("SID" not in request.cookies):
                 return Response("No session detected", status=400)
             if ('file' not in request.files):
-                return Response("No session detected", status=400)
+                return Response("No file detected", status=400)
             if (not UploadService.allowed_file(request.files["file"].filename)):
                 return Response("Prohibited file type", status=400) #TODO: Append to response: Dynamically return the types of allowed files
             
-            dataset = UploadService.createDataset(request, uploadRequestDate)
+            dataset, error = UploadService.createDataset(request, uploadRequestDate)
+
+            if (dataset):
+                return Response(str(dataset.id), status=200)
+            else:
+                if(error == "Mail"):
+                    return Response("Error Sending Email", status=503)
+                elif(error == "User"):
+                    return Response("Invalid Session ID", status=403)
+                else:
+                    return Response("Error Creating Dataset", status=400)
+
             
-            return Response(str(dataset.id))
         except ValueError:
             return Response("Empty fields detected. Please remove empty values from your dataset and try again.", status=400) 
 
