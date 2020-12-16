@@ -97,7 +97,7 @@ class UploadService():
             try:
                 MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
             except:
-                return None, "Mail"
+                return dataset, "Mail"
 
 
             return dataset, "Ok"

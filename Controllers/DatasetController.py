@@ -129,6 +129,7 @@ class GetDatasetObjectsPrimary(Resource):
             return Response("You do not have access to that dataset.", status=403)
 
         if (len(dataset) <= 1000):
+            print(DatasetService.buildDatasetObjectsList(dataset))
             return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(dataset)})
         else:
             cacheId = str(uuid4())

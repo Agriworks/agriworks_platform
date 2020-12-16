@@ -39,11 +39,11 @@ class UploadNewFile(Resource):
             
             dataset, error = UploadService.createDataset(request, uploadRequestDate)
 
-            if (dataset):
+            if (dataset and error != "Mail"):
                 return Response(str(dataset.id), status=200)
             else:
                 if(error == "Mail"):
-                    return Response("Error Sending Email", status=503)
+                    return Response({"message": "Error Sending Email", "dataset":str(dataset.id), "status": 503})
                 elif(error == "User"):
                     return Response("Invalid Session ID", status=403)
                 else:

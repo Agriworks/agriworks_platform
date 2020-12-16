@@ -11,6 +11,7 @@ class DatasetService():
     @param (optional): Boolean to return object with headers 
     """
     def createDatasetInfoObject(self, dataset, withHeaders=False):
+        print("In this method")
         datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
         datasetInfoObject = {"name":dataset.name, "legend":dataset.legend, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "tags": dataset.tags, "id":str(dataset.id), "views": dataset.views}
        

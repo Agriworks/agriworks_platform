@@ -20,13 +20,14 @@ class Response(FlaskResponse):
         if (isinstance(response, list)):
             response = json.dumps(response)
 
+
         if (isinstance(response, dict) and "status" in response and isinstance(response["status"], int)): 
+            print("Returng this response")
             kwargs["status"] = response["status"]
             response.pop("status")
         
         if (isinstance(response, dict)):
             response = json.dumps(response)
-
         if("content_type" not in kwargs):
             kwargs["content_type"] = "application/json"
         
