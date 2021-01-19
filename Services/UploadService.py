@@ -82,8 +82,6 @@ class UploadService():
             )
             dataset.save()
 
-         
-
             #Go back to the front of the file
             uploadedFile.seek(0)
 
