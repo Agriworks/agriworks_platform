@@ -43,11 +43,8 @@ class UploadService():
             dataSetIsPublic = True if request.form.get(
                 "permissions") == "Public" else False
             dataSetTags = request.form.get("tags").split(',')
-            print("Loaded up to Data")
             datasetColumnLabels = json.loads(request.form.get('columnLabels'))
             dataSetType = request.form.get("type")
-
-            print("Loaded Everything")
 
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
@@ -56,8 +53,8 @@ class UploadService():
             data = pd.read_csv(uploadedFile)
             keys = list(data.columns)
 
-            if (data.isnull().values.sum() > 0 ):
-                raise ValueError
+            #if (data.isnull().values.sum() > 0 ):
+            #    raise ValueError
         
             #Add new tags to collection
             for tag in dataSetTags:
@@ -95,8 +92,6 @@ class UploadService():
             datasetLink = f"<b> Link below to view your dataset: </b> <br> <a href ='{app.rootUrl}/dataset/{dataset.id}'>{app.rootUrl}/dataset/{dataset.id}</a>."
             formattedMessage = headline + uploadString + datasetLink
             MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
-            
-            print("We are here")
 
             return dataset
 

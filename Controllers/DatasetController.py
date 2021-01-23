@@ -98,7 +98,7 @@ class GetDatasetObjectsPrimary(Resource):
         if (Dataset.objects.get(Q(id=dataset_id) & (Q(public=True) | Q(author=user) ) ) != None):
             filename = dataset_id + ".csv"
             fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
-            dataset = pd.read_csv(fileFromS3["Body"], dtype=str)
+            dataset = pd.read_csv(fileFromS3["Body"], dtype=str).fillna("NO DATA")
         else:
             return Response("You do not have access to that dataset.", status=403)
 

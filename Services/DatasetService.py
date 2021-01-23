@@ -32,4 +32,5 @@ class DatasetService():
         datasetObjects = []
         for i in range(len(dataset)):
             datasetObjects.append(dict(dataset.iloc[i]))
+        print(type(datasetObjects))
         return datasetObjects
