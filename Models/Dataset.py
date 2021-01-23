@@ -13,10 +13,8 @@ class Dataset(DynamicDocument):
     public = BooleanField(required=True)
     tags = ListField()
     datasetType = StringField(required=True)
-    columnData = DictField(required=True)
+    columnLabels = ListField(required=True)
     views = IntField(required = True)
-    timeGranularity = StringField(required=False)
-    locationGranularity = StringField(required=False)
 
     meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"], 'weights': {
         'title': 5, 'keys': 3, 'tags': 3, 'datasetType': 2}}]}
