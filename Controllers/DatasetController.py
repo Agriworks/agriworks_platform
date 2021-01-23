@@ -78,34 +78,6 @@ class GetDataset(Resource):
         Dataset.objects(id=datasetId).update_one(inc__views=1)
         AuthenticationService.updateRecentDatasets(request.cookies["SID"],datasetId)
         return Response(DatasetService.createDatasetInfoObject(dataset, withHeaders=True))
-
-@dataset_ns.route("/columndata/<datasetId>")
-class GetColumnData(Resource):
-    @dataset_ns.doc(
-        responses={
-            400: "Unable to retrieve dataset information. Please try again later.", 
-            403: "You do not have permission to access that dataset."
-        },
-        params={
-            'SID': {'in': 'cookies', 'required': True},
-        }
-    )
-    def get(self,datasetId):
-        print("here")
-        print(request.cookies)
-        user = AuthenticationService.verifySessionAndReturnUser(
-            request.cookies["SID"])
-        dataset = Dataset.objects.get(id=datasetId)
-
-        if dataset == None:
-            return Response("Unable to retrieve dataset information. Please try again later.", status=400)
-        if (dataset.public == False and dataset.author != user):
-            return Response("You do not have permission to access that dataset.", status=403)
-
-        columnData = DatasetService.getColumnData(dataset)
-        
-        return Response(columnData)
-
         
 
 @dataset_ns.route("/objects/primary/<dataset_id>")
@@ -126,7 +98,7 @@ class GetDatasetObjectsPrimary(Resource):
         if (Dataset.objects.get(Q(id=dataset_id) & (Q(public=True) | Q(author=user) ) ) != None):
             filename = dataset_id + ".csv"
             fileFromS3 = s3.get_object(Bucket="agriworks-user-datasets", Key=filename)
-            dataset = pd.read_csv(fileFromS3["Body"], dtype=str)
+            dataset = pd.read_csv(fileFromS3["Body"], dtype=str).fillna("NO DATA")
         else:
             return Response("You do not have access to that dataset.", status=403)
 

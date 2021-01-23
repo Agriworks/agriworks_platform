@@ -31,8 +31,10 @@ class UploadService():
             #keep track of when request was made 
             user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
 
+
             if (not user):
                 return {"message": "Invalid session", "status": 400}
+
 
             #TODO: verify that these parameters exist
             uploadedFile = request.files['file']
@@ -41,10 +43,8 @@ class UploadService():
             dataSetIsPublic = True if request.form.get(
                 "permissions") == "Public" else False
             dataSetTags = request.form.get("tags").split(',')
+            datasetColumnLabels = json.loads(request.form.get('columnLabels'))
             dataSetType = request.form.get("type")
-            dataSetColumnData = json.loads(request.form.get("columnData"))
-            dataSetTimeGranularity = request.form.get("timeGranularity")
-            dataSetLocationGranularity = request.form.get("locationGranularity")
 
             if (len(dataSetTags) == 1):
                 if (dataSetTags[0] == ""):
@@ -53,8 +53,8 @@ class UploadService():
             data = pd.read_csv(uploadedFile)
             keys = list(data.columns)
 
-            if (data.isnull().values.sum() > 0 ):
-                raise ValueError
+            #if (data.isnull().values.sum() > 0 ):
+            #    raise ValueError
         
             #Add new tags to collection
             for tag in dataSetTags:
@@ -74,9 +74,7 @@ class UploadService():
                 public=dataSetIsPublic,
                 tags=dataSetTags,
                 datasetType=dataSetType,
-                columnData=dataSetColumnData,
-                timeGranularity=dataSetTimeGranularity,
-                locationGranularity=dataSetLocationGranularity,
+                columnLabels=datasetColumnLabels,
                 views=1
             )
             dataset.save()
@@ -94,7 +92,7 @@ class UploadService():
             datasetLink = f"<b> Link below to view your dataset: </b> <br> <a href ='{app.rootUrl}/dataset/{dataset.id}'>{app.rootUrl}/dataset/{dataset.id}</a>."
             formattedMessage = headline + uploadString + datasetLink
             MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
-            
+
             return dataset
 
         except ValidationError as e:

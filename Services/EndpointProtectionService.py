@@ -19,8 +19,8 @@ def authRequired(f):
         try:
             user = AuthenticationService.verifySessionAndReturnUser(cookie)
             return f(*args, **kwargs)
-        except:
-            print("invalid session ID")
+        except Exception as e:
+            print(e)
             return Response("Invalid session ID", status=403)
 
     return decorator
