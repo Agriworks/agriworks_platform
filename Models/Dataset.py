@@ -16,5 +16,5 @@ class Dataset(DynamicDocument):
     columnLabels = ListField(required=True)
     views = IntField(required = True)
 
-    meta = {'indexes': [{'fields': ['$name', "$keys", "$tags"], 'weights': {
-        'name': 5, 'keys': 3, 'tags': 3}}]}
+    meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"], 'weights': {
+        'title': 5, 'keys': 3, 'tags': 3, 'datasetType': 2}}]}
