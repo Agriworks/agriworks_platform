@@ -28,7 +28,6 @@ class AgriWatchViewService():
             viewVisualtype = request.form.get("visualType")
             viewXData = request.form.get("xData")
             viewYData = request.form.get("yData")
-            print(viewVisualtype)
 
             # Create and save view object
             view = AgriWatchView(
