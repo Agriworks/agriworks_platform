@@ -106,12 +106,14 @@ def importControllers():
         from Controllers.UploadController import upload_ns
         from Controllers.DatasetController import dataset_ns
         from Controllers.VisualizeController import visualize_ns
+        from Controllers.AgriWatchViewController import view_ns
 
         api.add_namespace(admin_ns)
         api.add_namespace(auth_ns)
         api.add_namespace(upload_ns)
         api.add_namespace(dataset_ns)
         api.add_namespace(visualize_ns)
+        api.add_namespace(view_ns)
 
         application.register_blueprint(apiBlueprint)
 
