@@ -4,8 +4,6 @@ from mongoengine.queryset.visitor import Q
 from Models.Dataset import Dataset
 from Services.DatasetService import DatasetService
 from Services.AuthenticationService import AuthenticationService
-from Models.User import User
-import boto3
 import botocore
 import pandas as pd
 from uuid import uuid4
@@ -14,7 +12,7 @@ import json
 
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
-dataset_ns = Namespace('dataset', 'upload methods')
+dataset_ns = Namespace('dataset', 'Get, manipulate, filter, and edit Datasets')
 
 s3 = current_app.awsSession.client('s3')
 DatasetCache = {}
@@ -344,23 +342,34 @@ class New(Resource):
             print(e)
             return Response("Couldn't retrieve recent datasets", status=400)
 
-@dataset_ns.route("/filter/<datasetId>/<datasetFilter>")
-class FilteredDataset(Resource):
-    def get(self, datasetId, datasetFilter):
-        df = DatasetService.getDataset(datasetId)
-        try:
-            datasetFilter = json.loads(datasetFilter)
-            for i in datasetFilter:
-                df = df[df[i].isin(datasetFilter[i])]
-            return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(df)})
-        except Exception as e:
-            print(e)
-            return Response("Couldn't filter dataset", status=400)
-
-@dataset_ns.route("/filters/<datasetId>")
+@dataset_ns.route("/<datasetId>/filters")
 class DatasetFilters(Resource):
     def get(self, datasetId):
         try:
             return Response(Dataset.objects.get(id=datasetId)["filters"])
+        except Dataset.DoesNotExist:
+            return Response("Invalid dataset requested.", status=400)
         except Exception as e:
-            return Response("Could not find dataset filters for requested dataset", 500)
+            return Response(e, status=500)
+
+@dataset_ns.route("/filter/<string:datasetId>/")
+class FilteredDataset(Resource):
+    @dataset_ns.doc(
+        params={
+            "datasetFilter": "An object with column and desired valid values within that column key-value pairs. "
+                             'E.g "{"State": ["ASSAM"], "Year": ["2005-06", "2006-07"]}"'
+        }
+    )
+    def get(self, datasetId):
+        try:
+            df = DatasetService.getDataset(datasetId)
+            datasetFilter = json.loads(request.args.get("datasetFilter"))
+            for i in datasetFilter:
+                df = df[df[i].isin(datasetFilter[i])]
+            return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(df)})
+        except TypeError:
+            return Response("Invalid filter parameters provided.", status=400)
+        except s3.exceptions.NoSuchKey as e:
+            return Response("Invalid dataset requested.", status=400)
+        except Exception as e:
+            return Response(e, status=500)

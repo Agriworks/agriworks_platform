@@ -37,5 +37,5 @@ class DatasetService():
         return datasetObjects
 
     def getDataset(self, id):
-        rawDataset = self.s3.get_object(Bucket="agriworks_user_datasets", Key=f'{id}.csv')
+        rawDataset = self.s3.get_object(Bucket="agriworks-user-datasets", Key=f'{id}.csv')
         return pd.read_csv(rawDataset["Body"], dtype=str).fillna("NO DATA")
