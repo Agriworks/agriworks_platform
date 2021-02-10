@@ -360,5 +360,7 @@ class FilteredDataset(Resource):
 @dataset_ns.route("/filters/<datasetId>")
 class DatasetFilters(Resource):
     def get(self, datasetId):
-        dataset = Dataset.objects.get(id=datasetId)
-        return Response(dataset["filters"])
+        try:
+            return Response(Dataset.objects.get(id=datasetId)["filters"])
+        except Exception as e:
+            return Response("Could not find dataset filters for requested dataset", 500)
