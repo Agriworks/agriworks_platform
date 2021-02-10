@@ -10,7 +10,7 @@ import botocore
 import pandas as pd
 from uuid import uuid4
 from flask_restplus import Api, Resource, Namespace
-
+import json
 
 DatasetService = DatasetService()
 AuthenticationService = AuthenticationService()
@@ -343,3 +343,17 @@ class New(Resource):
         except Exception as e:
             print(e)
             return Response("Couldn't retrieve recent datasets", status=400)
+
+@dataset_ns.route("/filter/<datasetId>/<datasetFilter>")
+class FilteredDataset(Resource):
+    def get(self, datasetId, datasetFilter):
+        df = DatasetService.getDataset(datasetId)
+        try:
+            datasetFilter = json.loads(datasetFilter)
+            for i in datasetFilter:
+                df = df[df[i].isin(datasetFilter[i])]
+            return Response({"datasetObjects": DatasetService.buildDatasetObjectsList(df)})
+        except Exception as e:
+            print(e)
+            return Response("Couldn't filter dataset", status=400)
+
