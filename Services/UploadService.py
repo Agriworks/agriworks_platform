@@ -66,6 +66,11 @@ class UploadService():
                 if not self.tagExist(newTag):
                     newTag.save()
 
+            filters = {}
+            for i in range(0, len(keys)):
+                if datasetColumnLabels[i] != "data":
+                    filters[keys[i]] = {"cat": datasetColumnLabels[i], "values": data[keys[i]].unique()}
+
             #Create and save dataset object
             dataset = Dataset(
                 name=dataSetName,
@@ -75,7 +80,8 @@ class UploadService():
                 tags=dataSetTags,
                 datasetType=dataSetType,
                 columnLabels=datasetColumnLabels,
-                views=1
+                views=1,
+                filters=filters
             )
             dataset.save()
 
