@@ -15,6 +15,7 @@ class Dataset(DynamicDocument):
     datasetType = StringField(required=True)
     columnLabels = ListField(required=True)
     views = IntField(required = True)
+    filters = DictField(required=True)
 
     meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"], 'weights': {
         'title': 5, 'keys': 3, 'tags': 3, 'datasetType': 2}}]}

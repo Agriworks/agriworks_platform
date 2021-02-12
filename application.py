@@ -117,7 +117,6 @@ def importControllers():
 
         application.register_blueprint(apiBlueprint)
 
-
 importControllers()
 
 #Default error handler
@@ -128,7 +127,7 @@ def handleServerError(e):
 # Protect all endpoints by wrapping relevant view function with authentication required function.
 viewFunctions = application.view_functions
 for key in viewFunctions.keys():
-    if (key not in NON_PROTECTED_ENDPOINTS):    
+    if (key not in NON_PROTECTED_ENDPOINTS):
         viewFunctions[key] = authRequired(viewFunctions[key])
 
 if (application.env == "production"):
