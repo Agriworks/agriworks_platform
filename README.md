@@ -22,6 +22,6 @@ To run the application, first follow the steps below to setup the project on you
    (Windows) Execute `setEnvVars.bat`. 
 
 6.(Unix) Execute `./start.sh` to start the application. 
-   (Windows) Execute the command `flask run` to start the application. 
+   (Windows) Execute the command `flask run` to start the application.
 
 Navigate to http://localhost:4000/api/admin/. If you see a JSON response stating that Agriworks is running, you have successfully setup the project correctly.
