@@ -343,3 +343,10 @@ class New(Resource):
         except Exception as e:
             print(e)
             return Response("Couldn't retrieve recent datasets", status=400)
+@dataset_ns.route("/changeLabel/")
+class ChangeLabel(Resource):
+    def post(self):
+        try:
+            DatasetService.changeLabel(request)
+        except:
+            return Response("", status=400)

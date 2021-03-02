@@ -1,4 +1,6 @@
 from Services.AuthenticationService import AuthenticationService
+from Models.Dataset import Dataset
+import json
 
 AuthenticationService = AuthenticationService()
 
@@ -12,7 +14,7 @@ class DatasetService():
     """
     def createDatasetInfoObject(self, dataset, withHeaders=False):
         datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
-        datasetInfoObject = {"name":dataset.name, "legend":dataset.legend, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "tags": dataset.tags, "id":str(dataset.id), "views": dataset.views}
+        datasetInfoObject = {"name":dataset.name, "legend":dataset.legend, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "tags": dataset.tags, "id":str(dataset.id), "views": dataset.views, "columnLabels": dataset.columnLabels}
        
         if (withHeaders):
             headers = []
@@ -33,3 +35,15 @@ class DatasetService():
         for i in range(len(dataset)):
             datasetObjects.append(dict(dataset.iloc[i]))
         return datasetObjects
+
+    def changeLabel(self, request):
+        datasetID = request.form.get("datasetID")
+        columnLabels = json.loads(request.form.get("labels"))
+        try:
+            dataset = Dataset.objects.get(id=datasetID)
+            dataset.columnLabels = columnLabels
+            dataset.save()
+            return True
+        except:
+            return False
+

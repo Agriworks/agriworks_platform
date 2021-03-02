@@ -278,10 +278,11 @@ class VerifySession(Resource):
     def post(self):  
         try:
             sessionId = request.form["sessionId"]
-            if not AuthenticationService.verifySessionAndReturnUser(sessionId):
+            user = AuthenticationService.verifySessionAndReturnUser(sessionId)
+            if not user:
                 return Response("Your session has expired. Please login again.",status=401)
             else:
-                return Response(status=200)
+                return Response(user.email, status=200)
         except DoesNotExist as e:
             return Response("Your session was not found. Please login again.",status=401)
         except ValueError as e:
