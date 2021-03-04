@@ -1,6 +1,10 @@
 from Services.AuthenticationService import AuthenticationService
+from Models.Dataset import Dataset
+from Models.User import User
+import json
 from flask import current_app
 import pandas as pd
+
 AuthenticationService = AuthenticationService()
 
 class DatasetService():
@@ -12,9 +16,19 @@ class DatasetService():
     @param: dataset document
     @param (optional): Boolean to return object with headers 
     """
-    def createDatasetInfoObject(self, dataset, withHeaders=False):
+    def createDatasetInfoObject(self, dataset, withHeaders=False, userEmail=""):
         datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
-        datasetInfoObject = {"name":dataset.name, "legend":dataset.legend, "type":dataset.datasetType, "author": datasetAuthor.getFullname(), "tags": dataset.tags, "id":str(dataset.id), "views": dataset.views}
+        allowToEdit = False
+        if userEmail == datasetAuthor.email:
+            allowToEdit = True
+        datasetInfoObject = {"name":dataset.name, 
+                             "legend":dataset.legend, 
+                             "type":dataset.datasetType, 
+                             "author": datasetAuthor.getFullname(), 
+                             "tags": dataset.tags, "id":str(dataset.id), 
+                             "views": dataset.views, 
+                             "columnLabels": dataset.columnLabels, 
+                             "allowToEdit": allowToEdit}
        
         if (withHeaders):
             headers = []
@@ -35,6 +49,21 @@ class DatasetService():
         for i in range(len(dataset)):
             datasetObjects.append(dict(dataset.iloc[i]))
         return datasetObjects
+
+    def changeLabel(self, request):
+        datasetID = request.form.get("datasetID")
+        user = request.form.get("user")
+        columnLabels = json.loads(request.form.get("labels"))
+        try:
+            dataset = Dataset.objects.get(id=datasetID)
+            author = User.objects.get(id=dataset.author.id)
+            if author.email != user:
+                return False
+            dataset.columnLabels = columnLabels
+            dataset.save()
+            return True
+        except:
+            return False
 
     def getDataset(self, id):
         rawDataset = self.s3.get_object(Bucket="agriworks-user-datasets", Key=f'{id}.csv')

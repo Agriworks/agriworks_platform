@@ -75,7 +75,7 @@ class GetDataset(Resource):
         
         Dataset.objects(id=datasetId).update_one(inc__views=1)
         AuthenticationService.updateRecentDatasets(request.cookies["SID"],datasetId)
-        return Response(DatasetService.createDatasetInfoObject(dataset, withHeaders=True))
+        return Response(DatasetService.createDatasetInfoObject(dataset, withHeaders=True, userEmail=user.email))
         
 
 @dataset_ns.route("/objects/primary/<dataset_id>")
@@ -341,6 +341,28 @@ class New(Resource):
         except Exception as e:
             print(e)
             return Response("Couldn't retrieve recent datasets", status=400)
+
+@dataset_ns.route("/changeLabel/")
+class ChangeLabel(Resource):
+    @dataset_ns.doc(
+        responses={
+            400: "Error changing label.", 
+            200: "Succesfully changed label."
+        },
+        params={
+            'user': {'in': 'formData', 'description': 'email of requested user','required': True},
+            'datasetID': {'in': 'formData', 'description': 'id of requested dataset','required': True},
+            'labels': {'in': 'formData', 'description': 'array of column labels to replace','required': True},
+        }
+    )
+    def post(self):
+        try:
+            if DatasetService.changeLabel(request):
+                return Response("Succesfully changed label.", status=200)
+            else:
+                return Response("Error changing label.", status=400)
+        except:
+            return Response("Error changing label", status=400)
 
 @dataset_ns.route("/<datasetId>/filters")
 class DatasetFilters(Resource):
