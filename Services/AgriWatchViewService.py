@@ -11,6 +11,7 @@ class AgriWatchViewService():
         return
 
     def createView(self, request):
+        print("Creating view")
         try:
             # Get the user to establish view ownership
             user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
@@ -18,8 +19,9 @@ class AgriWatchViewService():
                 return {"message": "Invalid session", "status": 400}
 
             # Get the dataset to link view to dataset
-            datasetName = request.form.get("dataset")
-            dataset = Dataset.objects.get(name=datasetName)
+            #problem if the dataset name is not unique
+            datasetId = request.form.get("dataset")
+            dataset = Dataset.objects.get(id=datasetId)
             if (not dataset):
                 return {"message": "Invalid dataset ID", "status": 400}
 
