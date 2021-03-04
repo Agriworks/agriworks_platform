@@ -2,11 +2,14 @@ from Services.AuthenticationService import AuthenticationService
 from Models.Dataset import Dataset
 from Models.User import User
 import json
+from flask import current_app
+import pandas as pd
 
 AuthenticationService = AuthenticationService()
 
 class DatasetService():
     def __init__(self):
+        self.s3 = current_app.awsSession.client('s3')
         return
 
     """
@@ -62,3 +65,6 @@ class DatasetService():
         except:
             return False
 
+    def getDataset(self, id):
+        rawDataset = self.s3.get_object(Bucket="agriworks-user-datasets", Key=f'{id}.csv')
+        return pd.read_csv(rawDataset["Body"], dtype=str).fillna("NO DATA")
