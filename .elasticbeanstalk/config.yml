@@ -2,9 +2,12 @@ branch-defaults:
   master:
     environment: test
   PROD:
-    environment: Agriworksproduction-env
+    environment: prod
 environment-defaults:
   test:
+    branch: null
+    repository: null
+  prod:
     branch: null
     repository: null
 global:
