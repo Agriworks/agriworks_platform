@@ -12,6 +12,7 @@ workflows:
             branches:
               only:
                 - master
+                - PROD
 
 
 jobs:
