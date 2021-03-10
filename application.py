@@ -1,7 +1,6 @@
 from flask import Flask, send_file, send_from_directory, Blueprint
 from mongoengine import connect
 import yaml
-import boto3
 from uuid import uuid4
 from Response import Response
 from Services.EndpointProtectionService import authRequired, NON_PROTECTED_ENDPOINTS
@@ -11,7 +10,6 @@ from flask_restplus import Api
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 import boto3
-import botocore
 
 STATIC_DIRECTORIES = ["js", "css", "img", "fonts"]
 STATIC_DIRECTORY_ROOT = "./dist/"
