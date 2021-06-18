@@ -191,7 +191,7 @@ class DeleteDataset(Resource):
 class Search(Resource):
     @dataset_ns.doc(
         responses={
-            400: "Error processing request. Please try again later.", 
+            400: "Error processing search request. Please try again later.", 
             400: "Unable to retrieve datasets with the given search parameter.", 
         },
         params={
@@ -228,7 +228,7 @@ class Search(Resource):
                     typeUser = False
                 else:
                     # invalid referrer url
-                    return Response("Error processing request. Please try again later.", status=400)
+                    return Response("Error processing search request. Please try again later.", status=400)
 
             for dataset in matchedDatasets:
                 datasets.append(DatasetService.createDatasetInfoObject(dataset))
@@ -244,7 +244,7 @@ class Search(Resource):
 class GetUsersDatasets(Resource):
     @dataset_ns.doc(
         responses={
-            400: "No datasets found", 
+            400: "No user datasets found", 
         },
         params={
             'SID': {'in': 'cookies', 'required': True},
@@ -257,7 +257,7 @@ class GetUsersDatasets(Resource):
         datasets = Dataset.objects.filter(author=user).order_by('-dateCreated')
         for dataset in datasets:
             if dataset == None:
-                return Response("No datasets found", status=400)
+                return Response("No user datasets found", status=400)
             retList.append(DatasetService.createDatasetInfoObject(dataset))
         return Response(retList)
 
@@ -265,7 +265,7 @@ class GetUsersDatasets(Resource):
 class Popular(Resource):
     @dataset_ns.doc(
         responses={
-            400: "No datasets found",
+            400: "No popular datasets found",
             400: "Couldn't retrieve popular datasets" 
         },
         params={
@@ -280,7 +280,7 @@ class Popular(Resource):
             datasets = Dataset.objects.filter(Q(author=user) | Q(public=True)).order_by("-views")[:5]
             for dataset in datasets:
                 if dataset == None:
-                    return Response("No datasets found", status=400)
+                    return Response("No popular datasets found", status=400)
                 retList.append(DatasetService.createDatasetInfoObject(dataset))
             return Response(retList)
         except:
@@ -319,8 +319,8 @@ class Recent(Resource):
 class New(Resource):
     @dataset_ns.doc(
         responses={
-            400: "Couldn't retrieve recent datasets", 
-            404: "No datasets found"       
+            400: "Couldn't retrieve new datasets", 
+            404: "No new datasets found"       
         },
         params={
             'SID': {'in': 'cookies', 'required': True},
@@ -335,12 +335,12 @@ class New(Resource):
             newDatasets = Dataset.objects(author=user).order_by("-dateCreated")[:5]
             for dataset in newDatasets:
                 if dataset == None:
-                    return Response("No datasets found", status=404)
+                    return Response("No new datasets found", status=404)
                 retList.append(DatasetService.createDatasetInfoObject(dataset))
             return Response(retList)
         except Exception as e:
             print(e)
-            return Response("Couldn't retrieve recent datasets", status=400)
+            return Response("Couldn't retrieve new datasets", status=400)
 
 @dataset_ns.route("/changeLabel/")
 class ChangeLabel(Resource):

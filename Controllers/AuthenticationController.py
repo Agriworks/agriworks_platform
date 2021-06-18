@@ -103,7 +103,7 @@ class Logout(Resource):
             AuthenticationService.logout(sessionId)
             return Response("Successfully logged out.", status=200)
         except:
-            return Response("Unable to process request. Please reload and try again later.", status=400)
+            return Response("Unable to logout. Please reload and try again later.", status=400)
 
 @auth_ns.route("/signup")
 class Signup(Resource):
