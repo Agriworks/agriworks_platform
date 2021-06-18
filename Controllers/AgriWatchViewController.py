@@ -31,7 +31,7 @@ class CreateNewView(Resource):
 class FetchViews(Resource):
     @view_ns.doc(
         responses = {
-            400: "Fetch AgriWatch views error."
+            400: "Error fetching AgriWatch views."
         },
         params = {
             'SID': {'in': 'cookies', 'required': True},
