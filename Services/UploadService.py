@@ -1,67 +1,69 @@
+import datetime
+import json
+
+import pandas as pd
+from flask import current_app as app
+from mongoengine import ValidationError
+
 from Models.Dataset import Dataset
 from Models.Tag import Tag
 from Services.AuthenticationService import AuthenticationService
 from Services.MailService import MailService
-from mongoengine import ValidationError
-from flask import current_app as app
-import pandas as pd
-import datetime
-import json
 
 AuthenticationService = AuthenticationService()
 MailService = MailService()
 
-ALLOWED_EXTENSIONS = set(['txt', 'csv'])
+ALLOWED_EXTENSIONS = set(["txt", "csv"])
 
-s3 = app.awsSession.resource('s3')
+s3 = app.awsSession.resource("s3")
 
-class UploadService():
 
+class UploadService:
     def __init__(self):
         self.largeFileThreshold = 1500
         return
 
-    #Function that checks the file type
+    # Function that checks the file type
     def allowed_file(self, filename):
-        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        return (
+            "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+        )
 
-    #TODO: Verify that the user that is uploading this dataset is logged in. 
+    # TODO: Verify that the user that is uploading this dataset is logged in.
     def createDataset(self, request, uploadTime):
         try:
-            #keep track of when request was made 
-            user = AuthenticationService.verifySessionAndReturnUser(request.cookies["SID"])
+            # keep track of when request was made
+            user = AuthenticationService.verifySessionAndReturnUser(
+                request.cookies["SID"]
+            )
 
-
-            if (not user):
+            if not user:
                 return {"message": "Invalid session", "status": 400}
 
-
-            #TODO: verify that these parameters exist
-            uploadedFile = request.files['file']
+            # TODO: verify that these parameters exist
+            uploadedFile = request.files["file"]
             dataSetName = request.form.get("name")
             dataSetAuthor = user
-            dataSetIsPublic = True if request.form.get(
-                "permissions") == "Public" else False
-            dataSetTags = request.form.get("tags").split(',')
-            datasetColumnLabels = json.loads(request.form.get('columnLabels'))
+            dataSetIsPublic = (
+                True if request.form.get("permissions") == "Public" else False
+            )
+            dataSetTags = request.form.get("tags").split(",")
+            datasetColumnLabels = json.loads(request.form.get("columnLabels"))
             dataSetType = request.form.get("type")
 
-            if (len(dataSetTags) == 1):
-                if (dataSetTags[0] == ""):
+            if len(dataSetTags) == 1:
+                if dataSetTags[0] == "":
                     dataSetTags.pop()
 
             data = pd.read_csv(uploadedFile)
             keys = list(data.columns)
 
-            #if (data.isnull().values.sum() > 0 ):
+            # if (data.isnull().values.sum() > 0 ):
             #    raise ValueError
-        
-            #Add new tags to collection
+
+            # Add new tags to collection
             for tag in dataSetTags:
-                newTag = Tag(
-                    name=tag,
-                    datasetType=dataSetType
-                )
+                newTag = Tag(name=tag, datasetType=dataSetType)
                 newTag.validate()
                 if not self.tagExist(newTag):
                     newTag.save()
@@ -69,9 +71,12 @@ class UploadService():
             filters = {}
             for i in range(0, len(keys)):
                 if datasetColumnLabels[i] != "data":
-                    filters[keys[i]] = {"cat": datasetColumnLabels[i], "values": data[keys[i]].unique()}
+                    filters[keys[i]] = {
+                        "cat": datasetColumnLabels[i],
+                        "values": data[keys[i]].unique(),
+                    }
 
-            #Create and save dataset object
+            # Create and save dataset object
             dataset = Dataset(
                 name=dataSetName,
                 author=dataSetAuthor,
@@ -81,23 +86,25 @@ class UploadService():
                 datasetType=dataSetType,
                 columnLabels=datasetColumnLabels,
                 views=1,
-                filters=filters
+                filters=filters,
             )
             dataset.save()
 
-            #Go back to the front of the file
+            # Go back to the front of the file
             uploadedFile.seek(0)
 
-            #Save to S3
+            # Save to S3
             self.uploadToAWS(dataset.id, uploadedFile)
-            
+
             uploadCompletedDate = str(datetime.datetime.now()).split(".")[0]
 
             headline = f"Your <b>{dataset.name}</b> dataset has finished processing. <br> <br> "
             uploadString = f"<b>Upload Received</b>: {uploadTime} <br> <br> <b>Upload Completed</b>: {uploadCompletedDate}<br> <br>"
             datasetLink = f"<b> Link below to view your dataset: </b> <br> <a href ='{app.rootUrl}/dataset/{dataset.id}'>{app.rootUrl}/dataset/{dataset.id}</a>."
             formattedMessage = headline + uploadString + datasetLink
-            MailService.sendMessage(user, "Dataset successfully uploaded", formattedMessage)
+            MailService.sendMessage(
+                user, "Dataset successfully uploaded", formattedMessage
+            )
 
             return dataset
 
@@ -118,7 +125,7 @@ class UploadService():
         tags = []
 
         # get first 10 most used tags for the datasetType
-        for tag in Tag.objects(datasetType=datasetType).order_by('noOfEntries')[:10]:
+        for tag in Tag.objects(datasetType=datasetType).order_by("noOfEntries")[:10]:
             tags.append(tag.name)
         return tags
 

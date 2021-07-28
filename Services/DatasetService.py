@@ -1,49 +1,56 @@
-from Services.AuthenticationService import AuthenticationService
+import json
+
+import pandas as pd
+from flask import current_app
+
 from Models.Dataset import Dataset
 from Models.User import User
-import json
-from flask import current_app
-import pandas as pd
+from Services.AuthenticationService import AuthenticationService
 
 AuthenticationService = AuthenticationService()
 
-class DatasetService():
+
+class DatasetService:
     def __init__(self):
-        self.s3 = current_app.awsSession.client('s3')
+        self.s3 = current_app.awsSession.client("s3")
         return
 
     """
     @param: dataset document
     @param (optional): Boolean to return object with headers 
     """
+
     def createDatasetInfoObject(self, dataset, withHeaders=False, userEmail=""):
         datasetAuthor = AuthenticationService.getUser(id=dataset.author.id)
         allowToEdit = False
         if userEmail == datasetAuthor.email:
             allowToEdit = True
-        datasetInfoObject = {"name":dataset.name, 
-                             "legend":dataset.legend, 
-                             "type":dataset.datasetType, 
-                             "author": datasetAuthor.getFullname(), 
-                             "tags": dataset.tags, "id":str(dataset.id), 
-                             "views": dataset.views, 
-                             "columnLabels": dataset.columnLabels, 
-                             "allowToEdit": allowToEdit}
-       
-        if (withHeaders):
+        datasetInfoObject = {
+            "name": dataset.name,
+            "legend": dataset.legend,
+            "type": dataset.datasetType,
+            "author": datasetAuthor.getFullname(),
+            "tags": dataset.tags,
+            "id": str(dataset.id),
+            "views": dataset.views,
+            "columnLabels": dataset.columnLabels,
+            "allowToEdit": allowToEdit,
+        }
+
+        if withHeaders:
             headers = []
 
-            #v-table requires headers to be in this format
-            #TODO: Update v-table so that we can just pass the headers in as normal without performing any extra work
-            
-            for header in dataset["keys"]: 
+            # v-table requires headers to be in this format
+            # TODO: Update v-table so that we can just pass the headers in as normal without performing any extra work
+
+            for header in dataset["keys"]:
                 headerObj = {"text": header, "value": header}
                 headers.append(headerObj)
-            
+
             datasetInfoObject["headers"] = headers
 
         return datasetInfoObject
-    
+
     def buildDatasetObjectsList(self, dataset):
         datasetObjects = []
         for i in range(len(dataset)):
@@ -66,5 +73,7 @@ class DatasetService():
             return False
 
     def getDataset(self, id):
-        rawDataset = self.s3.get_object(Bucket="agriworks-user-datasets", Key=f'{id}.csv')
+        rawDataset = self.s3.get_object(
+            Bucket="agriworks-user-datasets", Key=f"{id}.csv"
+        )
         return pd.read_csv(rawDataset["Body"], dtype=str).fillna("NO DATA")

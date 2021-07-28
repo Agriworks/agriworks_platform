@@ -1,4 +1,5 @@
-from mongoengine import Document, StringField, IntField
+from mongoengine import Document, IntField, StringField
+
 
 class Tag(Document):
     name = StringField(required=True)

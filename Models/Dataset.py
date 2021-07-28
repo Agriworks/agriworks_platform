@@ -1,6 +1,17 @@
-
-from mongoengine import DynamicDocument, Document, StringField, ReferenceField, ListField, IntField, DateTimeField, BooleanField, DictField
 from datetime import datetime
+
+from mongoengine import (
+    BooleanField,
+    DateTimeField,
+    DictField,
+    Document,
+    DynamicDocument,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
+
 from Models.User import User
 
 
@@ -14,8 +25,14 @@ class Dataset(DynamicDocument):
     tags = ListField()
     datasetType = StringField(required=True)
     columnLabels = ListField(required=True)
-    views = IntField(required = True)
+    views = IntField(required=True)
     filters = DictField(required=True)
 
-    meta = {'indexes': [{'fields': ['$name', "$keys", "$tags", "$datasetType"], 'weights': {
-        'title': 5, 'keys': 3, 'tags': 3, 'datasetType': 2}}]}
+    meta = {
+        "indexes": [
+            {
+                "fields": ["$name", "$keys", "$tags", "$datasetType"],
+                "weights": {"title": 5, "keys": 3, "tags": 3, "datasetType": 2},
+            }
+        ]
+    }
