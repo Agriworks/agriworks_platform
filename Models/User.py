@@ -1,4 +1,13 @@
-from mongoengine import (DynamicDocument, Document, StringField, EmailField, ListField, ValidationError, BooleanField)
+from mongoengine import (
+    BooleanField,
+    Document,
+    DynamicDocument,
+    EmailField,
+    ListField,
+    StringField,
+    ValidationError,
+)
+
 
 class User(DynamicDocument):
     firstName = StringField(max_length=40, required=True)
@@ -9,13 +18,12 @@ class User(DynamicDocument):
     organization = StringField(required=False)
     location = StringField(required=False)
     isAdmin = BooleanField(default=False)
-    recentDatasets = ListField(default=[]), 
+    recentDatasets = (ListField(default=[]),)
     resetId = StringField(default="")
     confirmationId = StringField(default="")
     isConfirmed = BooleanField(default=False)
 
     def getFullname(self):
         return self.firstName + " " + self.lastName
-    
-    meta = {'indexes': [{'fields': ['$firstName', "$lastName"]}]}
 
+    meta = {"indexes": [{"fields": ["$firstName", "$lastName"]}]}

@@ -1,7 +1,19 @@
-from mongoengine import DynamicDocument, Document, StringField, ReferenceField, ListField, IntField, DateTimeField, BooleanField, DictField
 from datetime import datetime
-from Models.User import User
+
+from mongoengine import (
+    BooleanField,
+    DateTimeField,
+    DictField,
+    Document,
+    DynamicDocument,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
+
 from Models.Dataset import Dataset
+from Models.User import User
 
 
 class AgriWatchView(DynamicDocument):
@@ -12,4 +24,4 @@ class AgriWatchView(DynamicDocument):
     xData = StringField(required=False)
     yData = StringField(required=False)
 
-    meta = {'indexes': [{'fields': ["$dataset"], 'weights': {'dataset': 5}}]}
+    meta = {"indexes": [{"fields": ["$dataset"], "weights": {"dataset": 5}}]}
